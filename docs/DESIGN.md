@@ -158,9 +158,42 @@ against the manifest's directory. Build ids change every release, so the
 manifest is parsed at runtime and nothing is hard-coded except the package
 paths.
 
-License: `<sdk>/licenses/android-sdk-license` containing the SHA-1 of the
-accepted license text (currently `24333f8a63b6825ea9c5514f83c2829b004d1fee`).
-Only `sdkmanager` enforces it, but we write it so the tree is a valid SDK.
+Manifest parsing traps (all confirmed against the live manifests; each becomes
+a unit test with the manifests committed as fixtures):
+
+- **Channel filtering is mandatory.** `repository2-3.xml` lists two
+  `<remotePackage path="emulator">` entries (channel-0 stable 37.1.11 under
+  `android-sdk-license`, channel-2 dev 37.2.x under
+  `android-sdk-preview-license`). A first-match parser picks the wrong one.
+- **Archive URLs resolve against the manifest's own directory.** The Play
+  image archive is `arm64-v8a-36.1_r04.zip`, relative to
+  `…/repository/sys-img/google_apis_playstore/`, not the repository root.
+- **A missing `<host-arch>` means universal.** platform-tools ships one
+  `macosx` archive with no `host-arch` element; a strict arch filter finds
+  nothing.
+- **Licenses are per manifest and differ by package.** The arm64 Play image
+  uses `android-sdk-arm-dbt-license`, which is only defined in the
+  system-image manifest. Onboarding resolves license text from the manifest
+  each package came from and shows it before download.
+- **Dependencies are declared.** The android-36.1 image requires
+  `emulator` ≥ 35.4.9 (`<dependency>` / `<min-revision>`); the bootstrap plan
+  checks them.
+
+License files: `<sdk>/licenses/<license-id>` containing the SHA-1 of the
+accepted license text (currently `android-sdk-license` =
+`24333f8a63b6825ea9c5514f83c2829b004d1fee`, `android-sdk-arm-dbt-license` =
+`859f317696f67ef3d7f30a50a5560e7834b43903`; recompute from the manifest text
+at runtime rather than hard-coding). Only `sdkmanager` reads them; we write
+them so the tree is a valid SDK.
+
+No JVM is involved anywhere: `otool -L` on `emulator`, `adb` and `aapt2` shows
+only system frameworks and their own dylibs. `aapt2` from the Maven `-osx.jar`
+is a universal Mach-O binary (≈ 11 MB unpacked): unzip, `chmod +x`, run.
+
+No `platforms/` directory is required. The emulator validates the SDK root by
+looking for a kernel under `system-images/` (its own error string:
+"ANDROID_SDK_ROOT is defined … but cannot find kernel file in
+…/system-images/ sub directories").
 
 AVD without `avdmanager`: two files.
 
@@ -215,7 +248,10 @@ AVD without `avdmanager`: two files.
     runtime.network.speed=full
 ```
 
-(Template: a real `avdmanager`-generated `Medium_Phone` API 36.1 AVD.)
+(Template: a real `avdmanager`-generated `Medium_Phone` API 36.1 AVD.) The
+emulator ships no `devices.xml`; `hw.device.name` is a plain string with no
+catalogue lookup, so every `hw.*` value must be written explicitly and
+`hw.device.hash2` (an Android Studio artefact) is omitted.
 
 Environment isolation for every `emulator` and `adb` process we spawn, so the
 user's own `~/.android` and Android Studio are never touched:
@@ -379,8 +415,8 @@ registers `androidrunner`; not `LSUIElement` (we own real windows).
 
 1. **Setup** (`needsSetup`): show what will be downloaded and how big it is
    (≈ 2.4 GB), the license notice, and the system image choice. Download,
-   verify, extract, write `licenses/`, create an empty `platforms/` directory
-   (the spike confirms whether the emulator wants it), write the AVD.
+   verify, extract, write `licenses/`, write the AVD. No `platforms/` directory
+   is needed (§3.4).
 2. **Boot**: spawn the emulator, wait for adb, wait for
    `sys.boot_completed`, apply guest settings
    (`settings put secure show_ime_with_hard_keyboard 0`,
@@ -437,6 +473,9 @@ registers `androidrunner`; not `LSUIElement` (we own real windows).
 `KeyboardEvent` has no display id and Android has one keyboard focus
 device-wide, so `InputRouter` implements a policy ladder:
 
+0. Create displays with `OWN_FOCUS` (API 34+) first: if per-display focus
+   works, each window keeps its own focused view and the nudge below only has
+   to move the top-focused display, which touch already does.
 1. On `windowDidBecomeKey`, nudge Android's top-focused display by sending a
    `MouseEvent{buttons: 0}` (or, if hover is not enough, a tap) to that
    window's display, then send keys. Verified by `dumpsys window |

@@ -18,7 +18,7 @@ Phase 1 starts. Environment for the spike: reference SDK at
 | 8 | `injectWheel` on the phone image: scrolls, or silently dropped? | no | _pending_ |
 | 9 | Boot times: cold boot vs quickboot snapshot restore (wall clock to `sys.boot_completed`) | no | _pending_ |
 | 10 | Sustained fps and host CPU over gRPC at 720×1280, 1080×1920, 1080×2400 (RGBA8888, scrolling content) | no | _pending_ |
-| 11 | Bootstrap without Java: emulator boots from a hand-written AVD in an isolated SDK root? Is an empty `platforms/` directory required? Any warnings? | yes | _pending_ |
+| 11 | Bootstrap without Java: emulator boots from a hand-written AVD (no `hw.device.name`/`hash2`) in an isolated SDK root with no `platforms/` directory? Any warnings? | yes | _pending_ |
 | 12 | Quarantine: does a `URLSession`-downloaded emulator zip carry `com.apple.quarantine` after `ditto` extraction? Does the emulator launch and use HVF? | yes | _pending_ |
 | 13 | Permission dialogs: does a runtime permission prompt from an app on display 1 appear on display 1 or display 0? | no | _pending_ |
 | 14 | IME: with `show_ime_with_hard_keyboard 0` and injected keys, does the soft keyboard stay hidden on the secondary display? | no | _pending_ |

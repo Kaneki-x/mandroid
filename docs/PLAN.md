@@ -40,9 +40,9 @@ build scaffolding.
       14. sustained fps and host CPU at 720×1280, 1080×1920, 1080×2400 over gRPC
 - [ ] Bootstrap dry run: parse the live manifests, download platform-tools
       and the emulator into a temporary SDK root, write an AVD by hand that
-      points at the *local* system image, boot it with no Java installed in
-      the path; record whether an empty `platforms/` directory is required and
-      whether the quarantine attribute appears
+      points at the *local* system image, boot it with no Java on the path and
+      no `platforms/` directory; record warnings and whether the quarantine
+      attribute appears
 
 Done when: `docs/SPIKE-NOTES.md` has every measurement filled in and the
 skeleton project builds.
@@ -76,8 +76,10 @@ App:
       `InputHandler`
 - [ ] `Device/DeviceScreenWindowController` (display 0)
 
-Tests: `RepositoryManifest`, `AVDConfig`, `DumpsysDisplayParser`,
-`PackageListParser`, `CoordinateMapper`, `KeyMap`.
+Tests: `RepositoryManifest` against the committed live manifests (channel
+filtering, manifest-relative URLs, missing `host-arch` = universal,
+per-manifest licenses, `<dependency>` min-revision), `AVDConfig`,
+`DumpsysDisplayParser`, `PackageListParser`, `CoordinateMapper`, `KeyMap`.
 
 Done when, starting from an empty Application Support folder: download → boot
 → Play Store opens in the device window → install an app → the app opens in
