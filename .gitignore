@@ -1,0 +1,15 @@
+# Xcode / SwiftPM
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+.build/
+DerivedData/
+build/
+.swiftpm/
+*.xcresult
+
+# Local config
+.env
+Config/Local.xcconfig
+
+# macOS
+.DS_Store
