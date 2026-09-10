@@ -39,13 +39,8 @@ public actor SDKBootstrap {
     public private(set) var mirrors: [DownloadMirror] = DownloadMirror.order(for: .auto)
 
     public static let defaultTag = "google_apis_playstore"
-    public static var defaultABI: String {
-        #if arch(arm64)
-        return "arm64-v8a"
-        #else
-        return "x86_64"
-        #endif
-    }
+    /// Apple silicon only: arm64 system images under HVF.
+    public static let defaultABI = "arm64-v8a"
 
     public init(paths: SDKPaths, session: URLSession = .shared) {
         self.paths = paths

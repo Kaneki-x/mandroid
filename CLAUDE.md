@@ -10,6 +10,8 @@ holds the phase checklist and `docs/SPIKE-NOTES.md` the open measurements.
 - **xcodegen** `project.yml` → `Madroid.xcodeproj` (never edit the
   xcodeproj by hand; regenerate). Targets: `MadroidKit` (framework, no
   AppKit UI), `Madroid` (app), `MadroidKitTests`.
+- **Apple silicon only**: `ARCHS = arm64`, `HostArch.current` is always
+  `aarch64`, `defaultABI` is `arm64-v8a`. Do not add Intel paths.
 - macOS 15.0 deployment target, Swift 6 language mode, hardened runtime in
   Release. Bundle ids `io.github.madeye.madroid[.kit]`.
 - SwiftPM dependencies: `grpc-swift-2`, `grpc-swift-nio-transport`,
@@ -37,7 +39,8 @@ that volume is pending). Never point the app at files under `/Volumes/…`
 either: opening them from the app blocks on a removable-volume permission
 dialog.
 
-Debug builds accept `-autoSetup YES` (skip the download confirmation) and
+All builds accept `-dataRoot <path>` (use another data folder, e.g. to test a
+fresh install next to a real one). Debug builds accept `-autoSetup YES` (skip the download confirmation) and
 `madroid://debug/…` URLs (snapshot, click, type, scroll, resize, close,
 quit) used by `Scripts/integration-test.sh`; see `DebugHooks.swift`.
 

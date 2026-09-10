@@ -63,14 +63,11 @@ public struct RepositoryManifest: Sendable {
 
     // MARK: Queries
 
+    /// Host architectures that appear in the manifests. Madroid ships for
+    /// Apple silicon only, so `current` is always `aarch64`; `x64` remains so
+    /// the parser can represent (and skip) Intel archives.
     public enum HostArch: String, Sendable { case x64, aarch64
-        public static var current: HostArch {
-            #if arch(arm64)
-            return .aarch64
-            #else
-            return .x64
-            #endif
-        }
+        public static var current: HostArch { .aarch64 }
     }
 
     /// The newest stable package for `path` that has an archive for macOS on

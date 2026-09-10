@@ -42,8 +42,8 @@ clipboard are translated back the same way.
 
 ## Requirements
 
-- macOS 15 or later; Apple Silicon recommended (Intel is supported through the
-  x64 emulator build)
+- A Mac with Apple silicon (M1 or later) running macOS 15 or later. Intel
+  Macs are not supported; the app is built for arm64 only.
 - About 2.5 GB of disk for the emulator and system image, downloaded on first
   launch, plus space for Android apps and data
 - No Java, Android Studio or SDK installation needed

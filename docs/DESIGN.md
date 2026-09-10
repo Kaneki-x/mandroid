@@ -18,8 +18,9 @@ for the questions the first spike must answer.
 - **Self-contained**: the app downloads the emulator, platform-tools, a system
   image and `aapt2` on first launch. No Java, no Android Studio, no `sdkmanager`
   or `avdmanager` on the user's machine.
-- **Pure Swift** (AppKit + SwiftUI), macOS 15+, Apple Silicon first with an
-  Intel path via the x64 emulator build.
+- **Pure Swift** (AppKit + SwiftUI), macOS 15+, **Apple silicon only**
+  (`ARCHS = arm64`; arm64 system images under HVF). The manifest parser still
+  understands `host-arch = x64` entries but nothing selects them.
 
 ### Non-goals (for now)
 
@@ -146,7 +147,7 @@ exactly what `sdkmanager` does.
 
 | Component | Manifest | Package / archive (September 2026) | Size |
 |---|---|---|---|
-| Emulator | `https://dl.google.com/android/repository/repository2-3.xml` | `emulator`, channel-0 (stable) 37.1.11, `emulator-darwin_aarch64-<build>.zip` (x64 variant too) | ≈ 394 MB |
+| Emulator | `https://dl.google.com/android/repository/repository2-3.xml` | `emulator`, channel-0 (stable) 37.1.11, `emulator-darwin_aarch64-<build>.zip` (the x64 variant is ignored) | ≈ 394 MB |
 | platform-tools | same | `platform-tools`, `platform-tools_r37.0.1-darwin.zip` | ≈ 16 MB |
 | System image | `https://dl.google.com/android/repository/sys-img/google_apis_playstore/sys-img2-3.xml` | `system-images;android-36.1;google_apis_playstore;arm64-v8a` → `arm64-v8a-36.1_r04.zip` (android-36 and android-35 also listed; `google_apis` variants under `sys-img/google_apis/`) | ≈ 1.96 GB |
 | aapt2 | `https://dl.google.com/dl/android/maven2/com/android/tools/build/aapt2/maven-metadata.xml` | `aapt2-<ver>-osx.jar` (a zip containing a universal `aapt2` binary) | ≈ 4.5 MB |
@@ -222,8 +223,8 @@ AVD without `avdmanager`: two files.
     AvdId=runner
     avd.ini.displayname=Madroid
     avd.ini.encoding=UTF-8
-    abi.type=arm64-v8a            # x86_64 on Intel
-    hw.cpu.arch=arm64             # x86_64 on Intel
+    abi.type=arm64-v8a
+    hw.cpu.arch=arm64
     tag.id=google_apis_playstore
     tag.display=Google Play
     image.sysdir.1=system-images/android-36.1/google_apis_playstore/arm64-v8a/
