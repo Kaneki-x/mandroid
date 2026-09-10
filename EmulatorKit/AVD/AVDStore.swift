@@ -1,0 +1,43 @@
+import Foundation
+
+/// Creates and inspects AVDs under the isolated `ANDROID_AVD_HOME`.
+public struct AVDStore: Sendable {
+    public let paths: SDKPaths
+    public init(paths: SDKPaths) { self.paths = paths }
+
+    public func directory(for name: String) -> URL {
+        paths.avdHome.appendingPathComponent("\(name).avd", isDirectory: true)
+    }
+
+    public func exists(_ name: String) -> Bool {
+        FileManager.default.fileExists(atPath: directory(for: name).appendingPathComponent("config.ini").path)
+    }
+
+    /// Writes the AVD files. Existing user data (`userdata-qemu.img`,
+    /// snapshots) is preserved; only the ini files are (re)written.
+    /// The emulator appends `hw.displayN.*` keys at runtime; we strip them so
+    /// every boot starts with display 0 only.
+    public func write(_ config: AVDConfig) throws {
+        let dir = directory(for: config.name)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        try config.renderConfigINI().write(to: dir.appendingPathComponent("config.ini"), atomically: true, encoding: .utf8)
+        try config.renderPointerINI(avdDirectory: dir)
+            .write(to: paths.avdHome.appendingPathComponent("\(config.name).ini"), atomically: true, encoding: .utf8)
+    }
+
+    /// Removes `hw.display1..3` lines the emulator may have persisted.
+    public func stripPersistedDisplays(_ name: String) throws {
+        let file = directory(for: name).appendingPathComponent("config.ini")
+        guard let text = try? String(contentsOf: file, encoding: .utf8) else { return }
+        let kept = text.split(separator: "\n", omittingEmptySubsequences: false)
+            .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("hw.display") }
+        let out = kept.joined(separator: "\n")
+        if out != text { try out.write(to: file, atomically: true, encoding: .utf8) }
+    }
+
+    /// Deletes the AVD entirely (cold start from scratch).
+    public func delete(_ name: String) throws {
+        try? FileManager.default.removeItem(at: directory(for: name))
+        try? FileManager.default.removeItem(at: paths.avdHome.appendingPathComponent("\(name).ini"))
+    }
+}

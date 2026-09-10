@@ -7,20 +7,68 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04DA7047C4AF5D01A197FBB6 /* DumpsysDisplayParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AB4B5D2A7FC69ECE83C52FF /* DumpsysDisplayParser.swift */; };
+		0779D220B4E4B74F98E02BB8 /* EmulatorSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2236435C2D65817084826D99 /* EmulatorSession.swift */; };
+		0973B3FD7219D12A51373030 /* dumpsys-display-3secondary.txt in Resources */ = {isa = PBXBuildFile; fileRef = FF51EE94139FE9AD64718E95 /* dumpsys-display-3secondary.txt */; };
+		0AC55BD7A72EBF8EF5F68E13 /* KeyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C3EAA9A2A3110947593CF /* KeyMap.swift */; };
+		0DF1197051DAF037D98474AB /* EmulatorProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88F617A499000576A9664ADF /* EmulatorProcess.swift */; };
+		109AA783B1D1AC9FC14124B1 /* InputChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC59F9AB29D4F2CECA477731 /* InputChannel.swift */; };
+		1250CDB8231B02324036E4D6 /* RunnerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2399BF0E6D0E828987F66A2 /* RunnerState.swift */; };
+		143B265AD4A5065632D820F9 /* SHA1.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEC30370FCECC3FF55457B93 /* SHA1.swift */; };
 		1A92F8FB1ACBE9094F550BCD /* GRPCProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = E82E8899E20A97A98C976ADD /* GRPCProtobuf */; };
 		22BBAC79AEE3987A28BFFAA9 /* EmulatorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */; };
 		244AA171119E4FBEE3079805 /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = E9C763E8C714FB6D2AF8BE67 /* SwiftProtobuf */; };
+		289D7185D574918B95BCEB4A /* Frame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E15B909A31FE2A580B727FE /* Frame.swift */; };
+		293D404DAE8F4726FD9AF34F /* Unarchiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 326729D1BCD57A8030ABD49A /* Unarchiver.swift */; };
+		2A009FFB36499B75A61FD159 /* dumpsys-display-1secondary.txt in Resources */ = {isa = PBXBuildFile; fileRef = D380E3E46C4247FBF8144094 /* dumpsys-display-1secondary.txt */; };
+		33F3442434F8AEFB661F56F1 /* LibraryWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C746339D069D9C75EC0AF0 /* LibraryWindowController.swift */; };
 		35DFD191990CFCB84F3BC907 /* EmulatorKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		42B7C4002103E0F4E01DEC8C /* EmulatorKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 751E66E02D4D1F70419BE025 /* EmulatorKit.swift */; };
-		46ACADA568FB2F10941D6895 /* EmulatorKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D627CC09813B0EB7A7D177 /* EmulatorKitTests.swift */; };
+		3815486752618540E4A64590 /* PortAllocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB2B482FDA54FD15CD87E8FC /* PortAllocator.swift */; };
+		3929B04E05535C6F100AB71B /* SDKBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = C46228A1444AA4403864267D /* SDKBootstrap.swift */; };
+		3E01067481E96C2BFAAD0567 /* AppWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0E6D4C1BC9DB7438BF016C /* AppWindowController.swift */; };
+		4281594E14FE47111BB6861B /* RepositoryManifestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C5777188FF8282953FDEBE /* RepositoryManifestTests.swift */; };
 		49B461F906EA57AF66F82DD2 /* EmulatorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */; };
+		4E1DA7D78B02644D8D2DD41F /* InputRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5BEC36F6EBD6FC5BE8B8A3 /* InputRouter.swift */; };
+		4E79C1FCE84DFF8BDEDF8B51 /* SetupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70042B9A52D94A323283D1D5 /* SetupWindowController.swift */; };
 		4F6F4705BE6D5ED57A538507 /* emulator_controller.grpc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3647A3BC73BD40ACA4C3D58A /* emulator_controller.grpc.swift */; };
 		51233549F17D5450C31BA824 /* EmulatorKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		545CF8FCAEA34EF27C37D45E /* Subprocess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E41CC3DF0666A4660E623D0 /* Subprocess.swift */; };
 		58503F6C6DF464212345C782 /* GRPCCore in Frameworks */ = {isa = PBXBuildFile; productRef = 445DC3386FDCE17BCCC2B066 /* GRPCCore */; };
 		58ECA5E40F03CB4DF6CEE9D5 /* emulator_controller.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03E372EFDD2E7209486A297 /* emulator_controller.pb.swift */; };
+		5BED7C77B83C9EFC0446B35B /* ADBClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D362A76038AC1539084E0C91 /* ADBClient.swift */; };
+		5D1E4E139E477BECD07AC394 /* sys-img2-3-google_apis_playstore.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2BF61486FE65CE6C3E828F58 /* sys-img2-3-google_apis_playstore.xml */; };
+		5F23F18B68E72A025E5706FC /* GRPCFrameStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1251AF66DD330E75DAB14764 /* GRPCFrameStream.swift */; };
+		66333852CE175EA5B205C334 /* repository2-3.xml in Resources */ = {isa = PBXBuildFile; fileRef = 090CB98708F1393EC5B9734B /* repository2-3.xml */; };
+		72878AF614B68F431C319FC1 /* Fixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33673B8336A94A1482B777B /* Fixtures.swift */; };
+		7411697D9DF7527F3A5BF601 /* RunnerCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9527B63F45D781AEBA9D04D8 /* RunnerCoordinator.swift */; };
 		758C080466516C735A2811D3 /* GRPCNIOTransportHTTP2 in Frameworks */ = {isa = PBXBuildFile; productRef = DA1C401E4BC3BE10F92DECFD /* GRPCNIOTransportHTTP2 */; };
+		7ADCE4567CE528FBEF2668A7 /* RepositoryManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4EEB9E9B9C70962CE1DC8E0 /* RepositoryManifest.swift */; };
+		85AC3A481F64A86A0114DDD2 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 288006F2D89BA93153661030 /* SetupView.swift */; };
+		9270EED7C4A7877038C74048 /* dumpsys-display-0only.txt in Resources */ = {isa = PBXBuildFile; fileRef = 99E4CD2BF5100ED30E309E41 /* dumpsys-display-0only.txt */; };
+		92F8011341AB14AE2245D55C /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EBECB07D856B12DBE37E814 /* Log.swift */; };
+		934430C1A628779654F1ADFB /* PackageListParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D977D1AED3E09E8F860BD4F /* PackageListParser.swift */; };
+		950217BC4475A5A124BF30C1 /* EmulatorClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AC469BD6E4D1F1771677073 /* EmulatorClient.swift */; };
 		99DE1B08E68D655995C24AC8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D0B1023279E4B3259D504121 /* Assets.xcassets */; };
 		A90A5C5331FC3EB9D896D43C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CBF416B0A5B883B21FDA708 /* AppDelegate.swift */; };
+		AEBEF56C0F6C58A5D1926202 /* CoordinateMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74ABD6350ADD5908064D3784 /* CoordinateMapper.swift */; };
+		B2FBA44C19BC7C79ED68A18D /* InputTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFDB7A01A5AD49CA0C5AB45D /* InputTests.swift */; };
+		B4F5FE778B5F0251CFF660EE /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D436BECE406CDF4CF4A2B6 /* ParserTests.swift */; };
+		C187B9E652C569D68004C877 /* BootWaiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91F4B8FD2BD96865D07D447F /* BootWaiter.swift */; };
+		CA45D1361023712A1ACE01B6 /* DisplaySlotPool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55B5EFC9AB1131067625998B /* DisplaySlotPool.swift */; };
+		D318CB2FFBFF093EA53D21CA /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990969E158C4113474927BCC /* LibraryView.swift */; };
+		D680DFB830782267ABBA47E3 /* GuestSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56F8111A12742ED2A05FCAC1 /* GuestSetup.swift */; };
+		E03F70E70AB6F71FE619864F /* SDKPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EA92D29680826D012674D2 /* SDKPaths.swift */; };
+		E87B6C6710202565F7E26A3A /* EmulatorLaunchOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC00B8A031594370601237CE /* EmulatorLaunchOptions.swift */; };
+		EAC02BB7598820042B966354 /* DisplaySlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 294E2B8FA49832FA3696FD0F /* DisplaySlot.swift */; };
+		F2139EDC7DB14F32EFFC28FF /* EmulatorKitError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51EC7F726A36760B28CD5675 /* EmulatorKitError.swift */; };
+		F5531E1CEA4BF9D98614DA52 /* WindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F511954533387288DA803D /* WindowManager.swift */; };
+		F5DA019E52B3A38BA6883E87 /* AVDStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D4EA976A18E4F28FCD41A6 /* AVDStore.swift */; };
+		F7210328D35EE488213C7D6D /* FrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9008F8515F05DA31D91B7D4E /* FrameView.swift */; };
+		F7B4C9B930F421C14B9165F1 /* ScrollGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB17D44A78267B5C4387007 /* ScrollGesture.swift */; };
+		F8823310259DE9EDB3503CC9 /* EmulatorConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBFFCC065C62AF66BCD669B /* EmulatorConnection.swift */; };
+		FA8B5B23BDD3302184F55273 /* AVDConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320090F245AA70A402AE5F8D /* AVDConfig.swift */; };
+		FCB08B297A5A015022C06907 /* Downloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 785EA3FC77E5AD4DF795D4D3 /* Downloader.swift */; };
+		FF7F0EBD274457C85F03BC0D /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = F481936076E969ABDA2E3ACE /* MainMenu.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,16 +114,64 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		090CB98708F1393EC5B9734B /* repository2-3.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "repository2-3.xml"; sourceTree = "<group>"; };
+		0E15B909A31FE2A580B727FE /* Frame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Frame.swift; sourceTree = "<group>"; };
+		1251AF66DD330E75DAB14764 /* GRPCFrameStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRPCFrameStream.swift; sourceTree = "<group>"; };
+		15D436BECE406CDF4CF4A2B6 /* ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParserTests.swift; sourceTree = "<group>"; };
+		18D4EA976A18E4F28FCD41A6 /* AVDStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVDStore.swift; sourceTree = "<group>"; };
+		1A0E6D4C1BC9DB7438BF016C /* AppWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppWindowController.swift; sourceTree = "<group>"; };
+		1BB17D44A78267B5C4387007 /* ScrollGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollGesture.swift; sourceTree = "<group>"; };
 		1CBF416B0A5B883B21FDA708 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		2236435C2D65817084826D99 /* EmulatorSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorSession.swift; sourceTree = "<group>"; };
+		288006F2D89BA93153661030 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		294E2B8FA49832FA3696FD0F /* DisplaySlot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplaySlot.swift; sourceTree = "<group>"; };
+		2B5BEC36F6EBD6FC5BE8B8A3 /* InputRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputRouter.swift; sourceTree = "<group>"; };
+		2BF61486FE65CE6C3E828F58 /* sys-img2-3-google_apis_playstore.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "sys-img2-3-google_apis_playstore.xml"; sourceTree = "<group>"; };
+		2D977D1AED3E09E8F860BD4F /* PackageListParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackageListParser.swift; sourceTree = "<group>"; };
+		320090F245AA70A402AE5F8D /* AVDConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVDConfig.swift; sourceTree = "<group>"; };
+		326729D1BCD57A8030ABD49A /* Unarchiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unarchiver.swift; sourceTree = "<group>"; };
 		3647A3BC73BD40ACA4C3D58A /* emulator_controller.grpc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = emulator_controller.grpc.swift; sourceTree = "<group>"; };
-		37D627CC09813B0EB7A7D177 /* EmulatorKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorKitTests.swift; sourceTree = "<group>"; };
 		3D1A220E29A385EEB559B9B6 /* AndroidAppRunner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AndroidAppRunner.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		751E66E02D4D1F70419BE025 /* EmulatorKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorKit.swift; sourceTree = "<group>"; };
+		3EBFFCC065C62AF66BCD669B /* EmulatorConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorConnection.swift; sourceTree = "<group>"; };
+		40C5777188FF8282953FDEBE /* RepositoryManifestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryManifestTests.swift; sourceTree = "<group>"; };
+		46EA92D29680826D012674D2 /* SDKPaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKPaths.swift; sourceTree = "<group>"; };
+		4EBECB07D856B12DBE37E814 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
+		51EC7F726A36760B28CD5675 /* EmulatorKitError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorKitError.swift; sourceTree = "<group>"; };
+		55B5EFC9AB1131067625998B /* DisplaySlotPool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplaySlotPool.swift; sourceTree = "<group>"; };
+		56F8111A12742ED2A05FCAC1 /* GuestSetup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuestSetup.swift; sourceTree = "<group>"; };
+		5AB4B5D2A7FC69ECE83C52FF /* DumpsysDisplayParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DumpsysDisplayParser.swift; sourceTree = "<group>"; };
+		5B8C3EAA9A2A3110947593CF /* KeyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMap.swift; sourceTree = "<group>"; };
+		70042B9A52D94A323283D1D5 /* SetupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupWindowController.swift; sourceTree = "<group>"; };
+		74ABD6350ADD5908064D3784 /* CoordinateMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateMapper.swift; sourceTree = "<group>"; };
+		785EA3FC77E5AD4DF795D4D3 /* Downloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloader.swift; sourceTree = "<group>"; };
+		84F511954533387288DA803D /* WindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowManager.swift; sourceTree = "<group>"; };
+		88F617A499000576A9664ADF /* EmulatorProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorProcess.swift; sourceTree = "<group>"; };
+		9008F8515F05DA31D91B7D4E /* FrameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameView.swift; sourceTree = "<group>"; };
+		91F4B8FD2BD96865D07D447F /* BootWaiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BootWaiter.swift; sourceTree = "<group>"; };
+		9527B63F45D781AEBA9D04D8 /* RunnerCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerCoordinator.swift; sourceTree = "<group>"; };
+		990969E158C4113474927BCC /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		99E4CD2BF5100ED30E309E41 /* dumpsys-display-0only.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "dumpsys-display-0only.txt"; sourceTree = "<group>"; };
+		9AC469BD6E4D1F1771677073 /* EmulatorClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorClient.swift; sourceTree = "<group>"; };
+		9E41CC3DF0666A4660E623D0 /* Subprocess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Subprocess.swift; sourceTree = "<group>"; };
 		A94A28A5F13AB6760301C650 /* EmulatorKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EmulatorKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AEC30370FCECC3FF55457B93 /* SHA1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SHA1.swift; sourceTree = "<group>"; };
 		B03E372EFDD2E7209486A297 /* emulator_controller.pb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = emulator_controller.pb.swift; sourceTree = "<group>"; };
+		B1C746339D069D9C75EC0AF0 /* LibraryWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryWindowController.swift; sourceTree = "<group>"; };
+		B2399BF0E6D0E828987F66A2 /* RunnerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerState.swift; sourceTree = "<group>"; };
+		C46228A1444AA4403864267D /* SDKBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKBootstrap.swift; sourceTree = "<group>"; };
 		D0B1023279E4B3259D504121 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D33673B8336A94A1482B777B /* Fixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fixtures.swift; sourceTree = "<group>"; };
+		D362A76038AC1539084E0C91 /* ADBClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ADBClient.swift; sourceTree = "<group>"; };
+		D380E3E46C4247FBF8144094 /* dumpsys-display-1secondary.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "dumpsys-display-1secondary.txt"; sourceTree = "<group>"; };
 		D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = EmulatorKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB8A8526ECA3D0D876A3F66F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		EB2B482FDA54FD15CD87E8FC /* PortAllocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortAllocator.swift; sourceTree = "<group>"; };
+		EC00B8A031594370601237CE /* EmulatorLaunchOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorLaunchOptions.swift; sourceTree = "<group>"; };
+		EFDB7A01A5AD49CA0C5AB45D /* InputTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputTests.swift; sourceTree = "<group>"; };
+		F481936076E969ABDA2E3ACE /* MainMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenu.swift; sourceTree = "<group>"; };
+		F4EEB9E9B9C70962CE1DC8E0 /* RepositoryManifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryManifest.swift; sourceTree = "<group>"; };
+		FC59F9AB29D4F2CECA477731 /* InputChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputChannel.swift; sourceTree = "<group>"; };
+		FF51EE94139FE9AD64718E95 /* dumpsys-display-3secondary.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "dumpsys-display-3secondary.txt"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +205,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1113BBCBE032DC48617A0776 /* AVD */ = {
+			isa = PBXGroup;
+			children = (
+				320090F245AA70A402AE5F8D /* AVDConfig.swift */,
+				18D4EA976A18E4F28FCD41A6 /* AVDStore.swift */,
+			);
+			path = AVD;
+			sourceTree = "<group>";
+		};
 		12E9038520B21BBC37E204BC = {
 			isa = PBXGroup;
 			children = (
@@ -125,6 +230,12 @@
 				1CBF416B0A5B883B21FDA708 /* AppDelegate.swift */,
 				D0B1023279E4B3259D504121 /* Assets.xcassets */,
 				DB8A8526ECA3D0D876A3F66F /* Info.plist */,
+				84F511954533387288DA803D /* WindowManager.swift */,
+				A7F59B6C1DB8478CDC552410 /* AppWindow */,
+				9246C1A6ED31CD57ACE3B23A /* Device */,
+				A5287D9EBF922524881E8947 /* Library */,
+				8C012697E69B46C8D89504E9 /* Menu */,
+				2F79E68DB859BAD92A6463D4 /* Setup */,
 			);
 			path = AndroidAppRunner;
 			sourceTree = "<group>";
@@ -141,17 +252,111 @@
 		2622BA47D953D85A8822C9D4 /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
+				99E4CD2BF5100ED30E309E41 /* dumpsys-display-0only.txt */,
+				D380E3E46C4247FBF8144094 /* dumpsys-display-1secondary.txt */,
+				FF51EE94139FE9AD64718E95 /* dumpsys-display-3secondary.txt */,
+				090CB98708F1393EC5B9734B /* repository2-3.xml */,
+				2BF61486FE65CE6C3E828F58 /* sys-img2-3-google_apis_playstore.xml */,
 			);
 			path = Fixtures;
+			sourceTree = "<group>";
+		};
+		2F79E68DB859BAD92A6463D4 /* Setup */ = {
+			isa = PBXGroup;
+			children = (
+				288006F2D89BA93153661030 /* SetupView.swift */,
+				70042B9A52D94A323283D1D5 /* SetupWindowController.swift */,
+			);
+			path = Setup;
+			sourceTree = "<group>";
+		};
+		3896D9C893808846530F65DE /* SDK */ = {
+			isa = PBXGroup;
+			children = (
+				785EA3FC77E5AD4DF795D4D3 /* Downloader.swift */,
+				F4EEB9E9B9C70962CE1DC8E0 /* RepositoryManifest.swift */,
+				C46228A1444AA4403864267D /* SDKBootstrap.swift */,
+				46EA92D29680826D012674D2 /* SDKPaths.swift */,
+				326729D1BCD57A8030ABD49A /* Unarchiver.swift */,
+			);
+			path = SDK;
+			sourceTree = "<group>";
+		};
+		526E72460400B4ED7C199D6D /* Input */ = {
+			isa = PBXGroup;
+			children = (
+				74ABD6350ADD5908064D3784 /* CoordinateMapper.swift */,
+				FC59F9AB29D4F2CECA477731 /* InputChannel.swift */,
+				2B5BEC36F6EBD6FC5BE8B8A3 /* InputRouter.swift */,
+				5B8C3EAA9A2A3110947593CF /* KeyMap.swift */,
+				1BB17D44A78267B5C4387007 /* ScrollGesture.swift */,
+			);
+			path = Input;
+			sourceTree = "<group>";
+		};
+		7965C10D8F37E2904C08C5F6 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				51EC7F726A36760B28CD5675 /* EmulatorKitError.swift */,
+				4EBECB07D856B12DBE37E814 /* Log.swift */,
+				AEC30370FCECC3FF55457B93 /* SHA1.swift */,
+				9E41CC3DF0666A4660E623D0 /* Subprocess.swift */,
+			);
+			path = Support;
 			sourceTree = "<group>";
 		};
 		7B73E415A5A95BD164E7A0E0 /* EmulatorKit */ = {
 			isa = PBXGroup;
 			children = (
-				751E66E02D4D1F70419BE025 /* EmulatorKit.swift */,
+				DD3AB62F9486C4A019C464F9 /* ADB */,
+				1113BBCBE032DC48617A0776 /* AVD */,
+				8EB35B0D70593522E71BFEAA /* Client */,
+				D8D108E88530F7F85FA44D91 /* Display */,
+				7CC600A52A0E6C69F0A78D16 /* Emulator */,
+				CF07592FD11EDBE385413F65 /* Frames */,
 				223CCCBF0ED7891AD8607FD3 /* Generated */,
+				526E72460400B4ED7C199D6D /* Input */,
+				C5C7764D3F71DF42757630ED /* Runner */,
+				3896D9C893808846530F65DE /* SDK */,
+				7965C10D8F37E2904C08C5F6 /* Support */,
 			);
 			path = EmulatorKit;
+			sourceTree = "<group>";
+		};
+		7CC600A52A0E6C69F0A78D16 /* Emulator */ = {
+			isa = PBXGroup;
+			children = (
+				91F4B8FD2BD96865D07D447F /* BootWaiter.swift */,
+				EC00B8A031594370601237CE /* EmulatorLaunchOptions.swift */,
+				88F617A499000576A9664ADF /* EmulatorProcess.swift */,
+				56F8111A12742ED2A05FCAC1 /* GuestSetup.swift */,
+				EB2B482FDA54FD15CD87E8FC /* PortAllocator.swift */,
+			);
+			path = Emulator;
+			sourceTree = "<group>";
+		};
+		8C012697E69B46C8D89504E9 /* Menu */ = {
+			isa = PBXGroup;
+			children = (
+				F481936076E969ABDA2E3ACE /* MainMenu.swift */,
+			);
+			path = Menu;
+			sourceTree = "<group>";
+		};
+		8EB35B0D70593522E71BFEAA /* Client */ = {
+			isa = PBXGroup;
+			children = (
+				9AC469BD6E4D1F1771677073 /* EmulatorClient.swift */,
+				3EBFFCC065C62AF66BCD669B /* EmulatorConnection.swift */,
+			);
+			path = Client;
+			sourceTree = "<group>";
+		};
+		9246C1A6ED31CD57ACE3B23A /* Device */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Device;
 			sourceTree = "<group>";
 		};
 		A114420DF28C6C4191EB99DD /* Products */ = {
@@ -164,13 +369,72 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		A5287D9EBF922524881E8947 /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				990969E158C4113474927BCC /* LibraryView.swift */,
+				B1C746339D069D9C75EC0AF0 /* LibraryWindowController.swift */,
+			);
+			path = Library;
+			sourceTree = "<group>";
+		};
+		A7F59B6C1DB8478CDC552410 /* AppWindow */ = {
+			isa = PBXGroup;
+			children = (
+				1A0E6D4C1BC9DB7438BF016C /* AppWindowController.swift */,
+				9008F8515F05DA31D91B7D4E /* FrameView.swift */,
+			);
+			path = AppWindow;
+			sourceTree = "<group>";
+		};
+		C5C7764D3F71DF42757630ED /* Runner */ = {
+			isa = PBXGroup;
+			children = (
+				2236435C2D65817084826D99 /* EmulatorSession.swift */,
+				9527B63F45D781AEBA9D04D8 /* RunnerCoordinator.swift */,
+				B2399BF0E6D0E828987F66A2 /* RunnerState.swift */,
+			);
+			path = Runner;
+			sourceTree = "<group>";
+		};
 		C8499387E47533D539759834 /* EmulatorKitTests */ = {
 			isa = PBXGroup;
 			children = (
-				37D627CC09813B0EB7A7D177 /* EmulatorKitTests.swift */,
+				D33673B8336A94A1482B777B /* Fixtures.swift */,
+				EFDB7A01A5AD49CA0C5AB45D /* InputTests.swift */,
+				15D436BECE406CDF4CF4A2B6 /* ParserTests.swift */,
+				40C5777188FF8282953FDEBE /* RepositoryManifestTests.swift */,
 				2622BA47D953D85A8822C9D4 /* Fixtures */,
 			);
 			path = EmulatorKitTests;
+			sourceTree = "<group>";
+		};
+		CF07592FD11EDBE385413F65 /* Frames */ = {
+			isa = PBXGroup;
+			children = (
+				0E15B909A31FE2A580B727FE /* Frame.swift */,
+				1251AF66DD330E75DAB14764 /* GRPCFrameStream.swift */,
+			);
+			path = Frames;
+			sourceTree = "<group>";
+		};
+		D8D108E88530F7F85FA44D91 /* Display */ = {
+			isa = PBXGroup;
+			children = (
+				294E2B8FA49832FA3696FD0F /* DisplaySlot.swift */,
+				55B5EFC9AB1131067625998B /* DisplaySlotPool.swift */,
+			);
+			path = Display;
+			sourceTree = "<group>";
+		};
+		DD3AB62F9486C4A019C464F9 /* ADB */ = {
+			isa = PBXGroup;
+			children = (
+				D362A76038AC1539084E0C91 /* ADBClient.swift */,
+				5AB4B5D2A7FC69ECE83C52FF /* DumpsysDisplayParser.swift */,
+				2D977D1AED3E09E8F860BD4F /* PackageListParser.swift */,
+			);
+			path = ADB;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -181,6 +445,7 @@
 			buildConfigurationList = 4F898BB496B8A79FB92CF2E7 /* Build configuration list for PBXNativeTarget "EmulatorKitTests" */;
 			buildPhases = (
 				B578AEA178D620FFC8541E4B /* Sources */,
+				967444EF8628EA4E4E25E4AD /* Resources */,
 				87628B9746AB948FD4819397 /* Frameworks */,
 				25F682702F1D95D3E87CAF6A /* Embed Frameworks */,
 			);
@@ -287,6 +552,18 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		967444EF8628EA4E4E25E4AD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9270EED7C4A7877038C74048 /* dumpsys-display-0only.txt in Resources */,
+				2A009FFB36499B75A61FD159 /* dumpsys-display-1secondary.txt in Resources */,
+				0973B3FD7219D12A51373030 /* dumpsys-display-3secondary.txt in Resources */,
+				66333852CE175EA5B205C334 /* repository2-3.xml in Resources */,
+				5D1E4E139E477BECD07AC394 /* sys-img2-3-google_apis_playstore.xml in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BD703C370112A6422F899A40 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -303,6 +580,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				A90A5C5331FC3EB9D896D43C /* AppDelegate.swift in Sources */,
+				3E01067481E96C2BFAAD0567 /* AppWindowController.swift in Sources */,
+				F7210328D35EE488213C7D6D /* FrameView.swift in Sources */,
+				D318CB2FFBFF093EA53D21CA /* LibraryView.swift in Sources */,
+				33F3442434F8AEFB661F56F1 /* LibraryWindowController.swift in Sources */,
+				FF7F0EBD274457C85F03BC0D /* MainMenu.swift in Sources */,
+				85AC3A481F64A86A0114DDD2 /* SetupView.swift in Sources */,
+				4E79C1FCE84DFF8BDEDF8B51 /* SetupWindowController.swift in Sources */,
+				F5531E1CEA4BF9D98614DA52 /* WindowManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -310,7 +595,39 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				42B7C4002103E0F4E01DEC8C /* EmulatorKit.swift in Sources */,
+				5BED7C77B83C9EFC0446B35B /* ADBClient.swift in Sources */,
+				FA8B5B23BDD3302184F55273 /* AVDConfig.swift in Sources */,
+				F5DA019E52B3A38BA6883E87 /* AVDStore.swift in Sources */,
+				C187B9E652C569D68004C877 /* BootWaiter.swift in Sources */,
+				AEBEF56C0F6C58A5D1926202 /* CoordinateMapper.swift in Sources */,
+				EAC02BB7598820042B966354 /* DisplaySlot.swift in Sources */,
+				CA45D1361023712A1ACE01B6 /* DisplaySlotPool.swift in Sources */,
+				FCB08B297A5A015022C06907 /* Downloader.swift in Sources */,
+				04DA7047C4AF5D01A197FBB6 /* DumpsysDisplayParser.swift in Sources */,
+				950217BC4475A5A124BF30C1 /* EmulatorClient.swift in Sources */,
+				F8823310259DE9EDB3503CC9 /* EmulatorConnection.swift in Sources */,
+				F2139EDC7DB14F32EFFC28FF /* EmulatorKitError.swift in Sources */,
+				E87B6C6710202565F7E26A3A /* EmulatorLaunchOptions.swift in Sources */,
+				0DF1197051DAF037D98474AB /* EmulatorProcess.swift in Sources */,
+				0779D220B4E4B74F98E02BB8 /* EmulatorSession.swift in Sources */,
+				289D7185D574918B95BCEB4A /* Frame.swift in Sources */,
+				5F23F18B68E72A025E5706FC /* GRPCFrameStream.swift in Sources */,
+				D680DFB830782267ABBA47E3 /* GuestSetup.swift in Sources */,
+				109AA783B1D1AC9FC14124B1 /* InputChannel.swift in Sources */,
+				4E1DA7D78B02644D8D2DD41F /* InputRouter.swift in Sources */,
+				0AC55BD7A72EBF8EF5F68E13 /* KeyMap.swift in Sources */,
+				92F8011341AB14AE2245D55C /* Log.swift in Sources */,
+				934430C1A628779654F1ADFB /* PackageListParser.swift in Sources */,
+				3815486752618540E4A64590 /* PortAllocator.swift in Sources */,
+				7ADCE4567CE528FBEF2668A7 /* RepositoryManifest.swift in Sources */,
+				7411697D9DF7527F3A5BF601 /* RunnerCoordinator.swift in Sources */,
+				1250CDB8231B02324036E4D6 /* RunnerState.swift in Sources */,
+				3929B04E05535C6F100AB71B /* SDKBootstrap.swift in Sources */,
+				E03F70E70AB6F71FE619864F /* SDKPaths.swift in Sources */,
+				143B265AD4A5065632D820F9 /* SHA1.swift in Sources */,
+				F7B4C9B930F421C14B9165F1 /* ScrollGesture.swift in Sources */,
+				545CF8FCAEA34EF27C37D45E /* Subprocess.swift in Sources */,
+				293D404DAE8F4726FD9AF34F /* Unarchiver.swift in Sources */,
 				4F6F4705BE6D5ED57A538507 /* emulator_controller.grpc.swift in Sources */,
 				58ECA5E40F03CB4DF6CEE9D5 /* emulator_controller.pb.swift in Sources */,
 			);
@@ -320,7 +637,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46ACADA568FB2F10941D6895 /* EmulatorKitTests.swift in Sources */,
+				72878AF614B68F431C319FC1 /* Fixtures.swift in Sources */,
+				B2FBA44C19BC7C79ED68A18D /* InputTests.swift in Sources */,
+				B4F5FE778B5F0251CFF660EE /* ParserTests.swift in Sources */,
+				4281594E14FE47111BB6861B /* RepositoryManifestTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
