@@ -16,6 +16,7 @@ import EmulatorKit
 /// - `debug/type?pkg=&text=<text>` synthesises key presses for each character
 /// - `debug/key?pkg=&code=<keyCode>[&cmd=1][&shift=1]` one key press
 /// - `debug/resize?pkg=&w=&h=` resizes the window content
+/// - `debug/rotate?pkg=` swaps the window orientation
 /// - `debug/close?pkg=` closes the window
 /// - `debug/quit` terminates the app (exercises the shutdown path)
 @MainActor
@@ -49,6 +50,8 @@ struct DebugHooks {
         case "resize":
             guard let wc = controller(q["pkg"]), let w = Double(q["w"] ?? ""), let h = Double(q["h"] ?? "") else { return }
             wc.window?.setContentSize(NSSize(width: w, height: h))
+        case "rotate":
+            controller(q["pkg"])?.rotateWindow(nil)
         case "close":
             controller(q["pkg"])?.window?.performClose(nil)
         case "quit":
@@ -103,6 +106,7 @@ struct DebugHooks {
             lines.append("serial=\(session.options.serial)")
         }
         lines.append("packages=\(delegate.coordinator.installedPackages)")
+        lines.append("lastError=\(delegate.windows.lastError ?? "")")
         lines.append("parked=\(delegate.coordinator.parked.keys.sorted())")
         lines.append("apps=\(delegate.coordinator.apps.map { "\($0.package):\($0.label):\($0.iconFile != nil)" })")
         try? lines.joined(separator: "\n").write(to: base.appendingPathComponent("state.txt"), atomically: true, encoding: .utf8)

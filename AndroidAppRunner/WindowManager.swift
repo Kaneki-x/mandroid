@@ -14,12 +14,12 @@ final class WindowManager {
     /// rectangle that fits the main screen.
     func defaultAppSize() -> NSSize {
         let visible = NSScreen.main?.visibleFrame.size ?? NSSize(width: 1440, height: 900)
-        let preferred = CGFloat(RunnerSettings.load().defaultWindowHeight)
-        let height = min(preferred, visible.height - 40)
-        return NSSize(width: (height * 420 / 900).rounded(), height: height)
+        let s = RunnerSettings.load().defaultWindowSize(screenWidth: visible.width, screenHeight: visible.height)
+        return NSSize(width: s.width, height: s.height)
     }
 
     func open(package: String) {
+        Log.file("open \(package)")
         if let existing = appWindows[package] {
             existing.showWindow(nil)
             existing.window?.makeKeyAndOrderFront(nil)
@@ -90,7 +90,11 @@ final class WindowManager {
         (NSApp.keyWindow?.windowController as? AppWindowController)
     }
 
+    private(set) var lastError: String?
+
     func presentError(_ error: Error, title: String) {
+        lastError = "\(title): \(error.localizedDescription)"
+        Log.file("ERROR \(title): \(error.localizedDescription)")
         let alert = NSAlert()
         alert.messageText = title
         alert.informativeText = error.localizedDescription

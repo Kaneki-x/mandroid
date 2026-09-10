@@ -152,7 +152,7 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
                 guard let self, !self.isParked, case .app(let app) = self.target else { return }
                 let alive = await self.coordinator.isAppAlive(app)
                 misses = alive ? 0 : misses + 1
-                if misses >= 2 {
+                if misses >= 3 {
                     Log.ui.info("\(app.package) left its display; closing window")
                     self.window?.close()
                     return
@@ -288,6 +288,28 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
     @objc func androidBack(_ sender: Any?) { sendKey(.key("GoBack")) }
     @objc func androidHome(_ sender: Any?) { sendKey(.key("GoHome")) }
     @objc func androidRecents(_ sender: Any?) { sendKey(.key("AppSwitch")) }
+
+    /// ⌘R: swaps the window's width and height. The debounced resize path then
+    /// reconfigures the virtual display in place, so the app relays out for
+    /// the new orientation without restarting.
+    @objc func rotateWindow(_ sender: Any?) {
+        guard case .app = target, !isParked, let window else { NSSound.beep(); return }
+        let content = window.contentRect(forFrameRect: window.frame)
+        let chrome = window.frame.height - content.height
+        var size = NSSize(width: content.height, height: content.width)
+        let screen = window.screen ?? NSScreen.main
+        if let visible = screen?.visibleFrame {
+            let maxW = visible.width - 16, maxH = visible.height - chrome - 16
+            let f = min(1, maxW / size.width, maxH / size.height)
+            size = NSSize(width: (size.width * f).rounded(), height: (size.height * f).rounded())
+        }
+        // Keep the top-left corner, then pull the whole window back on screen.
+        var frame = window.frameRect(forContentRect: NSRect(origin: .zero, size: size))
+        frame.origin = NSPoint(x: window.frame.minX, y: window.frame.maxY - frame.height)
+        if let screen { frame = window.constrainFrameRect(frame, to: screen) }
+        window.setFrame(frame, display: true, animate: true)
+        scheduleReconfigure()
+    }
 
     /// ⇧⌘S: saves the current display as PNG on the Desktop.
     @objc func saveScreenshot(_ sender: Any?) {

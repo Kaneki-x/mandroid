@@ -81,3 +81,19 @@ import Testing
         #expect(DisplaySlotPool.sanitize(width: 1281, height: 9000, dpi: 1000) == (1280, 7680, 640))
     }
 }
+
+@Suite struct RunnerSettingsTests {
+    @Test func landscapeDefault() {
+        var s = RunnerSettings()
+        #expect(s.landscapeByDefault)
+        let l = s.defaultWindowSize(screenWidth: 1440, screenHeight: 900)
+        #expect(l.width > l.height)
+        #expect(abs(l.width / l.height - 1.6) < 0.01)
+        s.landscapeByDefault = false
+        let p = s.defaultWindowSize(screenWidth: 1440, screenHeight: 900)
+        #expect(p.height > p.width)
+        // Clamps to the screen.
+        let small = RunnerSettings().defaultWindowSize(screenWidth: 800, screenHeight: 600)
+        #expect(small.width <= 760 && small.height <= 560)
+    }
+}

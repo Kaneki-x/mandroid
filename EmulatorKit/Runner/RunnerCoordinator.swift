@@ -7,7 +7,10 @@ import Observation
 @Observable
 public final class RunnerCoordinator {
     public private(set) var state: RunnerState = .idle {
-        didSet { Log.runner.notice("state → \(String(describing: self.state).prefix(200), privacy: .public)") }
+        didSet {
+            Log.runner.notice("state → \(String(describing: self.state).prefix(200), privacy: .public)")
+            Log.file("state → \(String(describing: self.state).prefix(200))")
+        }
     }
     public private(set) var session: EmulatorSession?
     public private(set) var sessions: [String: AppSession] = [:]   // by package
@@ -242,13 +245,21 @@ public final class RunnerCoordinator {
         guard let session else { throw EmulatorKitError.emulator("not running") }
         if let existing = sessions[package] { return existing }
         let component = try await launcherComponent(for: package)
-        let slot = try await session.displays.acquire(width: width, height: height, dpi: dpi)
+        let slot: DisplaySlot
+        do {
+            slot = try await session.displays.acquire(width: width, height: height, dpi: dpi)
+        } catch {
+            Log.file("openApp \(package): acquire failed: \(error.localizedDescription)")
+            throw error
+        }
         do {
             try await session.adb.startActivity(component: component, displayID: slot.androidDisplayID)
         } catch {
+            Log.file("openApp \(package): am start failed: \(error.localizedDescription)")
             try? await session.displays.release(slot.emulatorIndex)
             throw error
         }
+        Log.file("openApp \(package) → slot \(slot.emulatorIndex) display \(slot.androidDisplayID) \(slot.width)x\(slot.height)")
         await session.router.noteTouch(androidDisplayID: slot.androidDisplayID)
         let app = AppSession(package: package, launcherComponent: component, slot: slot)
         sessions[package] = app

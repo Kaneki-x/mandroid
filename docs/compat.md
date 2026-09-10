@@ -14,6 +14,15 @@ tried; keep one line per app.
 | Settings (system) | `com.android.settings` | yes | yes | yes | Used for the spike; search typing verified. |
 | Camera (AOSP) | `com.android.camera2` | yes | — | — | Runtime permission dialog appears on the app's own display. |
 
+## Orientation
+
+New windows open in landscape by default (Settings ▸ Windows switches to
+portrait). Android ▸ Rotate Window (⌘R) swaps a window's width and height;
+the virtual display is reconfigured in place, so the app relays out without
+restarting. Android itself never reports a device rotation (the emulator
+keeps rotation 0); apps see a configuration change, exactly as on a tablet
+whose window was resized.
+
 ## General findings
 
 - **Apps that finish themselves** (Back on the root activity) leave an empty

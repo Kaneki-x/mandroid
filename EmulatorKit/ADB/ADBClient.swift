@@ -109,6 +109,8 @@ public actor ADBClient {
     /// True if any task is currently hosted on the given logical display.
     public func hasTasks(onDisplay displayID: Int) async throws -> Bool {
         let out = try await shell("am stack list")
+        // An empty answer means adb hiccupped, not that every task is gone.
+        guard out.contains("RootTask") else { throw EmulatorKitError.adb("empty task list") }
         return TaskListParser.displaysWithTasks(out).contains(displayID)
     }
 

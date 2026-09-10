@@ -27,6 +27,11 @@ struct SettingsView: View {
                 }
             }
             Section("Windows") {
+                Picker("New windows open", selection: $settings.landscapeByDefault) {
+                    Text("Landscape").tag(true)
+                    Text("Portrait").tag(false)
+                }
+                .pickerStyle(.segmented)
                 Stepper("Default window height: \(settings.defaultWindowHeight) pt",
                         value: $settings.defaultWindowHeight, in: 500...1600, step: 50)
                 Toggle("Create launcher stubs in ~/Applications/Android Apps", isOn: $settings.launcherStubs)

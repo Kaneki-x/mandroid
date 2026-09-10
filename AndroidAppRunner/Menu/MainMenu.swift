@@ -29,6 +29,7 @@ enum MainMenu {
         let home = android.addItem(withTitle: "Home", action: #selector(AppWindowController.androidHome(_:)), keyEquivalent: "h")
         home.keyEquivalentModifierMask = [.command, .shift]
         android.addItem(withTitle: "Recents", action: #selector(AppWindowController.androidRecents(_:)), keyEquivalent: "")
+        android.addItem(withTitle: "Rotate Window", action: #selector(AppWindowController.rotateWindow(_:)), keyEquivalent: "r")
         let shot = android.addItem(withTitle: "Save Screenshot", action: #selector(AppWindowController.saveScreenshot(_:)), keyEquivalent: "s")
         shot.keyEquivalentModifierMask = [.command, .shift]
         android.addItem(.separator())
