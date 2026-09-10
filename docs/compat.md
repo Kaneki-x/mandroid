@@ -38,3 +38,16 @@ whose window was resized.
   no macOS notification bridge yet.
 - **Audio** plays through the emulator regardless of which window is
   focused (`streamAudio` is VM-wide).
+
+## Audio
+
+Android audio is played by the emulator's own CoreAudio backend, VM-wide.
+That backend binds to the Mac's **default output device at the moment the
+guest opens its audio stream** (in practice, at boot) and does not follow
+later changes in System Settings ▸ Sound. If sound seems missing, check which
+device was the default when Madroid started (a Bluetooth speaker or a
+monitor's HDMI output are common surprises) and restart the emulator
+(Android ▸ Restart) after switching outputs. The guest side can be checked
+with `adb shell dumpsys audio` (player states) and the host side with
+CoreAudio's per-process objects (the `qemu-system-aarch64` process shows
+`runningOutput=1` while an app plays).

@@ -18,6 +18,7 @@ import MadroidKit
 /// - `debug/resize?pkg=&w=&h=` resizes the window content
 /// - `debug/rotate?pkg=` swaps the window orientation
 /// - `debug/close?pkg=` closes the window
+/// - `debug/settings` opens the Settings window
 /// - `debug/quit` terminates the app (exercises the shutdown path)
 @MainActor
 struct DebugHooks {
@@ -27,6 +28,7 @@ struct DebugHooks {
         guard let cmd = path.first else { return }
         switch cmd {
         case "snapshot": snapshot(dir: q["dir"] ?? NSTemporaryDirectory())
+        case "settings": delegate.showSettings(nil)
         case "click":
             guard let wc = controller(q["pkg"]), let x = Double(q["x"] ?? ""), let y = Double(q["y"] ?? "") else { return }
             synthesizeDrag(in: wc, from: CGPoint(x: x, y: y), to: CGPoint(x: x, y: y), steps: 0)

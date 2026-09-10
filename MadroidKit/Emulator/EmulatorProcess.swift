@@ -60,6 +60,17 @@ public final class EmulatorProcess: @unchecked Sendable {
         conts.forEach { $0.resume(returning: status) }
     }
 
+    /// Waits for exit, giving up after `timeout`. Returns whether it exited.
+    public func waitForExit(timeout: Duration) async -> Bool {
+        await withTaskGroup(of: Bool.self) { group in
+            group.addTask { _ = await self.waitForExit(); return true }
+            group.addTask { try? await Task.sleep(for: timeout); return false }
+            let first = await group.next() ?? false
+            group.cancelAll()
+            return first
+        }
+    }
+
     public func terminate() { if process.isRunning { process.terminate() } }
     public func kill() { if process.isRunning { Darwin.kill(process.processIdentifier, SIGKILL) } }
 

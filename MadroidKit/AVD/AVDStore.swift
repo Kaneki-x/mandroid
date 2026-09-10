@@ -35,6 +35,11 @@ public struct AVDStore: Sendable {
         if out != text { try out.write(to: file, atomically: true, encoding: .utf8) }
     }
 
+    /// Removes the quickboot snapshot (used after a failed or corrupt load).
+    public func deleteQuickbootSnapshot(_ name: String) {
+        try? FileManager.default.removeItem(at: directory(for: name).appendingPathComponent("snapshots/default_boot", isDirectory: true))
+    }
+
     /// Deletes the AVD entirely (cold start from scratch).
     public func delete(_ name: String) throws {
         try? FileManager.default.removeItem(at: directory(for: name))

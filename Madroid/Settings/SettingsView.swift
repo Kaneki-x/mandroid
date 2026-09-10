@@ -58,7 +58,9 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 480)
+        // A grouped Form has no intrinsic height (it is a scroll view), so the
+        // hosting window would collapse to zero height without an explicit size.
+        .frame(width: 500, height: 780)
         .onChange(of: settings) { _, new in
             new.save()
             if !new.launcherStubs {

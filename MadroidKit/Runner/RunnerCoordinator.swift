@@ -95,7 +95,12 @@ public final class RunnerCoordinator {
     private func setStage(_ s: String) { state = .booting(s) }
 
     public func boot(coldBoot: Bool = false) async {
+        await boot(coldBoot: coldBoot, isRetry: false)
+    }
+
+    private func boot(coldBoot: Bool, isRetry: Bool) async {
         guard session == nil else { return }
+        var launched: (process: EmulatorProcess, adb: ADBClient)?
         do {
             setStage("Preparing virtual device")
             guard let image = bootstrap.installedSystemImage() else {
@@ -124,6 +129,7 @@ public final class RunnerCoordinator {
             setStage("Starting emulator")
             let process = try EmulatorProcess(paths: paths, options: options)
             try process.start()
+            launched = (process, adb)
 
             let connection = try EmulatorConnection(port: grpc)
             setStage("Connecting to emulator")
@@ -167,7 +173,24 @@ public final class RunnerCoordinator {
             await refreshApps()
         } catch {
             Log.runner.error("boot failed: \(error.localizedDescription)")
-            state = .failed(error.localizedDescription)
+            Log.file("boot failed: \(error.localizedDescription.prefix(300))")
+            if let launched {
+                launched.process.terminate()
+                _ = await launched.process.waitForExit(timeout: .seconds(5))
+                launched.process.kill()
+                await launched.adb.killServer()
+            }
+            // An emulator that dies during boot is almost always a bad quickboot
+            // snapshot (e.g. the previous run was killed while saving it). Drop
+            // the snapshot and cold boot once before giving up.
+            let message = error.localizedDescription
+            if !isRetry, message.contains("exited during boot") {
+                if message.contains("snapshot") { avdStore.deleteQuickbootSnapshot(avdName) }
+                Log.file("boot: retrying with a cold boot")
+                await boot(coldBoot: true, isRetry: true)
+                return
+            }
+            state = .failed(message)
         }
     }
 
@@ -193,17 +216,20 @@ public final class RunnerCoordinator {
         clipboard = nil
         await session.input.close()
         try? await session.displays.reset()
-        _ = try? await session.adb.run(["emu", "kill"], timeout: .seconds(5))
-        let exited = await withTaskGroup(of: Bool.self) { group in
-            group.addTask { _ = await session.process.waitForExit(); return true }
-            group.addTask { try? await Task.sleep(for: .seconds(15)); return false }
-            let first = await group.next() ?? false
-            group.cancelAll()
-            return first
+        // Ask QEMU to power off over gRPC (adb "emu kill" needs the console
+        // auth token and silently does nothing without it). The emulator saves
+        // the quickboot snapshot on the way out, which takes several seconds
+        // for a 4 GB guest, so wait generously before escalating: a SIGKILL
+        // during the save leaves a snapshot the next boot cannot load.
+        _ = try? await session.client.requestShutdown()
+        var exited = await session.process.waitForExit(timeout: .seconds(60))
+        if !exited {
+            Log.file("shutdown: emulator still running after 60 s, sending SIGTERM")
+            session.process.terminate()
+            exited = await session.process.waitForExit(timeout: .seconds(30))
         }
         if !exited {
-            session.process.terminate()
-            try? await Task.sleep(for: .seconds(3))
+            Log.file("shutdown: emulator ignored SIGTERM, killing")
             session.process.kill()
         }
         await session.adb.killServer()
