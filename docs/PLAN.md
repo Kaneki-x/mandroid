@@ -11,15 +11,15 @@ build scaffolding.
 
 - [x] `docs/DESIGN.md`, `docs/PLAN.md`, `docs/SPIKE-NOTES.md`, `README.md`,
       `CLAUDE.md`, `LICENSE` (this branch)
-- [ ] `project.yml` with `EmulatorKit`, `AndroidAppRunner`, `EmulatorKitTests`
+- [x] `project.yml` with `EmulatorKit`, `AndroidAppRunner`, `EmulatorKitTests`
       targets compiling empty
-- [ ] `Protos/emulator_controller.proto` vendored from
+- [x] `Protos/emulator_controller.proto` vendored from
       `<sdk>/emulator/lib/` with a `PROVENANCE` note (emulator version, date)
-- [ ] `Tools/protoc-plugins/Package.swift` pinning `swift-protobuf` and
+- [x] `Tools/protoc-plugins/Package.swift` pinning `swift-protobuf` and
       `grpc-swift-protobuf`; `Scripts/gen-proto.sh` builds `protoc-gen-swift`
       and `protoc-gen-grpc-swift-2`, runs Homebrew `protoc`, writes
       `EmulatorKit/Generated/` (committed)
-- [ ] `Tools/Spike/` — throwaway SwiftPM executable (AppKit window from a CLI
+- [x] `Tools/Spike/` — throwaway SwiftPM executable (AppKit window from a CLI
       via `NSApplication` + `setActivationPolicy(.regular)`) run against the
       local reference SDK and the existing `Medium_Phone` AVD:
       1. `emulator -avd Medium_Phone -grpc 8554 -qt-hide-window -no-boot-anim -gpu host`
@@ -38,7 +38,7 @@ build scaffolding.
       12. `ImageTransport.MMAP` with a `file:///` handle: frames? byte layout?
       13. cold boot vs snapshot restore wall time
       14. sustained fps and host CPU at 720×1280, 1080×1920, 1080×2400 over gRPC
-- [ ] Bootstrap dry run: parse the live manifests, download platform-tools
+- [x] Bootstrap dry run: parse the live manifests, download platform-tools
       and the emulator into a temporary SDK root, write an AVD by hand that
       points at the *local* system image, boot it with no Java on the path and
       no `platforms/` directory; record warnings and whether the quarantine
@@ -111,9 +111,9 @@ ways without duplication; shortcuts work.
 
 ## Phase 3 — Native polish
 
-- [ ] `Frames/MMAPFrameStream` (two regions) + `AppWindow/MetalFrameView`
-      (`CAMetalLayer`, zero-copy blit, flip in the blit); display sized to
-      physical pixels, dpi = 160 × backingScale
+- [ ] ~~`Frames/MMAPFrameStream`~~ dropped (spike: MMAP crashes the emulator;
+      gRPC does 50 fps at 1080×2400). Retina sizing (display at physical
+      pixels, dpi = 160 × backingScale) moves to Phase 1.
 - [ ] `ResizeCoordinator`: free resize → 400 ms debounce → in-place display
       reconfiguration
 - [ ] `Launchers/LauncherStubBuilder` + `URLSchemeHandler`

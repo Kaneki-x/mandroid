@@ -45,8 +45,19 @@ must pass and `Scripts/gen-proto.sh` must leave a clean tree.
 - `KeyboardEvent` has no display id; keyboard routing goes through
   `InputRouter`'s focus policy.
 - Touch up events must send `pressure: 0` for the same identifier.
-- Raise `maxResponseMessageBytes` (64 MiB) for `streamScreenshot`; the NIO
-  transport default is 4 MiB.
+- Raise **both** `maxRequestMessageBytes` and `maxResponseMessageBytes`
+  (64 MiB) for screenshot calls; the NIO transport sizes its inbound decoder
+  from the request limit. Default is 4 MiB.
+- Emulator display *N* ↔ Android `uniqueId
+  "virtual:com.android.emulator.multidisplay:123456<N+1>"`; logical ids are
+  not stable, re-read them.
+- Never pass `-feature VirtioMouse` (kills per-display touch). `injectWheel`
+  and `ImageTransport.MMAP` are not used (dropped / crashes the emulator).
+- Always launch with `-no-metrics`; reset the secondary display set to empty
+  right after connecting (the emulator persists `hw.displayN.*` into the AVD
+  `config.ini`).
+- Keyboard focus follows the last touched display; nudge with
+  `am start --display <id> -n <component>`, not a mouse hover.
 - adb must be connected before adding displays (guest service starts over adb).
 
 ## Environment isolation (never touch the user's SDK)

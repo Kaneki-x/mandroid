@@ -57,7 +57,7 @@ Shipped proto: `<sdk>/emulator/lib/emulator_controller.proto` (vendored to
 
 | RPC | Use | Display-aware |
 |---|---|---|
-| `streamScreenshot(ImageFormat) → stream Image` | Frames per display, RGBA8888, **server-side scaled** to requested `width`/`height`; optional `ImageTransport.MMAP` writes pixels to a client-owned `file:///` region | yes (`display`) |
+| `streamScreenshot(ImageFormat) → stream Image` | Frames per display, RGBA8888, **server-side scaled** to requested `width`/`height` (capped at the display size). `ImageTransport.MMAP` crashes the emulator and is not used | yes (`display`) |
 | `streamInputEvent(stream InputEvent)` | One bidirectional stream carrying touch, mouse, wheel, key and Android events in a `oneof` | per event |
 | `sendTouch` / `sendMouse` / `injectWheel` / `sendKey` | Unary fallbacks | touch/mouse/wheel yes, **keyboard no** |
 | `setDisplayConfigurations` / `getDisplayConfigurations` | Add, resize and remove secondary displays (ids 1–3); id 0 is immutable; displays omitted from the request are removed | — |
@@ -275,8 +275,14 @@ never modify or re-sign the emulator tree.
   `apple/swift-protobuf` 1.31+. All three gRPC packages require macOS 15.0,
   which is our deployment target.
 - The NIO transport's default maximum message size is 4 MiB. A 1080×2400
-  RGBA frame is 10.4 MB, so `maxResponseMessageBytes` is raised (64 MiB) in a
-  per-method `MethodConfig` for `streamScreenshot`.
+  RGBA frame is 10.4 MB, so the limit is raised to 64 MiB in the
+  `CallOptions` of every screenshot call. Spike finding: in
+  grpc-swift-nio-transport 2.9 the inbound decoder takes its cap from
+  **`maxRequestMessageBytes`**, not `maxResponseMessageBytes`, so both are
+  set.
+- Measured throughput (Release build, spike item 10): ~50 fps at 1080×2400
+  over plain gRPC (520 MB/s) with the client on ~15–20 % of one core. Debug
+  builds decode 3–5× slower; profile only Release.
 - `withGRPCClient` is scoped and shuts the client down when its closure
   returns; the app needs a client that outlives any call, hence the
   `EmulatorConnection` wrapper (§4).
@@ -308,7 +314,7 @@ android-app-runner/
     ADB/        ADBClient, DumpsysDisplayParser, PackageListParser
     Client/     EmulatorConnection, EmulatorClient
     Display/    DisplaySlotPool, DisplaySlot, AppSession
-    Frames/     Frame, FrameStream (protocol), GRPCFrameStream, MMAPFrameStream
+    Frames/     Frame, FrameStream (protocol), GRPCFrameStream
     Input/      InputChannel, InputRouter, CoordinateMapper, KeyMap
     Catalog/    InstalledApps, APKBadging, IconExtractor, AppInstaller, AppCatalogCache
     Clipboard/  ClipboardSync
@@ -318,7 +324,7 @@ android-app-runner/
     AppDelegate.swift, Info.plist, Assets.xcassets
     Setup/      SetupWindow (SwiftUI onboarding, download progress)
     Library/    LibraryWindow, LibraryViewModel, APKDropTarget
-    AppWindow/  AppWindowController, FrameView, MetalFrameView, InputHandler, ParkedOverlayView
+    AppWindow/  AppWindowController, FrameView, InputHandler, ParkedOverlayView
     Device/     DeviceScreenWindowController (display 0)
     Menu/       MainMenu
     Launchers/  LauncherStubBuilder, URLSchemeHandler
@@ -365,16 +371,22 @@ and publishes the client; `EmulatorClient` is the typed facade
 `AsyncThrowingStream`.
 
 **Display/** — `DisplaySlotPool` owns slots 1–3. `acquire(size:dpi:)` assigns
-a slot, gives each slot a **unique pixel size** (widths differ by at least
-2 px, the reliable join key for `dumpsys display`), pushes the full display
-set via `setDisplayConfigurations`, re-reads `dumpsys display` and returns a
-`DisplaySlot{emulatorIndex, androidDisplayId, pixelSize, dpi}`. `release`
-removes the display. Phase 2 adds LRU parking (§5.5). `AppSession` ties a
-package, a slot and a window together.
+a slot, pushes the full display set via `setDisplayConfigurations`, re-reads
+`dumpsys display` and returns a
+`DisplaySlot{emulatorIndex, androidDisplayId, pixelSize, dpi}`. The join key
+is deterministic (spike item 3): emulator display *N* shows up in Android
+with `uniqueId="virtual:com.android.emulator.multidisplay:123456<N+1>"`;
+the logical `displayId` is not stable across reboots and is re-read every
+time. On startup the pool always pushes an **empty** secondary set first,
+because the emulator writes `hw.displayN.*` into the AVD `config.ini` and
+would otherwise recreate stale displays. `release` removes the display.
+Phase 2 adds LRU parking (§5.5). `AppSession` ties a package, a slot and a
+window together.
 
 **Frames/** — `FrameStream` is a protocol so the transport can change without
-touching the UI: `GRPCFrameStream` (Phase 1) consumes `streamScreenshot`;
-`MMAPFrameStream` (Phase 3) uses `ImageTransport.MMAP`.
+touching the UI: `GRPCFrameStream` consumes `streamScreenshot`. The MMAP
+transport was dropped after the spike (item 6: it crashes emulator 36.3.10);
+the protocol stays for a future scrcpy-style provider.
 
 **Input/** — `InputChannel` owns the single `streamInputEvent` bidirectional
 stream. `CoordinateMapper` converts view points to display pixels (letterbox
@@ -437,22 +449,17 @@ registers `androidrunner`; not `LSUIElement` (we own real windows).
 - Frames are requested as **RGBA8888**. RGB888 saves a quarter of the bytes
   but its rows are not 4-byte aligned and no Core Animation or Metal format
   matches it, so every frame would need a CPU repack.
-- **Phase 1**: build a `CGImage` over the frame bytes
-  (`CGDataProvider`, `byteOrder32Big | noneSkipLast`) and set it as
-  `layer.contents`. Request frames at the window's **logical (1x)** size,
-  capped at 1200 px on the long edge, and accept ~30 fps. The emulator only
-  emits a frame when content changes and `Image.seq` gaps tell us about drops.
-  If the proto's "bottom up" row order is real, `isGeometryFlipped` handles it
-  (spike item).
-- **Phase 3**: `MMAPFrameStream` with two alternating regions (the proto warns
-  the mmap path can tear) and `MetalFrameView`, a plain `NSView` hosting a
-  `CAMetalLayer` (not `MTKView`, which redraws on its own schedule). The region
-  is wrapped once with `makeBuffer(bytesNoCopy:)` and blitted per frame;
-  flipping is free in the blit. Only then is the virtual display sized to the
-  window's **physical** pixels with `dpi = 160 × backingScaleFactor`, which
-  makes 1 dp = 1 pt and gives Retina-crisp rendering. Uncompressed budget:
-  1080×2400 ≈ 10.4 MB per frame ≈ 620 MB/s at 60 fps, which is why this needs
-  shared memory rather than gRPC payloads.
+- Build a `CGImage` over the frame bytes (`CGDataProvider`,
+  `byteOrder32Big | noneSkipLast`) and set it as `layer.contents`. Rows are
+  top-down (spike item 7), no flip. The emulator only emits a frame when
+  content changes and `Image.seq` gaps tell us about drops; a frame that
+  arrives while the previous one is still being committed is dropped.
+- The virtual display is sized to the window's **physical** pixels with
+  `dpi = 160 × backingScaleFactor`, which makes 1 dp = 1 pt and gives
+  Retina-crisp rendering, and frames are requested at that same size. The
+  spike measured ~50 fps at 1080×2400 over gRPC, so no shared-memory path is
+  needed. A `CAMetalLayer` blit remains an option if CGImage upload ever
+  shows up in profiles.
 
 ### 5.3 Pointer input
 
@@ -464,8 +471,11 @@ registers `androidrunner`; not `LSUIElement` (we own real windows).
   (otherwise the touch identifier leaks; the default `expiration` self-heals a
   lost up-event after 120 s). Click-and-hold is a long-press with no special
   handling.
-- Two-finger scroll → `injectWheel` if the spike shows the phone image honours
-  it; otherwise a synthesised touch drag. Kept behind a preference.
+- Two-finger scroll → synthesised touch drag (`InputHandler` accumulates
+  scroll deltas into a moving touch, ending it after a short idle). The spike
+  showed `injectWheel` is dropped on the phone image; the only way to get a
+  wheel device (`-feature VirtioMouse`) removes the per-display touch devices
+  and must never be enabled.
 - Right-click is unmapped by default.
 
 ### 5.4 Keyboard and focus
@@ -473,13 +483,15 @@ registers `androidrunner`; not `LSUIElement` (we own real windows).
 `KeyboardEvent` has no display id and Android has one keyboard focus
 device-wide, so `InputRouter` implements a policy ladder:
 
-0. Create displays with `OWN_FOCUS` (API 34+) first: if per-display focus
-   works, each window keeps its own focused view and the nudge below only has
-   to move the top-focused display, which touch already does.
-1. On `windowDidBecomeKey`, nudge Android's top-focused display by sending a
-   `MouseEvent{buttons: 0}` (or, if hover is not enough, a tap) to that
-   window's display, then send keys. Verified by `dumpsys window |
-   grep mTopFocusedDisplayId` in the spike.
+0. Android routes keys to `FocusedDisplayId` (`dumpsys input`), which is the
+   last display that received a touch (spike item 5). `InputRouter` tracks
+   the display of the last touch we sent, so typing after a click needs no
+   extra work. `OWN_FOCUS` was tested and changes nothing here.
+1. On `windowDidBecomeKey`, if the last touched display differs, nudge with
+   `am start --display <id> -n <launcher component>` of that window's app
+   (the task is already at the top of that display, so Android only moves
+   focus, "intent delivered to top-most instance"). A `MouseEvent{buttons: 0}`
+   hover does not move focus on the phone image.
 2. Use `TextViewFocus{textViewHasFocus, display}` from `streamNotification`
    as ground truth for where Android thinks text focus is; the window UI can
    show a subtle "keyboard not focused" state.
@@ -533,7 +545,7 @@ and drops echoes so the two systems never ping-pong.
 
 | Risk | Mitigation |
 |---|---|
-| Uncompressed frames over gRPC at Retina sizes | 1x-sized frames ≤ 1200 px and ~30 fps in Phase 1; MMAP + Metal in Phase 3; drop stale frames |
+| Uncompressed frames over gRPC at Retina sizes | Measured 50 fps at 1080×2400 in Release; drop stale frames; pause streams for hidden windows |
 | Keyboard has no display target | Focus nudge on activation, `TextViewFocus` as ground truth, single-keyboard-window fallback |
 | Hard cap of 3 displays | Slot pool with LRU parking; "3 of 3 windows in use" UI; future providers |
 | App compatibility on secondary displays (`resizeableActivity=false`, display-0 assumptions) | Per-app "run on device screen" fallback; compatibility matrix; manifest warning |
