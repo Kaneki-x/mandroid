@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Regenerates EmulatorKit/Generated from Protos/*.proto.
+# Regenerates MadroidKit/Generated from Protos/*.proto.
 #
 # Builds protoc-gen-swift and protoc-gen-grpc-swift-2 from the pinned
 # Tools/protoc-plugins package (SwiftPM), then runs Homebrew protoc.
@@ -8,7 +8,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PLUGINS="$ROOT/Tools/protoc-plugins"
-OUT="$ROOT/EmulatorKit/Generated"
+OUT="$ROOT/MadroidKit/Generated"
 PROTOC="${PROTOC:-$(command -v protoc || true)}"
 
 if [[ -z "$PROTOC" ]]; then

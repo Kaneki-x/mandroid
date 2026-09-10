@@ -1,4 +1,4 @@
-name: AndroidAppRunner
+name: Madroid
 options:
   minimumXcodeGenVersion: 2.42.0
   deploymentTarget:
@@ -34,11 +34,11 @@ packages:
     url: https://github.com/apple/swift-protobuf.git
     from: 1.29.0
 targets:
-  EmulatorKit:
+  MadroidKit:
     type: framework
     platform: macOS
     sources:
-      - path: EmulatorKit
+      - path: MadroidKit
         excludes:
           - "**/.DS_Store"
     dependencies:
@@ -52,25 +52,25 @@ targets:
         product: SwiftProtobuf
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: io.github.madeye.androidapprunner.kit
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.madeye.madroid.kit
         DEFINES_MODULE: YES
         GENERATE_INFOPLIST_FILE: YES
         # Generated protobuf code is not ours to lint.
         SWIFT_TREAT_WARNINGS_AS_ERRORS: NO
-  AndroidAppRunner:
+  Madroid:
     type: application
     platform: macOS
     sources:
-      - AndroidAppRunner
+      - Madroid
     dependencies:
-      - target: EmulatorKit
+      - target: MadroidKit
         embed: true
     info:
-      path: AndroidAppRunner/Info.plist
+      path: Madroid/Info.plist
       properties:
         CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
-        CFBundleDisplayName: Android App Runner
-        CFBundleName: Android App Runner
+        CFBundleDisplayName: Madroid
+        CFBundleName: Madroid
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSMinimumSystemVersion: $(MACOSX_DEPLOYMENT_TARGET)
@@ -83,9 +83,9 @@ targets:
         NSSupportsSuddenTermination: false
         NSHumanReadableCopyright: "Copyright © 2026 Max Lv. MIT License."
         CFBundleURLTypes:
-          - CFBundleURLName: io.github.madeye.androidapprunner.launch
+          - CFBundleURLName: io.github.madeye.madroid.launch
             CFBundleURLSchemes:
-              - androidrunner
+              - madroid
         CFBundleDocumentTypes:
           - CFBundleTypeName: Android Package
             CFBundleTypeRole: Viewer
@@ -105,31 +105,31 @@ targets:
                 - application/vnd.android.package-archive
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: io.github.madeye.androidapprunner
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.madeye.madroid
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_APP_SANDBOX: NO
         SWIFT_TREAT_WARNINGS_AS_ERRORS: NO
-  EmulatorKitTests:
+  MadroidKitTests:
     type: bundle.unit-test
     platform: macOS
     sources:
-      - path: EmulatorKitTests
+      - path: MadroidKitTests
     dependencies:
-      - target: EmulatorKit
+      - target: MadroidKit
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: io.github.madeye.androidapprunner.tests
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.madeye.madroid.tests
         GENERATE_INFOPLIST_FILE: YES
 schemes:
-  AndroidAppRunner:
+  Madroid:
     build:
       targets:
-        AndroidAppRunner: all
-        EmulatorKit: all
-        EmulatorKitTests: [test]
+        Madroid: all
+        MadroidKit: all
+        MadroidKitTests: [test]
     run:
       config: Debug
     test:
       config: Debug
       targets:
-        - EmulatorKitTests
+        - MadroidKitTests

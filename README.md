@@ -1,4 +1,4 @@
-# Android App Runner
+# Madroid
 
 Run Android apps on your Mac as if they were native macOS apps. Each Android
 app gets its own window with a normal title bar, resizes like a Mac window,
@@ -21,13 +21,13 @@ plan live in [`docs/`](docs/):
 ```bash
 brew install xcodegen protobuf   # protobuf only if you regenerate gRPC code
 xcodegen generate
-xcodebuild -scheme AndroidAppRunner -configuration Debug build
-open ~/Library/Developer/Xcode/DerivedData/AndroidAppRunner-*/Build/Products/Debug/AndroidAppRunner.app
+xcodebuild -scheme Madroid -configuration Debug build
+open ~/Library/Developer/Xcode/DerivedData/Madroid-*/Build/Products/Debug/Madroid.app
 ```
 
 On first launch the app lists what it will download (about 2.5 GB from
 `dl.google.com`) and installs everything under
-`~/Library/Application Support/AndroidAppRunner/`.
+`~/Library/Application Support/Madroid/`.
 
 ## How it works
 

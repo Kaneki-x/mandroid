@@ -1,7 +1,7 @@
 # App compatibility notes
 
 Observed behaviour of apps running on a secondary emulator display inside an
-Android App Runner window. Environment: emulator 37.1.11, Google Play
+Madroid window. Environment: emulator 37.1.11, Google Play
 arm64 image API 36.1, display flags 1225. Update this table as apps are
 tried; keep one line per app.
 

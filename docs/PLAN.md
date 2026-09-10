@@ -11,14 +11,14 @@ build scaffolding.
 
 - [x] `docs/DESIGN.md`, `docs/PLAN.md`, `docs/SPIKE-NOTES.md`, `README.md`,
       `CLAUDE.md`, `LICENSE` (this branch)
-- [x] `project.yml` with `EmulatorKit`, `AndroidAppRunner`, `EmulatorKitTests`
+- [x] `project.yml` with `MadroidKit`, `Madroid`, `MadroidKitTests`
       targets compiling empty
 - [x] `Protos/emulator_controller.proto` vendored from
       `<sdk>/emulator/lib/` with a `PROVENANCE` note (emulator version, date)
 - [x] `Tools/protoc-plugins/Package.swift` pinning `swift-protobuf` and
       `grpc-swift-protobuf`; `Scripts/gen-proto.sh` builds `protoc-gen-swift`
       and `protoc-gen-grpc-swift-2`, runs Homebrew `protoc`, writes
-      `EmulatorKit/Generated/` (committed)
+      `MadroidKit/Generated/` (committed)
 - [x] `Tools/Spike/` — throwaway SwiftPM executable (AppKit window from a CLI
       via `NSApplication` + `setActivationPolicy(.regular)`) run against the
       local reference SDK and the existing `Medium_Phone` AVD:
@@ -49,7 +49,7 @@ skeleton project builds.
 
 ## Phase 1 — MVP: bootstrap, boot, one app in one window
 
-EmulatorKit:
+MadroidKit:
 - [x] `SDK/`: `SDKPaths`, `RepositoryManifest`, `Downloader` (resume,
       progress, SHA-1), `Unarchiver` (`ditto`), `SDKBootstrap` (idempotent
       plan), `AAPT2Fetcher`
@@ -90,7 +90,7 @@ and frees the display → Quit leaves no emulator process behind.
 quickboot snapshot in ~23 s, open, click/type/scroll, in-place resize to
 1400×960, close releases the display, quit leaves no processes). Also landed
 early: free window resize with in-place display reconfiguration, Retina
-sizing (dpi = 160 × backingScale), `androidrunner://launch/<pkg>` URL
+sizing (dpi = 160 × backingScale), `madroid://launch/<pkg>` URL
 handling, debug automation hooks. Known gaps carried into Phase 2: package
 names instead of labels/icons, no detection of an app that finished itself
 (window shows black), no clipboard sync.
@@ -168,7 +168,7 @@ streaming frames. `Scripts/release.sh` signs, notarizes and staples.
 
 ## Verification strategy
 
-- **Unit tests** (`EmulatorKitTests`, run on every build): manifest parsing
+- **Unit tests** (`MadroidKitTests`, run on every build): manifest parsing
   from fixture XML (archive selection by os/arch/channel), AVD config
   rendering, `dumpsys display` parsing from captured fixtures, package list
   parsing, aapt2 badging parsing, coordinate mapping (letterbox, scale,
@@ -179,10 +179,10 @@ streaming frames. `Scripts/release.sh` signs, notarizes and staples.
   assert one secondary display and a non-blank frame, click/type/scroll,
   resize and assert the in-place reconfiguration, ⌘[, close and assert the
   display is released, quit and assert no emulator or adb process remains.
-  Drives the UI through `androidrunner://debug/…` hooks (Debug builds only).
+  Drives the UI through `madroid://debug/…` hooks (Debug builds only).
 - **Manual acceptance** per phase ("done when" above) and the compatibility
   matrix in `docs/compat.md`.
 - **Gate before any push**: `xcodegen generate`, `xcodebuild -scheme
-  AndroidAppRunner build`, `xcodebuild test -scheme AndroidAppRunner`, and
+  Madroid build`, `xcodebuild test -scheme Madroid`, and
   `Scripts/gen-proto.sh` leaving a clean tree.
 - **Git**: feature branches only; never commit on `main`.

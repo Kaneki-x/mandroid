@@ -1,4 +1,4 @@
-# Android App Runner for macOS — Design
+# Madroid for macOS — Design
 
 Status: design stage (September 2026). No application code exists yet; see
 [PLAN.md](PLAN.md) for the phased roadmap and [SPIKE-NOTES.md](SPIKE-NOTES.md)
@@ -206,7 +206,7 @@ AVD without `avdmanager`: two files.
 
 <ANDROID_AVD_HOME>/runner.avd/config.ini
     AvdId=runner
-    avd.ini.displayname=Android App Runner
+    avd.ini.displayname=Madroid
     avd.ini.encoding=UTF-8
     abi.type=arm64-v8a            # x86_64 on Intel
     hw.cpu.arch=arm64             # x86_64 on Intel
@@ -257,9 +257,9 @@ Environment isolation for every `emulator` and `adb` process we spawn, so the
 user's own `~/.android` and Android Studio are never touched:
 
 ```
-ANDROID_SDK_ROOT / ANDROID_HOME = ~/Library/Application Support/AndroidAppRunner/sdk
-ANDROID_AVD_HOME               = ~/Library/Application Support/AndroidAppRunner/avd
-ANDROID_EMULATOR_HOME          = ~/Library/Application Support/AndroidAppRunner/emu-home
+ANDROID_SDK_ROOT / ANDROID_HOME = ~/Library/Application Support/Madroid/sdk
+ANDROID_AVD_HOME               = ~/Library/Application Support/Madroid/avd
+ANDROID_EMULATOR_HOME          = ~/Library/Application Support/Madroid/emu-home
 ANDROID_ADB_SERVER_PORT        = a dedicated port (default adb server on 5037 is left alone)
 ```
 
@@ -288,7 +288,7 @@ never modify or re-sign the emulator tree.
   `EmulatorConnection` wrapper (§4).
 - Code generation uses the `protoc-gen-swift` and `protoc-gen-grpc-swift-2`
   executables built once with SwiftPM (`Tools/protoc-plugins`) and Homebrew's
-  `protoc`; output is committed under `EmulatorKit/Generated/`. The
+  `protoc`; output is committed under `MadroidKit/Generated/`. The
   `GRPCProtobufGenerator` build plugin is deliberately not used because it does
   not compose well with an xcodegen-generated Xcode project.
 
@@ -299,14 +299,14 @@ conventions of the author's other macOS apps (macOS 15, Swift 6 language mode,
 framework + app, hardened runtime in Release).
 
 ```
-android-app-runner/
+madroid/
   project.yml
   Protos/emulator_controller.proto        vendored, with a PROVENANCE note
-  Scripts/gen-proto.sh                    regenerates EmulatorKit/Generated
+  Scripts/gen-proto.sh                    regenerates MadroidKit/Generated
   Scripts/integration-test.sh             needs a booted emulator
   Tools/protoc-plugins/Package.swift      pins and builds the two protoc plugins
   Tools/Spike/                            Phase 0 throwaway executable
-  EmulatorKit/                            framework, no AppKit UI
+  MadroidKit/                            framework, no AppKit UI
     Generated/                            *.pb.swift, *.grpc.swift (committed)
     SDK/        SDKPaths, RepositoryManifest, Downloader, Unarchiver, SDKBootstrap, AAPT2Fetcher
     AVD/        AVDConfig, AVDStore
@@ -320,7 +320,7 @@ android-app-runner/
     Clipboard/  ClipboardSync
     Notifications/ NotificationStream
     Runner/     RunnerCoordinator, RunnerState
-  AndroidAppRunner/                       app target
+  Madroid/                       app target
     AppDelegate.swift, Info.plist, Assets.xcassets
     Setup/      SetupWindow (SwiftUI onboarding, download progress)
     Library/    LibraryWindow, LibraryViewModel, APKDropTarget
@@ -330,7 +330,7 @@ android-app-runner/
     Launchers/  LauncherStubBuilder, URLSchemeHandler
     Settings/   SettingsView
     WindowManager.swift, ResizeCoordinator.swift
-  EmulatorKitTests/  + Fixtures/ (manifest excerpts, dumpsys dumps, aapt2 output)
+  MadroidKitTests/  + Fixtures/ (manifest excerpts, dumpsys dumps, aapt2 output)
 ```
 
 ### 4.1 Module responsibilities
@@ -351,7 +351,7 @@ writes the pointer `.ini` and the `.avd` directory under `ANDROID_AVD_HOME`.
 **Emulator/** — `EmulatorProcess` spawns
 `emulator -avd runner -qt-hide-window -grpc <port> -no-boot-anim -gpu host -feature Vulkan`
 with the isolated environment, captures stdout/stderr to
-`~/Library/Logs/AndroidAppRunner/emulator.log`, and shuts down via
+`~/Library/Logs/Madroid/emulator.log`, and shuts down via
 `setVmState(SHUTDOWN)` with a SIGTERM fallback. `PortAllocator` picks a free
 even console port (5554 + 2n; adb serial is `emulator-<port>`) and a gRPC
 port. `BootWaiter` waits for adb and `sys.boot_completed=1`. `GuestSetup`
@@ -406,7 +406,7 @@ connection, adb and the slot pool. The UI binds to it.
 ### 4.2 App target
 
 `AppDelegate` (AppKit lifecycle; last window closed does not quit; handles
-`androidrunner://launch/<pkg>` URLs), `SetupWindow` (SwiftUI onboarding with
+`madroid://launch/<pkg>` URLs), `SetupWindow` (SwiftUI onboarding with
 component sizes and download progress), `LibraryWindow` (SwiftUI grid: search,
 open, Play Store, install APK by drag and drop, uninstall),
 `AppWindowController` (one `NSWindow` per running app, title = app label),
@@ -419,7 +419,7 @@ Window menu), `MainMenu`, `LauncherStubBuilder` + `URLSchemeHandler`
 Info.plist: no App Sandbox (we spawn processes and read the SDK tree);
 `NSSupportsAutomaticTermination` and `NSSupportsSuddenTermination` are false
 so macOS never kills us out from under a running QEMU; `CFBundleURLTypes`
-registers `androidrunner`; not `LSUIElement` (we own real windows).
+registers `madroid`; not `LSUIElement` (we own real windows).
 
 ## 5. Key mechanisms
 
@@ -547,7 +547,7 @@ compatibility matrix.
 For each catalogued app, generate
 `~/Applications/Android Apps/<Label>.app`: a minimal bundle with an `.icns`
 built from the extracted icon and an executable that runs
-`open "androidrunner://launch/<pkg>"`. The runner handles the URL, boots if
+`open "madroid://launch/<pkg>"`. The runner handles the URL, boots if
 needed, and opens the app window. Stubs are regenerated when the catalog
 changes and removed on uninstall.
 

@@ -1,31 +1,31 @@
 #!/bin/zsh
 # End-to-end smoke test against the real emulator. Not run in CI.
 #
-# Prerequisites: a Debug build of the app (xcodebuild -scheme AndroidAppRunner
+# Prerequisites: a Debug build of the app (xcodebuild -scheme Madroid
 # -configuration Debug build), an SDK already installed under
-# ~/Library/Application Support/AndroidAppRunner (or network + ~2.5 GB for the
+# ~/Library/Application Support/Madroid (or network + ~2.5 GB for the
 # first run), and an APK to install (APK=path, defaults to none).
 #
-# Drives the UI through the debug URL hooks (see AndroidAppRunner/Launchers/
+# Drives the UI through the debug URL hooks (see Madroid/Launchers/
 # DebugHooks.swift) so no Screen Recording / Accessibility permission is needed.
 set -euo pipefail
 
-APP="${APP:-$(ls -d ~/Library/Developer/Xcode/DerivedData/AndroidAppRunner-*/Build/Products/Debug/AndroidAppRunner.app 2>/dev/null | head -1)}"
+APP="${APP:-$(ls -d ~/Library/Developer/Xcode/DerivedData/Madroid-*/Build/Products/Debug/Madroid.app 2>/dev/null | head -1)}"
 APK="${APK:-}"
 PKG="${PKG:-com.github.shadowsocks}"
 OUT="${OUT:-$(mktemp -d /tmp/aar-it.XXXXXX)}"
-AS="$HOME/Library/Application Support/AndroidAppRunner"
+AS="$HOME/Library/Application Support/Madroid"
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 snap() {
-  rm -rf "$OUT/$1"; open "androidrunner://debug/snapshot?dir=$OUT/$1"
+  rm -rf "$OUT/$1"; open "madroid://debug/snapshot?dir=$OUT/$1"
   for i in $(seq 1 20); do sleep 0.5; [[ -f "$OUT/$1/state.txt" ]] && break; done
   cat "$OUT/$1/state.txt" 2>/dev/null; echo
 }
-hook() { open "androidrunner://debug/$1"; }
+hook() { open "madroid://debug/$1"; }
 
 [[ -d "$APP" ]] || fail "app not built: $APP"
-pkill -x AndroidAppRunner 2>/dev/null || true
+pkill -x Madroid 2>/dev/null || true
 sleep 1
 
 echo "==> launching $APP"
@@ -52,7 +52,7 @@ fi
 snap installed; grep -q "$PKG" "$OUT/installed/state.txt" || fail "$PKG not installed"
 
 echo "==> opening $PKG"
-open "androidrunner://launch/$PKG"; sleep 8
+open "madroid://launch/$PKG"; sleep 8
 snap opened; grep -qF "sessions=[\"$PKG\"]" "$OUT/opened/state.txt" || fail "no session for $PKG"
 secondaries() { "$ADB" shell dumpsys display | grep -oE 'uniqueId="virtual:com.android.emulator.multidisplay:[0-9]+"' | sort -u | wc -l | tr -d ' '; }
 [[ $(secondaries) == 1 ]] || fail "expected one secondary display, got $(secondaries)"
@@ -81,8 +81,8 @@ hook "close?pkg=$PKG"; sleep 3
 
 echo "==> quitting"
 hook quit
-for i in $(seq 1 40); do sleep 1; pgrep -x AndroidAppRunner >/dev/null || break; done
-pgrep -x AndroidAppRunner >/dev/null && fail "app did not quit"
+for i in $(seq 1 40); do sleep 1; pgrep -x Madroid >/dev/null || break; done
+pgrep -x Madroid >/dev/null && fail "app did not quit"
 sleep 2
 pgrep -f 'qemu-system-aarch64 -avd runner' >/dev/null && fail "orphaned emulator"
 pgrep -f "adb -L tcp:$PORT" >/dev/null && fail "orphaned adb server"
