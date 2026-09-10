@@ -17,7 +17,11 @@ OUT="${OUT:-$(mktemp -d /tmp/aar-it.XXXXXX)}"
 AS="$HOME/Library/Application Support/AndroidAppRunner"
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
-snap() { rm -rf "$OUT/$1"; open "androidrunner://debug/snapshot?dir=$OUT/$1"; sleep 2; cat "$OUT/$1/state.txt"; echo; }
+snap() {
+  rm -rf "$OUT/$1"; open "androidrunner://debug/snapshot?dir=$OUT/$1"
+  for i in $(seq 1 20); do sleep 0.5; [[ -f "$OUT/$1/state.txt" ]] && break; done
+  cat "$OUT/$1/state.txt" 2>/dev/null; echo
+}
 hook() { open "androidrunner://debug/$1"; }
 
 [[ -d "$APP" ]] || fail "app not built: $APP"
@@ -37,7 +41,7 @@ grep -q '^state=ready' "$OUT/boot/state.txt" || fail "not ready after 10 minutes
 echo "==> ready after $(( $(date +%s) - T0 )) s"
 
 ADB="$AS/sdk/platform-tools/adb"
-PORT=$(pgrep -fl 'adb -L tcp:51' | grep -oE 'tcp:[0-9]+' | head -1 | cut -d: -f2)
+PORT=$(grep -oE '^adbPort=[0-9]+' "$OUT/boot/state.txt" | cut -d= -f2)
 export ANDROID_ADB_SERVER_PORT="$PORT"
 echo "==> adb server port $PORT"
 
@@ -45,12 +49,13 @@ if [[ -n "$APK" ]]; then
   echo "==> installing $APK"
   open -a "$APP" "$APK"; sleep 20
 fi
-snap installed | grep -q "$PKG" || fail "$PKG not installed"
+snap installed; grep -q "$PKG" "$OUT/installed/state.txt" || fail "$PKG not installed"
 
 echo "==> opening $PKG"
 open "androidrunner://launch/$PKG"; sleep 8
-snap opened | grep -q "sessions=\[\"$PKG\"\]" || fail "no session for $PKG"
-[[ $("$ADB" shell dumpsys display | grep -c 'Emulator 2D Display') == 1 ]] || fail "expected one secondary display"
+snap opened; grep -qF "sessions=[\"$PKG\"]" "$OUT/opened/state.txt" || fail "no session for $PKG"
+secondaries() { "$ADB" shell dumpsys display | grep -oE 'uniqueId="virtual:com.android.emulator.multidisplay:[0-9]+"' | sort -u | wc -l | tr -d ' '; }
+[[ $(secondaries) == 1 ]] || fail "expected one secondary display, got $(secondaries)"
 python3 - "$OUT/opened/$(ls "$OUT/opened" | grep -v -e state.txt -e Library -e Device | head -1)" <<'PY' || fail "frame is blank"
 import sys
 from PIL import Image
@@ -71,7 +76,7 @@ snap after_input >/dev/null
 
 echo "==> closing window"
 hook "close?pkg=$PKG"; sleep 3
-[[ $("$ADB" shell dumpsys display | grep -c 'Emulator 2D Display') == 0 ]] || fail "secondary display not released"
+[[ $(secondaries) == 0 ]] || fail "secondary display not released"
 "$ADB" shell pidof "$PKG" >/dev/null && fail "$PKG still running after close" || true
 
 echo "==> quitting"

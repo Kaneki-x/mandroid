@@ -50,31 +50,31 @@ skeleton project builds.
 ## Phase 1 — MVP: bootstrap, boot, one app in one window
 
 EmulatorKit:
-- [ ] `SDK/`: `SDKPaths`, `RepositoryManifest`, `Downloader` (resume,
+- [x] `SDK/`: `SDKPaths`, `RepositoryManifest`, `Downloader` (resume,
       progress, SHA-1), `Unarchiver` (`ditto`), `SDKBootstrap` (idempotent
       plan), `AAPT2Fetcher`
-- [ ] `AVD/`: `AVDConfig` (template in DESIGN §3.4), `AVDStore`
-- [ ] `Emulator/`: `EmulatorProcess`, `EmulatorLaunchOptions`,
+- [x] `AVD/`: `AVDConfig` (template in DESIGN §3.4), `AVDStore`
+- [x] `Emulator/`: `EmulatorProcess`, `EmulatorLaunchOptions`,
       `PortAllocator`, `BootWaiter`, `GuestSetup` (settings + snapshot)
-- [ ] `ADB/`: `ADBClient`, `DumpsysDisplayParser`, `PackageListParser`
-- [ ] `Client/`: `EmulatorConnection` (long-lived), `EmulatorClient` facade,
+- [x] `ADB/`: `ADBClient`, `DumpsysDisplayParser`, `PackageListParser`
+- [x] `Client/`: `EmulatorConnection` (long-lived), `EmulatorClient` facade,
       `MethodConfig` raising `maxResponseMessageBytes` for `streamScreenshot`
-- [ ] `Display/`: `DisplaySlotPool` (3 slots, unique sizes, no parking yet),
+- [x] `Display/`: `DisplaySlotPool` (3 slots, unique sizes, no parking yet),
       `DisplaySlot`, `AppSession`
-- [ ] `Frames/`: `Frame`, `FrameStream` protocol, `GRPCFrameStream`
-- [ ] `Input/`: `InputChannel`, `CoordinateMapper`, `KeyMap`, `InputRouter`
+- [x] `Frames/`: `Frame`, `FrameStream` protocol, `GRPCFrameStream`
+- [x] `Input/`: `InputChannel`, `CoordinateMapper`, `KeyMap`, `InputRouter`
       (single policy: nudge on activation)
-- [ ] `Runner/`: `RunnerCoordinator`, `RunnerState`
+- [x] `Runner/`: `RunnerCoordinator`, `RunnerState`
 
 App:
-- [ ] `AppDelegate` (no quit on last window; URL scheme registered but only
+- [x] `AppDelegate` (no quit on last window; URL scheme registered but only
       logs in this phase)
-- [ ] `Setup/SetupWindow` (component list with sizes, license notice,
+- [x] `Setup/SetupWindow` (component list with sizes, license notice,
       progress, retry)
-- [ ] `Library/LibraryWindow` (package names only), Open Play Store button
-- [ ] `AppWindow/AppWindowController`, `FrameView` (CALayer + CGImage),
+- [x] `Library/LibraryWindow` (package names only), Open Play Store button
+- [x] `AppWindow/AppWindowController`, `FrameView` (CALayer + CGImage),
       `InputHandler`
-- [ ] `Device/DeviceScreenWindowController` (display 0)
+- [x] `Device/DeviceScreenWindowController` (display 0)
 
 Tests: `RepositoryManifest` against the committed live manifests (channel
 filtering, manifest-relative URLs, missing `host-arch` = universal,
@@ -85,6 +85,15 @@ Done when, starting from an empty Application Support folder: download → boot
 → Play Store opens in the device window → install an app → the app opens in
 its own window with no bars → tap, drag, type, scroll work → ⌘W stops the app
 and frees the display → Quit leaves no emulator process behind.
+
+**Status 2026-09-10: done.** `Scripts/integration-test.sh` passes (boot from
+quickboot snapshot in ~23 s, open, click/type/scroll, in-place resize to
+1400×960, close releases the display, quit leaves no processes). Also landed
+early: free window resize with in-place display reconfiguration, Retina
+sizing (dpi = 160 × backingScale), `androidrunner://launch/<pkg>` URL
+handling, debug automation hooks. Known gaps carried into Phase 2: package
+names instead of labels/icons, no detection of an app that finished itself
+(window shows black), no clipboard sync.
 
 ## Phase 2 — Multi-window, catalog, clipboard
 

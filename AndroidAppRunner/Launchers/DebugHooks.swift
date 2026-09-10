@@ -97,6 +97,11 @@ struct DebugHooks {
             lines.append("window=\(title) frame=\(NSStringFromRect(window.frame)) key=\(window.isKeyWindow)")
         }
         lines.append("sessions=\(delegate.coordinator.sessions.keys.sorted())")
+        if let session = delegate.coordinator.session {
+            lines.append("adbPort=\(session.options.adbServerPort)")
+            lines.append("grpcPort=\(session.options.grpcPort)")
+            lines.append("serial=\(session.options.serial)")
+        }
         lines.append("packages=\(delegate.coordinator.installedPackages)")
         try? lines.joined(separator: "\n").write(to: base.appendingPathComponent("state.txt"), atomically: true, encoding: .utf8)
     }
