@@ -8,9 +8,18 @@ public struct SDKPaths: Sendable, Hashable {
 
     public init(root: URL) { self.root = root }
 
-    /// Default location under Application Support.
+    /// Default location under Application Support, unless the app was
+    /// launched with `-dataRoot <path>` (testing a fresh install side by side
+    /// with a real one).
     public static var `default`: SDKPaths {
-        SDKPaths(root: applicationSupport.appendingPathComponent("Madroid", isDirectory: true))
+        if let override = overrideRoot { return SDKPaths(root: override) }
+        return SDKPaths(root: applicationSupport.appendingPathComponent("Madroid", isDirectory: true))
+    }
+
+    /// `-dataRoot` launch argument, if any.
+    public static var overrideRoot: URL? {
+        guard let path = UserDefaults.standard.string(forKey: "dataRoot"), !path.isEmpty else { return nil }
+        return URL(fileURLWithPath: (path as NSString).expandingTildeInPath, isDirectory: true)
     }
 
     /// Data folder used before the app was renamed (Android App Runner).

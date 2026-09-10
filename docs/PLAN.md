@@ -180,6 +180,12 @@ streaming frames. `Scripts/release.sh` signs, notarizes and staples.
   resize and assert the in-place reconfiguration, ⌘[, close and assert the
   display is released, quit and assert no emulator or adb process remains.
   Drives the UI through `madroid://debug/…` hooks (Debug builds only).
+- **Fresh-install check** (manual, done 2026-09-10): `Madroid -dataRoot
+  <empty dir> -autoSetup YES` downloaded platform-tools, emulator 37.1.11 and
+  the android-36.1 Play image from `dl.google.com` (about 7 min at 10 MB/s,
+  resume verified after a kill mid-download), unpacked, first-booted in 40 s,
+  rendered the device screen, installed an APK by drag and drop, fetched
+  aapt2 for labels and opened an app window.
 - **Manual acceptance** per phase ("done when" above) and the compatibility
   matrix in `docs/compat.md`.
 - **Gate before any push**: `xcodegen generate`, `xcodebuild -scheme

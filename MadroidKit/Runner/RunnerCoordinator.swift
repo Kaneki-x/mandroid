@@ -8,6 +8,14 @@ import Observation
 public final class RunnerCoordinator {
     public private(set) var state: RunnerState = .idle {
         didSet {
+            // Download progress ticks arrive every couple of MB; log each
+            // component once instead of every tick.
+            if case .settingUp(.downloading(let name, _)) = state {
+                if case .settingUp(.downloading(let previous, _)) = oldValue, previous == name { return }
+                Log.runner.notice("state → downloading \(name, privacy: .public)")
+                Log.file("state → downloading \(name)")
+                return
+            }
             Log.runner.notice("state → \(String(describing: self.state).prefix(200), privacy: .public)")
             Log.file("state → \(String(describing: self.state).prefix(200))")
         }

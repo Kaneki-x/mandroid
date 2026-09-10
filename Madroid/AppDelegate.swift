@@ -25,7 +25,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private static func migrateFromAndroidAppRunner() {
         let fm = FileManager.default
-        guard !fm.fileExists(atPath: SDKPaths.default.root.path),
+        guard SDKPaths.overrideRoot == nil,
+              !fm.fileExists(atPath: SDKPaths.default.root.path),
               fm.fileExists(atPath: SDKPaths.legacyRoot.path) else { return }
         if !NSRunningApplication.runningApplications(withBundleIdentifier: legacyBundleID).isEmpty {
             let alert = NSAlert()
