@@ -27,6 +27,11 @@ enum MainMenu {
         let home = android.addItem(withTitle: "Home", action: #selector(AppWindowController.androidHome(_:)), keyEquivalent: "h")
         home.keyEquivalentModifierMask = [.command, .shift]
         android.addItem(withTitle: "Recents", action: #selector(AppWindowController.androidRecents(_:)), keyEquivalent: "")
+        let shot = android.addItem(withTitle: "Save Screenshot", action: #selector(AppWindowController.saveScreenshot(_:)), keyEquivalent: "s")
+        shot.keyEquivalentModifierMask = [.command, .shift]
+        android.addItem(.separator())
+        android.addItem(withTitle: "Restart Emulator", action: #selector(AppDelegate.restartEmulator(_:)), keyEquivalent: "").target = delegate
+        android.addItem(withTitle: "Cold Boot Emulator…", action: #selector(AppDelegate.coldBootEmulator(_:)), keyEquivalent: "").target = delegate
         android.addItem(.separator())
         android.addItem(withTitle: "Show Device Screen", action: #selector(AppDelegate.showDeviceScreen(_:)), keyEquivalent: "d").target = delegate
         android.addItem(withTitle: "Open Play Store", action: #selector(AppDelegate.openPlayStore(_:)), keyEquivalent: "").target = delegate

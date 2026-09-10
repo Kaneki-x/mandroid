@@ -16,6 +16,15 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
     private let frameView = FrameView(frame: .zero)
     private var frameTask: Task<Void, Never>?
     private var resizeDebounce: Task<Void, Never>?
+    private var watchdog: Task<Void, Never>?
+    private var overlay: ParkedOverlayView?
+    private(set) var isParked = false
+    /// Last time this window became key; used for LRU parking.
+    private(set) var lastActivated = Date()
+    var onActivated: (() -> Void)?
+    /// Called before resuming a parked window so the window manager can park
+    /// another window if all slots are taken.
+    var makeRoom: (() async throws -> Void)?
 
     var emulatorDisplay: Int {
         if case .app(let s) = target { return s.slot.emulatorIndex } else { return 0 }
@@ -45,7 +54,7 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
         window.delegate = self
         switch target {
         case .app(let s):
-            window.title = Self.displayName(for: s.package)
+            window.title = coordinator.app(for: s.package)?.label ?? Self.displayName(for: s.package)
             window.setFrameAutosaveName("app:\(s.package)")
         case .device:
             window.title = "Device Screen"
@@ -56,7 +65,10 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
         frameView.frame = window.contentView!.bounds
         configureInput()
         startFrames()
+        startWatchdog()
     }
+
+    var package: String? { if case .app(let s) = target { return s.package } else { return nil } }
 
     required init?(coder: NSCoder) { fatalError() }
 
@@ -126,20 +138,92 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
         }
     }
 
+    // MARK: Liveness
+
+    /// Closes the window when Android no longer hosts a task on our display
+    /// (the app finished itself, e.g. Back on its root activity).
+    private func startWatchdog() {
+        watchdog?.cancel()
+        guard case .app = target else { return }
+        watchdog = Task { [weak self] in
+            var misses = 0
+            try? await Task.sleep(for: .seconds(4))
+            while !Task.isCancelled {
+                guard let self, !self.isParked, case .app(let app) = self.target else { return }
+                let alive = await self.coordinator.isAppAlive(app)
+                misses = alive ? 0 : misses + 1
+                if misses >= 2 {
+                    Log.ui.info("\(app.package) left its display; closing window")
+                    self.window?.close()
+                    return
+                }
+                try? await Task.sleep(for: .seconds(3))
+            }
+        }
+    }
+
+    // MARK: Parking
+
+    /// Keeps the last frame on screen behind an overlay and releases the
+    /// display slot. The Android task survives on display 0.
+    func park() async {
+        guard case .app(let app) = target, !isParked else { return }
+        isParked = true
+        frameTask?.cancel(); frameTask = nil
+        watchdog?.cancel(); watchdog = nil
+        await coordinator.parkApp(app)
+        let ov = ParkedOverlayView(frame: frameView.bounds)
+        ov.autoresizingMask = [.width, .height]
+        ov.onResume = { [weak self] in self?.resume() }
+        frameView.addSubview(ov)
+        overlay = ov
+        window?.title = (coordinator.app(for: app.package)?.label ?? Self.displayName(for: app.package)) + " (paused)"
+    }
+
+    func resume() {
+        guard case .app(let app) = target, isParked, let window else { return }
+        Task { @MainActor in
+            let scale = window.backingScaleFactor
+            let size = frameView.bounds.size
+            do {
+                try await makeRoom?()
+                let fresh = try await coordinator.openApp(package: app.package,
+                                                          width: Int(size.width * scale), height: Int(size.height * scale),
+                                                          dpi: Int(160 * scale))
+                target = .app(fresh)
+                isParked = false
+                overlay?.removeFromSuperview(); overlay = nil
+                window.title = coordinator.app(for: app.package)?.label ?? Self.displayName(for: app.package)
+                configureInput()
+                startFrames()
+                startWatchdog()
+            } catch {
+                Log.ui.error("resume failed: \(error.localizedDescription)")
+                NSSound.beep()
+            }
+        }
+    }
+
     // MARK: Window delegate
 
     func windowDidBecomeKey(_ notification: Notification) {
-        window?.makeFirstResponder(frameView)
-        Task { await ensureFocus() }
+        lastActivated = Date()
+        onActivated?()
+        window?.makeFirstResponder(isParked ? overlay : frameView)
+        guard !isParked else { return }
+        Task {
+            await ensureFocus()
+            await coordinator.clipboard?.pushHostClipboard()
+        }
     }
 
     func windowDidEndLiveResize(_ notification: Notification) {
-        guard case .app = target else { return }
+        guard case .app = target, !isParked else { return }
         scheduleReconfigure()
     }
 
     func windowDidResize(_ notification: Notification) {
-        guard case .app = target, window?.inLiveResize == false else { return }
+        guard case .app = target, !isParked, window?.inLiveResize == false else { return }
         scheduleReconfigure()
     }
 
@@ -173,6 +257,7 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         frameTask?.cancel()
         resizeDebounce?.cancel()
+        watchdog?.cancel()
         if case .app(let app) = target {
             Task { await coordinator.closeApp(app) }
         }
@@ -184,6 +269,26 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
     @objc func androidBack(_ sender: Any?) { sendKey(.key("GoBack")) }
     @objc func androidHome(_ sender: Any?) { sendKey(.key("GoHome")) }
     @objc func androidRecents(_ sender: Any?) { sendKey(.key("AppSwitch")) }
+
+    /// ⇧⌘S: saves the current display as PNG on the Desktop.
+    @objc func saveScreenshot(_ sender: Any?) {
+        let (w, h) = pixelSize
+        let display = emulatorDisplay
+        let name = (package.map { coordinator.app(for: $0)?.label ?? $0 } ?? "Device Screen")
+        Task {
+            do {
+                let frame = try await coordinator.screenshot(display: display, width: w, height: h)
+                guard let png = FrameView.pngData(frame) else { return }
+                let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
+                let dir = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0]
+                let url = dir.appendingPathComponent("\(name) \(stamp).png")
+                try png.write(to: url)
+                NSWorkspace.shared.activateFileViewerSelecting([url])
+            } catch {
+                Log.ui.error("screenshot failed: \(error.localizedDescription)")
+            }
+        }
+    }
 
     private func sendKey(_ action: KeyAction) {
         guard let session = coordinator.session else { return }

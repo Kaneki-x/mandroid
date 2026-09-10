@@ -97,18 +97,18 @@ names instead of labels/icons, no detection of an app that finished itself
 
 ## Phase 2 — Multi-window, catalog, clipboard
 
-- [ ] `DisplaySlotPool` LRU parking + `AppWindow/ParkedOverlayView`
-- [ ] `Catalog/`: `InstalledApps`, `APKBadging`, `IconExtractor`
+- [x] `DisplaySlotPool` LRU parking + `AppWindow/ParkedOverlayView`
+- [x] `Catalog/`: `InstalledApps`, `APKBadging`, `IconExtractor`
       (adaptive-icon fallback), `AppInstaller`, `AppCatalogCache`
-- [ ] `Library/`: icons, search, drag-and-drop APK install, uninstall,
+- [x] `Library/`: icons, search, drag-and-drop APK install, uninstall,
       "N of 3 windows in use"
-- [ ] `Clipboard/ClipboardSync` with echo guard
+- [x] `Clipboard/ClipboardSync` with echo guard
 - [ ] `Notifications/NotificationStream` (`TextViewFocus`) feeding
       `InputRouter`
-- [ ] `WindowManager` (focus nudging, Window menu entries)
-- [ ] `Menu/MainMenu`: Android menu (Back ⌘[, Home, Recents, Screenshot ⇧⌘S,
+- [x] `WindowManager` (focus nudging, Window menu entries)
+- [x] `Menu/MainMenu`: Android menu (Back ⌘[, Home, Recents, Screenshot ⇧⌘S,
       Restart emulator, Show device screen), Edit menu forwarding
-- [ ] `docs/compat.md` matrix: launches on a secondary display / survives
+- [x] `docs/compat.md` matrix: launches on a secondary display / survives
       resize / keyboard OK / notes (Play Integrity, `resizeableActivity`)
 
 Tests: `DisplaySlotPool` LRU and acquire-while-full, `ClipboardSync` echo
@@ -117,6 +117,14 @@ suppression, aapt2 badging parser.
 Done when: three apps run side by side; opening a fourth parks the LRU window
 and it resumes on click; the library shows icons; copy and paste work both
 ways without duplication; shortcuts work.
+
+**Status 2026-09-10: done except `NotificationStream`** (not needed: the
+focus router tracks touches and `am start --display` moves focus reliably;
+revisit if apps show a "keyboard not focused" state). Verified with four
+installed apps: LRU parking and resume (task moves to display 0 and back),
+labels and icons via aapt2 (raster, adaptive, obfuscated), ⌘V paste from the
+Mac and ⌘C copy to the Mac, window auto-close when the app exits. Caveat
+recorded in `docs/compat.md`: some apps lose text input after a park/resume.
 
 ## Phase 3 — Native polish
 

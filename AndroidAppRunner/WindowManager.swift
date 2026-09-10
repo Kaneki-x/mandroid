@@ -22,18 +22,21 @@ final class WindowManager {
         if let existing = appWindows[package] {
             existing.showWindow(nil)
             existing.window?.makeKeyAndOrderFront(nil)
+            if existing.isParked { existing.resume() }
             return
         }
         let size = defaultAppSize()
         let scale = NSScreen.main?.backingScaleFactor ?? 2
         Task { @MainActor in
             do {
+                try await makeRoomForNewWindow()
                 let app = try await coordinator.openApp(package: package,
                                                         width: Int(size.width * scale),
                                                         height: Int(size.height * scale),
                                                         dpi: Int(160 * scale))
                 let wc = AppWindowController(coordinator: coordinator, target: .app(app), logicalSize: size)
                 wc.onClose = { [weak self] in self?.appWindows[package] = nil }
+                wc.makeRoom = { [weak self] in try await self?.makeRoomForNewWindow() }
                 appWindows[package] = wc
                 wc.showWindow(nil)
                 wc.window?.makeKeyAndOrderFront(nil)
@@ -41,6 +44,17 @@ final class WindowManager {
                 presentError(error, title: "Could not open \(package)")
             }
         }
+    }
+
+    /// LRU parking: when all three displays are taken, pause the app window
+    /// that was used least recently so a new one can open.
+    func makeRoomForNewWindow() async throws {
+        guard coordinator.freeSlots <= 0 else { return }
+        let candidates = appWindows.values.filter { !$0.isParked }
+        guard let victim = candidates.min(by: { $0.lastActivated < $1.lastActivated }) else {
+            throw EmulatorKitError.display("all \(DisplaySlotPool.capacity) app windows are in use")
+        }
+        await victim.park()
     }
 
     func showDeviceScreen() {

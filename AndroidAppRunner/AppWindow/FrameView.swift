@@ -37,15 +37,23 @@ final class FrameView: NSView {
 
     // MARK: Frames
 
-    func display(_ frame: Frame) {
-        guard frame.isComplete, frame.width > 0, frame.height > 0 else { return }
-        let data = frame.pixels as CFData
-        guard let provider = CGDataProvider(data: data) else { return }
+    static func cgImage(_ frame: Frame) -> CGImage? {
+        guard frame.isComplete, frame.width > 0, frame.height > 0,
+              let provider = CGDataProvider(data: frame.pixels as CFData) else { return nil }
         let info = CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue)
-        guard let image = CGImage(width: frame.width, height: frame.height, bitsPerComponent: 8, bitsPerPixel: 32,
-                                  bytesPerRow: frame.bytesPerRow, space: CGColorSpaceCreateDeviceRGB(),
-                                  bitmapInfo: info, provider: provider, decode: nil, shouldInterpolate: true,
-                                  intent: .defaultIntent) else { return }
+        return CGImage(width: frame.width, height: frame.height, bitsPerComponent: 8, bitsPerPixel: 32,
+                       bytesPerRow: frame.bytesPerRow, space: CGColorSpaceCreateDeviceRGB(),
+                       bitmapInfo: info, provider: provider, decode: nil, shouldInterpolate: true,
+                       intent: .defaultIntent)
+    }
+
+    static func pngData(_ frame: Frame) -> Data? {
+        guard let cg = cgImage(frame) else { return nil }
+        return NSBitmapImageRep(cgImage: cg).representation(using: .png, properties: [:])
+    }
+
+    func display(_ frame: Frame) {
+        guard let image = Self.cgImage(frame) else { return }
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         layer?.contents = image

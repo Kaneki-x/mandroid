@@ -106,6 +106,12 @@ public actor ADBClient {
         try await run(["uninstall", package], timeout: .seconds(120))
     }
 
+    /// True if any task is currently hosted on the given logical display.
+    public func hasTasks(onDisplay displayID: Int) async throws -> Bool {
+        let out = try await shell("am stack list")
+        return TaskListParser.displaysWithTasks(out).contains(displayID)
+    }
+
     public func keyevent(_ key: String, displayID: Int? = nil) async throws {
         let d = displayID.map { "-d \($0) " } ?? ""
         try await shell("input \(d)keyevent \(key)")

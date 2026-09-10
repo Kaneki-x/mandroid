@@ -20,6 +20,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var stateObservation: Task<Void, Never>?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        coordinator.hostClipboard = PasteboardClipboard()
         NSApp.mainMenu = MainMenu.build(delegate: self)
         NSApp.activate(ignoringOtherApps: true)
         observeState()
@@ -66,6 +67,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func showDeviceScreen(_ sender: Any?) { windows.showDeviceScreen() }
+    @objc func restartEmulator(_ sender: Any?) {
+        windows.closeAll()
+        Task { await coordinator.restart() }
+    }
+    @objc func coldBootEmulator(_ sender: Any?) {
+        let alert = NSAlert()
+        alert.messageText = "Cold boot the emulator?"
+        alert.informativeText = "Running apps will be closed and Android will boot from scratch instead of restoring the saved snapshot. Installed apps and data are kept."
+        alert.addButton(withTitle: "Cold Boot")
+        alert.addButton(withTitle: "Cancel")
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        windows.closeAll()
+        Task { await coordinator.restart(coldBoot: true) }
+    }
     @objc func openPlayStore(_ sender: Any?) {
         Task { await coordinator.openPlayStore() }
         windows.showDeviceScreen()

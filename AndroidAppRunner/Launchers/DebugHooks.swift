@@ -103,6 +103,8 @@ struct DebugHooks {
             lines.append("serial=\(session.options.serial)")
         }
         lines.append("packages=\(delegate.coordinator.installedPackages)")
+        lines.append("parked=\(delegate.coordinator.parked.keys.sorted())")
+        lines.append("apps=\(delegate.coordinator.apps.map { "\($0.package):\($0.label):\($0.iconFile != nil)" })")
         try? lines.joined(separator: "\n").write(to: base.appendingPathComponent("state.txt"), atomically: true, encoding: .utf8)
     }
 

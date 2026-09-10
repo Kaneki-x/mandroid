@@ -26,6 +26,7 @@
 		35DFD191990CFCB84F3BC907 /* EmulatorKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3815486752618540E4A64590 /* PortAllocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB2B482FDA54FD15CD87E8FC /* PortAllocator.swift */; };
 		3929B04E05535C6F100AB71B /* SDKBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = C46228A1444AA4403864267D /* SDKBootstrap.swift */; };
+		3C5464EBD61E6D092E9300AE /* APKBadging.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6BFED59A3A0E824F57984C /* APKBadging.swift */; };
 		3E01067481E96C2BFAAD0567 /* AppWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0E6D4C1BC9DB7438BF016C /* AppWindowController.swift */; };
 		4281594E14FE47111BB6861B /* RepositoryManifestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C5777188FF8282953FDEBE /* RepositoryManifestTests.swift */; };
 		49B461F906EA57AF66F82DD2 /* EmulatorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */; };
@@ -34,12 +35,14 @@
 		4F6F4705BE6D5ED57A538507 /* emulator_controller.grpc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3647A3BC73BD40ACA4C3D58A /* emulator_controller.grpc.swift */; };
 		51233549F17D5450C31BA824 /* EmulatorKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		545CF8FCAEA34EF27C37D45E /* Subprocess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E41CC3DF0666A4660E623D0 /* Subprocess.swift */; };
+		551F6C3A26A223B47FBEC9C0 /* AppCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0881A55CC062026A15D2CA32 /* AppCatalog.swift */; };
 		58503F6C6DF464212345C782 /* GRPCCore in Frameworks */ = {isa = PBXBuildFile; productRef = 445DC3386FDCE17BCCC2B066 /* GRPCCore */; };
 		58ECA5E40F03CB4DF6CEE9D5 /* emulator_controller.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03E372EFDD2E7209486A297 /* emulator_controller.pb.swift */; };
 		5BED7C77B83C9EFC0446B35B /* ADBClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D362A76038AC1539084E0C91 /* ADBClient.swift */; };
 		5D1E4E139E477BECD07AC394 /* sys-img2-3-google_apis_playstore.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2BF61486FE65CE6C3E828F58 /* sys-img2-3-google_apis_playstore.xml */; };
 		5F23F18B68E72A025E5706FC /* GRPCFrameStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1251AF66DD330E75DAB14764 /* GRPCFrameStream.swift */; };
 		66333852CE175EA5B205C334 /* repository2-3.xml in Resources */ = {isa = PBXBuildFile; fileRef = 090CB98708F1393EC5B9734B /* repository2-3.xml */; };
+		7149417C9B07D1A70E5E823A /* TaskListParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0153680F5AF2A7C37781EC02 /* TaskListParser.swift */; };
 		72878AF614B68F431C319FC1 /* Fixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33673B8336A94A1482B777B /* Fixtures.swift */; };
 		7411697D9DF7527F3A5BF601 /* RunnerCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9527B63F45D781AEBA9D04D8 /* RunnerCoordinator.swift */; };
 		758C080466516C735A2811D3 /* GRPCNIOTransportHTTP2 in Frameworks */ = {isa = PBXBuildFile; productRef = DA1C401E4BC3BE10F92DECFD /* GRPCNIOTransportHTTP2 */; };
@@ -52,13 +55,20 @@
 		99DE1B08E68D655995C24AC8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D0B1023279E4B3259D504121 /* Assets.xcassets */; };
 		9DF28E83C5BA4015CCEAAE13 /* URLSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D406DEAFE24E53816C357B7 /* URLSchemeHandler.swift */; };
 		A90A5C5331FC3EB9D896D43C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CBF416B0A5B883B21FDA708 /* AppDelegate.swift */; };
+		AB37C026411B7968125D1C71 /* aapt2-badging-shadowsocks.txt in Resources */ = {isa = PBXBuildFile; fileRef = 009D1ACF63C4210B90F2FEBC /* aapt2-badging-shadowsocks.txt */; };
 		AEBEF56C0F6C58A5D1926202 /* CoordinateMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74ABD6350ADD5908064D3784 /* CoordinateMapper.swift */; };
+		B12F626A6C13452F346F9143 /* IconExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88C75567297A5F15B75AF79A /* IconExtractor.swift */; };
 		B2FBA44C19BC7C79ED68A18D /* InputTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFDB7A01A5AD49CA0C5AB45D /* InputTests.swift */; };
 		B4F5FE778B5F0251CFF660EE /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D436BECE406CDF4CF4A2B6 /* ParserTests.swift */; };
+		BFDE7809D229247E6EFE2095 /* ClipboardSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD86C43A8457EB294C03F65 /* ClipboardSync.swift */; };
 		C187B9E652C569D68004C877 /* BootWaiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91F4B8FD2BD96865D07D447F /* BootWaiter.swift */; };
+		C80ACA01858586F47CDA12FB /* ParkedOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E44509028489E1E664B94CE /* ParkedOverlayView.swift */; };
 		CA45D1361023712A1ACE01B6 /* DisplaySlotPool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55B5EFC9AB1131067625998B /* DisplaySlotPool.swift */; };
+		CBF9B27B1A47FD6C45E718FB /* PasteboardClipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D446A543E83E025525F79C /* PasteboardClipboard.swift */; };
+		D1E2781D3F02B9FFE07DC4B5 /* AAPT2Fetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465345BC16DCFDB9285B1728 /* AAPT2Fetcher.swift */; };
 		D318CB2FFBFF093EA53D21CA /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990969E158C4113474927BCC /* LibraryView.swift */; };
 		D680DFB830782267ABBA47E3 /* GuestSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56F8111A12742ED2A05FCAC1 /* GuestSetup.swift */; };
+		D6F00B26CA41D1E40D787441 /* CatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F0115005DC4168E79C27A4 /* CatalogTests.swift */; };
 		E03F70E70AB6F71FE619864F /* SDKPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EA92D29680826D012674D2 /* SDKPaths.swift */; };
 		E87B6C6710202565F7E26A3A /* EmulatorLaunchOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC00B8A031594370601237CE /* EmulatorLaunchOptions.swift */; };
 		EAC02BB7598820042B966354 /* DisplaySlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 294E2B8FA49832FA3696FD0F /* DisplaySlot.swift */; };
@@ -68,6 +78,7 @@
 		F7210328D35EE488213C7D6D /* FrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9008F8515F05DA31D91B7D4E /* FrameView.swift */; };
 		F7B4C9B930F421C14B9165F1 /* ScrollGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB17D44A78267B5C4387007 /* ScrollGesture.swift */; };
 		F8823310259DE9EDB3503CC9 /* EmulatorConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBFFCC065C62AF66BCD669B /* EmulatorConnection.swift */; };
+		F97F912DFD657080000A24BA /* aapt2-maven-metadata.xml in Resources */ = {isa = PBXBuildFile; fileRef = 8F0E0A75BF6FF710F5BFB667 /* aapt2-maven-metadata.xml */; };
 		FA8B5B23BDD3302184F55273 /* AVDConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320090F245AA70A402AE5F8D /* AVDConfig.swift */; };
 		FCB08B297A5A015022C06907 /* Downloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 785EA3FC77E5AD4DF795D4D3 /* Downloader.swift */; };
 		FF7F0EBD274457C85F03BC0D /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = F481936076E969ABDA2E3ACE /* MainMenu.swift */; };
@@ -116,6 +127,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		009D1ACF63C4210B90F2FEBC /* aapt2-badging-shadowsocks.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "aapt2-badging-shadowsocks.txt"; sourceTree = "<group>"; };
+		0153680F5AF2A7C37781EC02 /* TaskListParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListParser.swift; sourceTree = "<group>"; };
+		02F0115005DC4168E79C27A4 /* CatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogTests.swift; sourceTree = "<group>"; };
+		0881A55CC062026A15D2CA32 /* AppCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCatalog.swift; sourceTree = "<group>"; };
 		090CB98708F1393EC5B9734B /* repository2-3.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "repository2-3.xml"; sourceTree = "<group>"; };
 		0E15B909A31FE2A580B727FE /* Frame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Frame.swift; sourceTree = "<group>"; };
 		1251AF66DD330E75DAB14764 /* GRPCFrameStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRPCFrameStream.swift; sourceTree = "<group>"; };
@@ -129,7 +144,9 @@
 		294E2B8FA49832FA3696FD0F /* DisplaySlot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplaySlot.swift; sourceTree = "<group>"; };
 		2B5BEC36F6EBD6FC5BE8B8A3 /* InputRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputRouter.swift; sourceTree = "<group>"; };
 		2BF61486FE65CE6C3E828F58 /* sys-img2-3-google_apis_playstore.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "sys-img2-3-google_apis_playstore.xml"; sourceTree = "<group>"; };
+		2CD86C43A8457EB294C03F65 /* ClipboardSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardSync.swift; sourceTree = "<group>"; };
 		2D977D1AED3E09E8F860BD4F /* PackageListParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackageListParser.swift; sourceTree = "<group>"; };
+		2E44509028489E1E664B94CE /* ParkedOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParkedOverlayView.swift; sourceTree = "<group>"; };
 		320090F245AA70A402AE5F8D /* AVDConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVDConfig.swift; sourceTree = "<group>"; };
 		326729D1BCD57A8030ABD49A /* Unarchiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unarchiver.swift; sourceTree = "<group>"; };
 		3647A3BC73BD40ACA4C3D58A /* emulator_controller.grpc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = emulator_controller.grpc.swift; sourceTree = "<group>"; };
@@ -137,6 +154,7 @@
 		3D406DEAFE24E53816C357B7 /* URLSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeHandler.swift; sourceTree = "<group>"; };
 		3EBFFCC065C62AF66BCD669B /* EmulatorConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorConnection.swift; sourceTree = "<group>"; };
 		40C5777188FF8282953FDEBE /* RepositoryManifestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryManifestTests.swift; sourceTree = "<group>"; };
+		465345BC16DCFDB9285B1728 /* AAPT2Fetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AAPT2Fetcher.swift; sourceTree = "<group>"; };
 		46EA92D29680826D012674D2 /* SDKPaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKPaths.swift; sourceTree = "<group>"; };
 		4EBECB07D856B12DBE37E814 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		51EC7F726A36760B28CD5675 /* EmulatorKitError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorKitError.swift; sourceTree = "<group>"; };
@@ -148,7 +166,9 @@
 		74ABD6350ADD5908064D3784 /* CoordinateMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateMapper.swift; sourceTree = "<group>"; };
 		785EA3FC77E5AD4DF795D4D3 /* Downloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloader.swift; sourceTree = "<group>"; };
 		84F511954533387288DA803D /* WindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowManager.swift; sourceTree = "<group>"; };
+		88C75567297A5F15B75AF79A /* IconExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconExtractor.swift; sourceTree = "<group>"; };
 		88F617A499000576A9664ADF /* EmulatorProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorProcess.swift; sourceTree = "<group>"; };
+		8F0E0A75BF6FF710F5BFB667 /* aapt2-maven-metadata.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "aapt2-maven-metadata.xml"; sourceTree = "<group>"; };
 		9008F8515F05DA31D91B7D4E /* FrameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameView.swift; sourceTree = "<group>"; };
 		91F4B8FD2BD96865D07D447F /* BootWaiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BootWaiter.swift; sourceTree = "<group>"; };
 		9527B63F45D781AEBA9D04D8 /* RunnerCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerCoordinator.swift; sourceTree = "<group>"; };
@@ -161,6 +181,8 @@
 		B03E372EFDD2E7209486A297 /* emulator_controller.pb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = emulator_controller.pb.swift; sourceTree = "<group>"; };
 		B1C746339D069D9C75EC0AF0 /* LibraryWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryWindowController.swift; sourceTree = "<group>"; };
 		B2399BF0E6D0E828987F66A2 /* RunnerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerState.swift; sourceTree = "<group>"; };
+		B4D446A543E83E025525F79C /* PasteboardClipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardClipboard.swift; sourceTree = "<group>"; };
+		BF6BFED59A3A0E824F57984C /* APKBadging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APKBadging.swift; sourceTree = "<group>"; };
 		C46228A1444AA4403864267D /* SDKBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKBootstrap.swift; sourceTree = "<group>"; };
 		CB35C8405EAAE63FA357CAB9 /* DebugHooks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugHooks.swift; sourceTree = "<group>"; };
 		D0B1023279E4B3259D504121 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -236,6 +258,7 @@
 				DB8A8526ECA3D0D876A3F66F /* Info.plist */,
 				84F511954533387288DA803D /* WindowManager.swift */,
 				A7F59B6C1DB8478CDC552410 /* AppWindow */,
+				DF1C2516CE0A3027550715C4 /* Clipboard */,
 				9246C1A6ED31CD57ACE3B23A /* Device */,
 				DB77D37C9747EC9CD8577F73 /* Launchers */,
 				A5287D9EBF922524881E8947 /* Library */,
@@ -254,9 +277,19 @@
 			path = Generated;
 			sourceTree = "<group>";
 		};
+		2339B050EC7B01A9225D7212 /* Clipboard */ = {
+			isa = PBXGroup;
+			children = (
+				2CD86C43A8457EB294C03F65 /* ClipboardSync.swift */,
+			);
+			path = Clipboard;
+			sourceTree = "<group>";
+		};
 		2622BA47D953D85A8822C9D4 /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
+				009D1ACF63C4210B90F2FEBC /* aapt2-badging-shadowsocks.txt */,
+				8F0E0A75BF6FF710F5BFB667 /* aapt2-maven-metadata.xml */,
 				99E4CD2BF5100ED30E309E41 /* dumpsys-display-0only.txt */,
 				D380E3E46C4247FBF8144094 /* dumpsys-display-1secondary.txt */,
 				FF51EE94139FE9AD64718E95 /* dumpsys-display-3secondary.txt */,
@@ -315,7 +348,9 @@
 			children = (
 				DD3AB62F9486C4A019C464F9 /* ADB */,
 				1113BBCBE032DC48617A0776 /* AVD */,
+				FE8E61F005E76606A7CA7C42 /* Catalog */,
 				8EB35B0D70593522E71BFEAA /* Client */,
+				2339B050EC7B01A9225D7212 /* Clipboard */,
 				D8D108E88530F7F85FA44D91 /* Display */,
 				7CC600A52A0E6C69F0A78D16 /* Emulator */,
 				CF07592FD11EDBE385413F65 /* Frames */,
@@ -388,6 +423,7 @@
 			children = (
 				1A0E6D4C1BC9DB7438BF016C /* AppWindowController.swift */,
 				9008F8515F05DA31D91B7D4E /* FrameView.swift */,
+				2E44509028489E1E664B94CE /* ParkedOverlayView.swift */,
 			);
 			path = AppWindow;
 			sourceTree = "<group>";
@@ -405,6 +441,7 @@
 		C8499387E47533D539759834 /* EmulatorKitTests */ = {
 			isa = PBXGroup;
 			children = (
+				02F0115005DC4168E79C27A4 /* CatalogTests.swift */,
 				D33673B8336A94A1482B777B /* Fixtures.swift */,
 				EFDB7A01A5AD49CA0C5AB45D /* InputTests.swift */,
 				15D436BECE406CDF4CF4A2B6 /* ParserTests.swift */,
@@ -447,8 +484,28 @@
 				D362A76038AC1539084E0C91 /* ADBClient.swift */,
 				5AB4B5D2A7FC69ECE83C52FF /* DumpsysDisplayParser.swift */,
 				2D977D1AED3E09E8F860BD4F /* PackageListParser.swift */,
+				0153680F5AF2A7C37781EC02 /* TaskListParser.swift */,
 			);
 			path = ADB;
+			sourceTree = "<group>";
+		};
+		DF1C2516CE0A3027550715C4 /* Clipboard */ = {
+			isa = PBXGroup;
+			children = (
+				B4D446A543E83E025525F79C /* PasteboardClipboard.swift */,
+			);
+			path = Clipboard;
+			sourceTree = "<group>";
+		};
+		FE8E61F005E76606A7CA7C42 /* Catalog */ = {
+			isa = PBXGroup;
+			children = (
+				465345BC16DCFDB9285B1728 /* AAPT2Fetcher.swift */,
+				BF6BFED59A3A0E824F57984C /* APKBadging.swift */,
+				0881A55CC062026A15D2CA32 /* AppCatalog.swift */,
+				88C75567297A5F15B75AF79A /* IconExtractor.swift */,
+			);
+			path = Catalog;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -570,6 +627,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AB37C026411B7968125D1C71 /* aapt2-badging-shadowsocks.txt in Resources */,
+				F97F912DFD657080000A24BA /* aapt2-maven-metadata.xml in Resources */,
 				9270EED7C4A7877038C74048 /* dumpsys-display-0only.txt in Resources */,
 				2A009FFB36499B75A61FD159 /* dumpsys-display-1secondary.txt in Resources */,
 				0973B3FD7219D12A51373030 /* dumpsys-display-3secondary.txt in Resources */,
@@ -600,6 +659,8 @@
 				D318CB2FFBFF093EA53D21CA /* LibraryView.swift in Sources */,
 				33F3442434F8AEFB661F56F1 /* LibraryWindowController.swift in Sources */,
 				FF7F0EBD274457C85F03BC0D /* MainMenu.swift in Sources */,
+				C80ACA01858586F47CDA12FB /* ParkedOverlayView.swift in Sources */,
+				CBF9B27B1A47FD6C45E718FB /* PasteboardClipboard.swift in Sources */,
 				85AC3A481F64A86A0114DDD2 /* SetupView.swift in Sources */,
 				4E79C1FCE84DFF8BDEDF8B51 /* SetupWindowController.swift in Sources */,
 				9DF28E83C5BA4015CCEAAE13 /* URLSchemeHandler.swift in Sources */,
@@ -611,10 +672,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D1E2781D3F02B9FFE07DC4B5 /* AAPT2Fetcher.swift in Sources */,
 				5BED7C77B83C9EFC0446B35B /* ADBClient.swift in Sources */,
+				3C5464EBD61E6D092E9300AE /* APKBadging.swift in Sources */,
 				FA8B5B23BDD3302184F55273 /* AVDConfig.swift in Sources */,
 				F5DA019E52B3A38BA6883E87 /* AVDStore.swift in Sources */,
+				551F6C3A26A223B47FBEC9C0 /* AppCatalog.swift in Sources */,
 				C187B9E652C569D68004C877 /* BootWaiter.swift in Sources */,
+				BFDE7809D229247E6EFE2095 /* ClipboardSync.swift in Sources */,
 				AEBEF56C0F6C58A5D1926202 /* CoordinateMapper.swift in Sources */,
 				EAC02BB7598820042B966354 /* DisplaySlot.swift in Sources */,
 				CA45D1361023712A1ACE01B6 /* DisplaySlotPool.swift in Sources */,
@@ -629,6 +694,7 @@
 				289D7185D574918B95BCEB4A /* Frame.swift in Sources */,
 				5F23F18B68E72A025E5706FC /* GRPCFrameStream.swift in Sources */,
 				D680DFB830782267ABBA47E3 /* GuestSetup.swift in Sources */,
+				B12F626A6C13452F346F9143 /* IconExtractor.swift in Sources */,
 				109AA783B1D1AC9FC14124B1 /* InputChannel.swift in Sources */,
 				4E1DA7D78B02644D8D2DD41F /* InputRouter.swift in Sources */,
 				0AC55BD7A72EBF8EF5F68E13 /* KeyMap.swift in Sources */,
@@ -643,6 +709,7 @@
 				143B265AD4A5065632D820F9 /* SHA1.swift in Sources */,
 				F7B4C9B930F421C14B9165F1 /* ScrollGesture.swift in Sources */,
 				545CF8FCAEA34EF27C37D45E /* Subprocess.swift in Sources */,
+				7149417C9B07D1A70E5E823A /* TaskListParser.swift in Sources */,
 				293D404DAE8F4726FD9AF34F /* Unarchiver.swift in Sources */,
 				4F6F4705BE6D5ED57A538507 /* emulator_controller.grpc.swift in Sources */,
 				58ECA5E40F03CB4DF6CEE9D5 /* emulator_controller.pb.swift in Sources */,
@@ -653,6 +720,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6F00B26CA41D1E40D787441 /* CatalogTests.swift in Sources */,
 				72878AF614B68F431C319FC1 /* Fixtures.swift in Sources */,
 				B2FBA44C19BC7C79ED68A18D /* InputTests.swift in Sources */,
 				B4F5FE778B5F0251CFF660EE /* ParserTests.swift in Sources */,

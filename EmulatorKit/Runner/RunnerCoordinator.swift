@@ -11,7 +11,15 @@ public final class RunnerCoordinator {
     }
     public private(set) var session: EmulatorSession?
     public private(set) var sessions: [String: AppSession] = [:]   // by package
-    public private(set) var installedPackages: [String] = []
+    /// Apps whose window is parked: the task still exists in Android (moved to
+    /// display 0) but its slot has been released.
+    public private(set) var parked: [String: AppSession] = [:]
+    public private(set) var apps: [AppInfo] = []
+    public var installedPackages: [String] { apps.map(\.package) }
+    public private(set) var catalog: AppCatalog?
+    public private(set) var clipboard: ClipboardSync?
+    /// Set by the app to enable clipboard sync (needs AppKit's pasteboard).
+    public var hostClipboard: (any HostClipboard)?
 
     public let paths: SDKPaths
     public let bootstrap: SDKBootstrap
@@ -136,9 +144,15 @@ public final class RunnerCoordinator {
                 frames: GRPCFrameStream(client: client),
                 deviceWidth: config.lcdWidth, deviceHeight: config.lcdHeight, deviceDpi: config.lcdDensity)
             self.session = session
+            self.catalog = AppCatalog(paths: paths, adb: adb)
+            if let hostClipboard {
+                let sync = ClipboardSync(client: client, host: hostClipboard)
+                await sync.start()
+                self.clipboard = sync
+            }
             state = .ready
-            await refreshInstalledPackages()
             watchProcess(session)
+            await refreshApps()
         } catch {
             Log.runner.error("boot failed: \(error.localizedDescription)")
             state = .failed(error.localizedDescription)
@@ -151,6 +165,7 @@ public final class RunnerCoordinator {
             guard self.session?.options.consolePort == session.options.consolePort else { return }
             self.session = nil
             self.sessions = [:]
+            self.parked = [:]
             if case .shuttingDown = state { state = .idle } else {
                 state = .failed("The emulator stopped unexpectedly (exit code \(status)).")
             }
@@ -162,6 +177,8 @@ public final class RunnerCoordinator {
     public func shutdown() async {
         guard let session else { return }
         state = .shuttingDown
+        await clipboard?.stop()
+        clipboard = nil
         await session.input.close()
         try? await session.displays.reset()
         _ = try? await session.adb.run(["emu", "kill"], timeout: .seconds(5))
@@ -181,23 +198,50 @@ public final class RunnerCoordinator {
         session.connection.shutdown()
         self.session = nil
         self.sessions = [:]
+        self.parked = [:]
+        self.apps = []
         state = .idle
     }
 
     // MARK: Apps
 
-    public func refreshInstalledPackages() async {
-        guard let session else { return }
-        installedPackages = (try? await session.adb.listThirdPartyPackages()) ?? []
+    private var refreshTask: Task<Void, Never>?
+
+    /// Reloads the app list: cached entries immediately, then labels/icons
+    /// for anything new as they resolve.
+    public func refreshApps() async {
+        guard let catalog else { return }
+        refreshTask?.cancel()
+        if let quick = try? await catalog.cached() { apps = quick }
+        refreshTask = Task { [weak self] in
+            do {
+                _ = try await catalog.refresh { list in
+                    Task { @MainActor in self?.apps = list }
+                }
+            } catch {
+                Log.runner.warning("catalog refresh failed: \(error.localizedDescription)")
+            }
+        }
     }
 
-    /// Creates a display and launches the app on it.
+    /// Kept for callers that only need package names.
+    public func refreshInstalledPackages() async { await refreshApps() }
+
+    public func app(for package: String) -> AppInfo? { apps.first { $0.package == package } }
+
+    private func launcherComponent(for package: String) async throws -> String {
+        if let c = app(for: package)?.launcherComponent { return c }
+        guard let session, let c = try await session.adb.launcherComponent(of: package) else {
+            throw EmulatorKitError.adb("\(package) has no launcher activity")
+        }
+        return c
+    }
+
+    /// Creates a display and launches (or brings back) the app on it.
     public func openApp(package: String, width: Int, height: Int, dpi: Int) async throws -> AppSession {
         guard let session else { throw EmulatorKitError.emulator("not running") }
         if let existing = sessions[package] { return existing }
-        guard let component = try await session.adb.launcherComponent(of: package) else {
-            throw EmulatorKitError.adb("\(package) has no launcher activity")
-        }
+        let component = try await launcherComponent(for: package)
         let slot = try await session.displays.acquire(width: width, height: height, dpi: dpi)
         do {
             try await session.adb.startActivity(component: component, displayID: slot.androidDisplayID)
@@ -208,15 +252,36 @@ public final class RunnerCoordinator {
         await session.router.noteTouch(androidDisplayID: slot.androidDisplayID)
         let app = AppSession(package: package, launcherComponent: component, slot: slot)
         sessions[package] = app
+        parked[package] = nil
         return app
+    }
+
+    /// Frees the slot but keeps the Android task alive (it moves to display 0).
+    public func parkApp(_ app: AppSession) async {
+        guard let session else { return }
+        sessions[app.package] = nil
+        parked[app.package] = app
+        try? await session.displays.release(app.slot.emulatorIndex)
+        await session.router.forget(androidDisplayID: app.slot.androidDisplayID)
+    }
+
+    public var freeSlots: Int {
+        DisplaySlotPool.capacity - sessions.count
     }
 
     public func closeApp(_ app: AppSession) async {
         guard let session else { return }
         sessions[app.package] = nil
+        parked[app.package] = nil
         try? await session.adb.forceStop(app.package)
         try? await session.displays.release(app.slot.emulatorIndex)
         await session.router.forget(androidDisplayID: app.slot.androidDisplayID)
+    }
+
+    /// True while Android still hosts a task on the app's display.
+    public func isAppAlive(_ app: AppSession) async -> Bool {
+        guard let session else { return false }
+        return (try? await session.adb.hasTasks(onDisplay: app.slot.androidDisplayID)) ?? true
     }
 
     public func resizeApp(_ app: AppSession, width: Int, height: Int, dpi: Int) async throws -> AppSession {
@@ -231,14 +296,29 @@ public final class RunnerCoordinator {
     public func installAPK(_ url: URL) async throws {
         guard let session else { throw EmulatorKitError.emulator("not running") }
         try await session.adb.install(apk: url)
-        await refreshInstalledPackages()
+        await refreshApps()
     }
 
     public func uninstall(package: String) async throws {
         guard let session else { throw EmulatorKitError.emulator("not running") }
-        if let app = sessions[package] { await closeApp(app) }
+        if let app = sessions[package] ?? parked[package] { await closeApp(app) }
         try await session.adb.uninstall(package)
-        await refreshInstalledPackages()
+        await catalog?.invalidate(package: package)
+        await refreshApps()
+    }
+
+    /// Saves a PNG of the given display to `url`.
+    public func screenshot(display: Int, width: Int, height: Int) async throws -> Frame {
+        guard let session else { throw EmulatorKitError.emulator("not running") }
+        let img = try await session.client.screenshot(display: display, width: width, height: height)
+        return Frame(width: Int(img.format.width), height: Int(img.format.height), pixels: img.image,
+                     sequence: img.seq, timestampUs: img.timestampUs)
+    }
+
+    /// Restarts the emulator (cold boot when requested).
+    public func restart(coldBoot: Bool = false) async {
+        await shutdown()
+        await boot(coldBoot: coldBoot)
     }
 
     /// Opens the Play Store on the device screen (display 0).
