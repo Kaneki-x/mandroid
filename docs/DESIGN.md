@@ -158,6 +158,20 @@ against the manifest's directory. Build ids change every release, so the
 manifest is parsed at runtime and nothing is hard-coded except the package
 paths.
 
+**Download mirrors** (`DownloadMirror`). Google's hosts are unreachable from
+mainland China and `dl.google.cn` no longer resolves, so the bootstrap can
+fetch from a mirror: Tencent Cloud (`mirrors.cloud.tencent.com/AndroidSDK/`,
+a byte-identical mirror of `dl.google.com/android/repository/` with range
+support) for the SDK and system images, and Aliyun's Google Maven proxy
+(`maven.aliyun.com/repository/google/`) for aapt2. Manifests are fetched from
+the mirror, so the relative archive URLs resolve to it; SHA-1 checks still
+apply. Selection is a user setting (`downloadMirror`: automatic, Google,
+China). Automatic picks the China mirror only when the Mac's region is `CN`
+or its time zone is a mainland-China zone; everyone else downloads from
+Google only and never contacts the mirror hosts. When the mirror is used,
+Google stays behind it as a fallback per manifest and per archive (a mirror
+can lag a release); the reverse fallback does not exist.
+
 Manifest parsing traps (all confirmed against the live manifests; each becomes
 a unit test with the manifests committed as fixtures):
 

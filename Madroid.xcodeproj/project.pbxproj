@@ -43,6 +43,7 @@
 		7BEA42871B8524F441E72A64 /* Subprocess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECB7BAB81E41F5155DCDBE6 /* Subprocess.swift */; };
 		8449A2CBDE7AFD0851EA2485 /* ParkedOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1812C470EFB1B70320AAA1 /* ParkedOverlayView.swift */; };
 		89FC524313D00573F1A83964 /* AVDConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB2C08B95DD130C292C9683 /* AVDConfig.swift */; };
+		8C03369A40913C78CCC49FA0 /* DownloadMirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = D764AAC18B06926AF51A101F /* DownloadMirror.swift */; };
 		8CBFFA923B99A6B6885DB1C9 /* sys-img2-3-google_apis_playstore.xml in Resources */ = {isa = PBXBuildFile; fileRef = 86559A436E9653F7F65F2993 /* sys-img2-3-google_apis_playstore.xml */; };
 		8DA1AB3525926EDE18CD3D51 /* dumpsys-display-3secondary.txt in Resources */ = {isa = PBXBuildFile; fileRef = 15151CDE1B2F7ECDFAE482CA /* dumpsys-display-3secondary.txt */; };
 		936BDAABBDB47141384858E6 /* RepositoryManifestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1832787B77BB4BED7FA9724C /* RepositoryManifestTests.swift */; };
@@ -196,6 +197,7 @@
 		C5EE6BB28C525D52B6D93056 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		C8CBBA5443E7E96E94D5464D /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		CAF9E5E60F5EA7347B602514 /* DebugHooks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugHooks.swift; sourceTree = "<group>"; };
+		D764AAC18B06926AF51A101F /* DownloadMirror.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadMirror.swift; sourceTree = "<group>"; };
 		DA2CB851022246C35638AEBA /* RunnerSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerSettings.swift; sourceTree = "<group>"; };
 		DEE82F568C37BD0FCB2F5098 /* EmulatorConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorConnection.swift; sourceTree = "<group>"; };
 		E16C43135EC02032154BBA0D /* RunnerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerState.swift; sourceTree = "<group>"; };
@@ -343,6 +345,7 @@
 			isa = PBXGroup;
 			children = (
 				8A904CC299CB94D3C818D45C /* Downloader.swift */,
+				D764AAC18B06926AF51A101F /* DownloadMirror.swift */,
 				046816CE26CA306059AF292C /* RepositoryManifest.swift */,
 				9287E3E429B90976B1BC06B6 /* SDKBootstrap.swift */,
 				0D5DA232C3FCE890612D3DF6 /* SDKPaths.swift */,
@@ -714,6 +717,7 @@
 				ADEB2FEC6A31E752EAF47EFB /* CoordinateMapper.swift in Sources */,
 				B57AA0578B7D6620E7863CF6 /* DisplaySlot.swift in Sources */,
 				CA2A22337D3B3B90E58A681D /* DisplaySlotPool.swift in Sources */,
+				8C03369A40913C78CCC49FA0 /* DownloadMirror.swift in Sources */,
 				53C552FFFAD22D945031B1EC /* Downloader.swift in Sources */,
 				299F15BB23897027A357530D /* DumpsysDisplayParser.swift in Sources */,
 				B784AE9501085BCE21657F91 /* EmulatorClient.swift in Sources */,

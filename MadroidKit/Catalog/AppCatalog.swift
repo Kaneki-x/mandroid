@@ -41,10 +41,10 @@ public actor AppCatalog {
     private let adb: ADBClient
     private let aapt2: AAPT2Fetcher
 
-    public init(paths: SDKPaths, adb: ADBClient) {
+    public init(paths: SDKPaths, adb: ADBClient, mirrors: [DownloadMirror] = DownloadMirror.order(for: .auto)) {
         self.paths = paths
         self.adb = adb
-        self.aapt2 = AAPT2Fetcher(paths: paths)
+        self.aapt2 = AAPT2Fetcher(paths: paths, mirrors: mirrors)
     }
 
     private var cacheDir: URL { paths.cache.appendingPathComponent("apps", isDirectory: true) }

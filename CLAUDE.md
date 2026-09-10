@@ -81,6 +81,11 @@ under `~/Library/Application Support/Madroid/`, and a dedicated
 `AndroidAppRunner` folder and copies the old defaults domain on first launch. The reference SDK at
 `/Volumes/DATA/workspace/android` is for the Phase 0 spike only.
 
+Downloads go through `DownloadMirror` (Google, or the Tencent Cloud / Aliyun
+China mirror). Only China users may hit the mirror: `order(for:)` returns
+`[google]` unless the preference is `.china` or `auto` detects a mainland-China
+region/time zone (then `[china, google]`). Keep it that way.
+
 ## Git
 
 - Never commit on `main`; branch as `feature/…`, `fix/…`, `docs/…`.

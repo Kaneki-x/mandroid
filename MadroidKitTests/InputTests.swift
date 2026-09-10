@@ -97,3 +97,38 @@ import Testing
         #expect(small.width <= 760 && small.height <= 560)
     }
 }
+
+
+@Suite struct DownloadMirrorTests {
+    @Test func autoOutsideChinaUsesGoogleOnly() {
+        #expect(DownloadMirror.order(for: .auto, regionCode: "US", timeZoneID: "America/Los_Angeles") == [.google])
+        #expect(DownloadMirror.order(for: .auto, regionCode: "TW", timeZoneID: "Asia/Taipei") == [.google])
+        #expect(DownloadMirror.order(for: .auto, regionCode: nil, timeZoneID: "Europe/Berlin") == [.google])
+    }
+
+    @Test func autoInChinaPrefersMirrorWithGoogleFallback() {
+        #expect(DownloadMirror.order(for: .auto, regionCode: "CN", timeZoneID: "America/New_York") == [.china, .google])
+        #expect(DownloadMirror.order(for: .auto, regionCode: "US", timeZoneID: "Asia/Shanghai") == [.china, .google])
+    }
+
+    @Test func explicitChoices() {
+        #expect(DownloadMirror.order(for: .google, regionCode: "CN", timeZoneID: "Asia/Shanghai") == [.google])
+        #expect(DownloadMirror.order(for: .china, regionCode: "US", timeZoneID: "UTC") == [.china, .google])
+    }
+
+    @Test func rewriteKeepsPathOnOtherMirror() {
+        let sysimg = URL(string: "https://mirrors.cloud.tencent.com/AndroidSDK/sys-img/google_apis_playstore/arm64-v8a-36.1_r04.zip")!
+        #expect(DownloadMirror.china.rewrite(sysimg, to: .google)?.absoluteString
+                == "https://dl.google.com/android/repository/sys-img/google_apis_playstore/arm64-v8a-36.1_r04.zip")
+        let jar = DownloadMirror.google.aapt2Base.appendingPathComponent("9.4.0-15978811/aapt2-9.4.0-15978811-osx.jar")
+        #expect(DownloadMirror.google.rewrite(jar, to: .china)?.absoluteString
+                == "https://maven.aliyun.com/repository/google/com/android/tools/build/aapt2/9.4.0-15978811/aapt2-9.4.0-15978811-osx.jar")
+        #expect(DownloadMirror.google.rewrite(URL(string: "https://example.com/x.zip")!, to: .china) == nil)
+    }
+
+    @Test func manifestURLs() {
+        #expect(DownloadMirror.china.repositoryManifestURL.absoluteString == "https://mirrors.cloud.tencent.com/AndroidSDK/repository2-3.xml")
+        #expect(DownloadMirror.google.systemImageManifestURL(tag: "google_apis_playstore").absoluteString
+                == "https://dl.google.com/android/repository/sys-img/google_apis_playstore/sys-img2-3.xml")
+    }
+}

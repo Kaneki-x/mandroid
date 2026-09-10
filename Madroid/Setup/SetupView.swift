@@ -4,6 +4,7 @@ import SwiftUI
 /// First-run download UI and boot progress.
 struct SetupView: View {
     @Bindable var coordinator: RunnerCoordinator
+    @State private var mirrorPreference = RunnerSettings.load().downloadMirror
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -54,7 +55,7 @@ struct SetupView: View {
 
     private func planView(_ plan: BootstrapPlan) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("The following components will be downloaded from Google into your Application Support folder:")
+            Text("The following components will be downloaded into your Application Support folder:")
                 .fixedSize(horizontal: false, vertical: true)
             ForEach(plan.components) { c in
                 HStack {
@@ -70,6 +71,18 @@ struct SetupView: View {
                 Spacer()
                 Text(ByteCountFormatter.string(fromByteCount: plan.totalBytes, countStyle: .file)).bold().monospacedDigit()
             }
+            Picker("Download from", selection: $mirrorPreference) {
+                Text("Automatic (\(plan.mirror.name))").tag(DownloadMirror.Preference.auto)
+                Text(DownloadMirror.google.name).tag(DownloadMirror.Preference.google)
+                Text(DownloadMirror.china.name).tag(DownloadMirror.Preference.china)
+            }
+            .onChange(of: mirrorPreference) { _, new in
+                var s = RunnerSettings.load()
+                guard s.downloadMirror != new else { return }
+                s.downloadMirror = new
+                s.save()
+                coordinator.retry()
+            }
             Text("By continuing you accept the Android SDK License Agreement and the terms of the Google Play system image. Nothing outside this app's folder is modified.")
                 .font(.caption).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -84,7 +97,7 @@ struct SetupView: View {
     @ViewBuilder private func phaseView(_ phase: BootstrapPhase) -> some View {
         switch phase {
         case .fetchingManifests:
-            HStack { ProgressView(); Text("Contacting dl.google.com…") }
+            HStack { ProgressView(); Text("Preparing download…") }
         case .downloading(let name, let p):
             VStack(alignment: .leading, spacing: 8) {
                 Text("Downloading \(name)")

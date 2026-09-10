@@ -7,10 +7,12 @@ public actor AAPT2Fetcher {
     private let session: URLSession
     /// Known-good fallback if maven-metadata cannot be fetched.
     public static let fallbackVersion = "9.4.0-15978811"
-    static let mavenBase = URL(string: "https://dl.google.com/dl/android/maven2/com/android/tools/build/aapt2/")!
+    /// Download hosts to try, most preferred first.
+    private let mirrors: [DownloadMirror]
 
-    public init(paths: SDKPaths, session: URLSession = .shared) {
+    public init(paths: SDKPaths, mirrors: [DownloadMirror] = DownloadMirror.order(for: .auto), session: URLSession = .shared) {
         self.paths = paths
+        self.mirrors = mirrors.isEmpty ? [.google] : mirrors
         self.session = session
     }
 
@@ -21,11 +23,23 @@ public actor AAPT2Fetcher {
     /// Returns the binary URL, downloading it on first use.
     public func ensureInstalled() async throws -> URL {
         if isInstalled { return paths.aapt2Binary }
-        let version = (try? await latestStableVersion()) ?? Self.fallbackVersion
-        let jarURL = Self.mavenBase.appendingPathComponent("\(version)/aapt2-\(version)-osx.jar")
+        let (version, mirror) = await latestStableVersion()
         let jar = paths.downloads.appendingPathComponent("aapt2-\(version)-osx.jar")
         try paths.createDirectories()
-        try await Downloader(session: session).download(jarURL, to: jar, expectedSize: nil, sha1: nil) { _ in }
+        let downloader = Downloader(session: session)
+        var lastError: Error?
+        for candidate in [mirror] + mirrors.filter({ $0 != mirror }) {
+            let jarURL = candidate.aapt2Base.appendingPathComponent("\(version)/aapt2-\(version)-osx.jar")
+            do {
+                try await downloader.download(jarURL, to: jar, expectedSize: nil, sha1: nil) { _ in }
+                lastError = nil
+                break
+            } catch {
+                Log.sdk.error("aapt2 from \(candidate.host) failed: \(error.localizedDescription)")
+                lastError = error
+            }
+        }
+        if let lastError { throw lastError }
         // The jar is a zip; extract just the binary.
         let r = try await Subprocess.run(URL(fileURLWithPath: "/usr/bin/unzip"), arguments: ["-p", jar.path, "aapt2"])
         guard r.status == 0, !r.stdout.isEmpty else { throw MadroidKitError.unarchive("aapt2 missing from \(jar.lastPathComponent)") }
@@ -37,11 +51,19 @@ public actor AAPT2Fetcher {
         return paths.aapt2Binary
     }
 
-    /// Highest version in maven-metadata.xml without alpha/beta/rc.
-    func latestStableVersion() async throws -> String {
-        let (data, _) = try await session.data(from: Self.mavenBase.appendingPathComponent("maven-metadata.xml"))
-        let text = String(decoding: data, as: UTF8.self)
-        return Self.pickStable(fromMavenMetadata: text) ?? Self.fallbackVersion
+    /// Highest stable version in maven-metadata.xml from the first mirror
+    /// that answers, with the mirror it came from; the known-good fallback
+    /// version and the preferred mirror when none does.
+    func latestStableVersion() async -> (version: String, mirror: DownloadMirror) {
+        for mirror in mirrors {
+            var request = URLRequest(url: mirror.aapt2Base.appendingPathComponent("maven-metadata.xml"))
+            request.timeoutInterval = 20
+            guard let (data, response) = try? await session.data(for: request),
+                  (response as? HTTPURLResponse)?.statusCode == 200 else { continue }
+            let text = String(decoding: data, as: UTF8.self)
+            if let v = Self.pickStable(fromMavenMetadata: text) { return (v, mirror) }
+        }
+        return (Self.fallbackVersion, mirrors[0])
     }
 
     public static func pickStable(fromMavenMetadata text: String) -> String? {

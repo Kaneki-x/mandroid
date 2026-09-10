@@ -27,7 +27,9 @@ open ~/Library/Developer/Xcode/DerivedData/Madroid-*/Build/Products/Debug/Madroi
 
 On first launch the app lists what it will download (about 2.5 GB from
 `dl.google.com`) and installs everything under
-`~/Library/Application Support/Madroid/`.
+`~/Library/Application Support/Madroid/`. On Macs set to mainland China the
+download comes from the Tencent Cloud mirror instead (Aliyun for aapt2); the
+choice can be changed on the setup screen or in Settings ▸ Downloads.
 
 ## How it works
 

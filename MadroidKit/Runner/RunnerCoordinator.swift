@@ -48,6 +48,7 @@ public final class RunnerCoordinator {
                 await boot()
             } else {
                 do {
+                    await bootstrap.setMirrors(RunnerSettings.load().mirrors)
                     let plan = try await bootstrap.makePlan()
                     if plan.isEmpty {
                         await boot()
@@ -147,7 +148,7 @@ public final class RunnerCoordinator {
                 frames: GRPCFrameStream(client: client),
                 deviceWidth: config.lcdWidth, deviceHeight: config.lcdHeight, deviceDpi: config.lcdDensity)
             self.session = session
-            self.catalog = AppCatalog(paths: paths, adb: adb)
+            self.catalog = AppCatalog(paths: paths, adb: adb, mirrors: RunnerSettings.load().mirrors)
             if let hostClipboard {
                 let sync = ClipboardSync(client: client, host: hostClipboard)
                 await sync.start()

@@ -8,6 +8,8 @@ public struct RunnerSettings: Sendable, Equatable {
     public var launcherStubs: Bool = true
     /// New app windows open in landscape ("horizontal") unless changed.
     public var landscapeByDefault: Bool = true
+    /// Which download host to prefer for SDK components and aapt2.
+    public var downloadMirror: DownloadMirror.Preference = .auto
 
     public static let ramChoices = [2048, 3072, 4096, 6144, 8192]
     public static let coreChoices = [2, 4, 6, 8]
@@ -21,6 +23,7 @@ public struct RunnerSettings: Sendable, Equatable {
         if let v = defaults.object(forKey: "defaultWindowHeight") as? Int, (500...1600).contains(v) { s.defaultWindowHeight = v }
         if let v = defaults.object(forKey: "launcherStubs") as? Bool { s.launcherStubs = v }
         if let v = defaults.object(forKey: "landscapeByDefault") as? Bool { s.landscapeByDefault = v }
+        if let v = defaults.string(forKey: "downloadMirror"), let m = DownloadMirror.Preference(rawValue: v) { s.downloadMirror = m }
         return s
     }
 
@@ -30,6 +33,7 @@ public struct RunnerSettings: Sendable, Equatable {
         defaults.set(defaultWindowHeight, forKey: "defaultWindowHeight")
         defaults.set(launcherStubs, forKey: "launcherStubs")
         defaults.set(landscapeByDefault, forKey: "landscapeByDefault")
+        defaults.set(downloadMirror.rawValue, forKey: "downloadMirror")
     }
 
     /// Default logical size of a new app window given the usable screen size.
@@ -47,6 +51,9 @@ public struct RunnerSettings: Sendable, Equatable {
             return ((h * 420 / 900).rounded(), h)
         }
     }
+
+    /// Mirrors to try, in order, for the current preference.
+    public var mirrors: [DownloadMirror] { DownloadMirror.order(for: downloadMirror) }
 
     /// Applies the hardware settings to an AVD config.
     public func apply(to config: inout AVDConfig) {

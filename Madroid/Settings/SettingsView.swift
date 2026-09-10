@@ -37,6 +37,15 @@ struct SettingsView: View {
                 Toggle("Create launcher stubs in ~/Applications/Android Apps", isOn: $settings.launcherStubs)
                 Text("Stubs let Android apps appear in Spotlight and the Dock.").font(.caption).foregroundStyle(.secondary)
             }
+            Section("Downloads") {
+                Picker("Download SDK from", selection: $settings.downloadMirror) {
+                    Text("Automatic").tag(DownloadMirror.Preference.auto)
+                    Text(DownloadMirror.google.name).tag(DownloadMirror.Preference.google)
+                    Text(DownloadMirror.china.name).tag(DownloadMirror.Preference.china)
+                }
+                Text("Automatic uses the China mirror only when this Mac's region or time zone is mainland China. Applies to the next download.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             Section("Files") {
                 LabeledContent("System image") {
                     Text(coordinator.bootstrap.installedSystemImage()?.packagePath ?? "none").textSelection(.enabled)

@@ -16,6 +16,8 @@ public struct BootstrapPlan: Sendable {
     public var components: [SDKComponent]
     public var licenses: [RepositoryManifest.License]
     public var systemImagePath: String
+    /// Mirror the manifests came from; archive URLs point at it.
+    public var mirror: DownloadMirror = .google
     public var totalBytes: Int64 { components.reduce(0) { $0 + $1.sizeBytes } }
     public var isEmpty: Bool { components.isEmpty }
 }
@@ -33,6 +35,8 @@ public actor SDKBootstrap {
     public let paths: SDKPaths
     private let downloader: Downloader
     private let session: URLSession
+    /// Download hosts to try, most preferred first.
+    public private(set) var mirrors: [DownloadMirror] = DownloadMirror.order(for: .auto)
 
     public static let defaultTag = "google_apis_playstore"
     public static var defaultABI: String {
@@ -47,6 +51,10 @@ public actor SDKBootstrap {
         self.paths = paths
         self.session = session
         self.downloader = Downloader(session: session)
+    }
+
+    public func setMirrors(_ mirrors: [DownloadMirror]) {
+        if !mirrors.isEmpty { self.mirrors = mirrors }
     }
 
     // MARK: Installed state
@@ -96,17 +104,30 @@ public actor SDKBootstrap {
 
     // MARK: Planning
 
+    /// Fetches both manifests from the first reachable mirror.
     public func fetchManifests(tag: String = SDKBootstrap.defaultTag) async throws
-        -> (repository: RepositoryManifest, systemImages: RepositoryManifest) {
-        async let repo = fetchManifest(RepositoryManifest.repositoryURL)
-        async let img = fetchManifest(RepositoryManifest.systemImageManifestURL(tag: tag))
-        return try await (repo, img)
+        -> (repository: RepositoryManifest, systemImages: RepositoryManifest, mirror: DownloadMirror) {
+        var lastError: Error?
+        for mirror in mirrors {
+            do {
+                async let repo = fetchManifest(mirror.repositoryManifestURL)
+                async let img = fetchManifest(mirror.systemImageManifestURL(tag: tag))
+                let result = try await (repo, img, mirror)
+                Log.sdk.info("using download mirror \(mirror.id)")
+                return result
+            } catch {
+                Log.sdk.error("manifests from \(mirror.host) failed: \(error.localizedDescription)")
+                Log.file("mirror \(mirror.id) unreachable: \(error.localizedDescription)")
+                lastError = error
+            }
+        }
+        throw lastError ?? MadroidKitError.manifest("no download mirror reachable")
     }
 
     private func fetchManifest(_ url: URL) async throws -> RepositoryManifest {
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
-        request.timeoutInterval = 30
+        request.timeoutInterval = 20
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
             throw MadroidKitError.manifest("could not fetch \(url.lastPathComponent)")
@@ -121,9 +142,11 @@ public actor SDKBootstrap {
     public func makePlan(tag: String = SDKBootstrap.defaultTag,
                          abi: String = SDKBootstrap.defaultABI,
                          preferredAPI: String? = nil) async throws -> BootstrapPlan {
-        let (repo, imgs) = try await fetchManifests(tag: tag)
-        return try Self.plan(repository: repo, systemImages: imgs, paths: paths, tag: tag, abi: abi,
-                             preferredAPI: preferredAPI, installedRevision: installedRevision(at:))
+        let (repo, imgs, mirror) = try await fetchManifests(tag: tag)
+        var plan = try Self.plan(repository: repo, systemImages: imgs, paths: paths, tag: tag, abi: abi,
+                                 preferredAPI: preferredAPI, installedRevision: installedRevision(at:))
+        plan.mirror = mirror
+        return plan
     }
 
     /// Pure planning function (unit-testable).
@@ -184,9 +207,9 @@ public actor SDKBootstrap {
         for component in plan.components {
             let name = component.displayName
             let zip = paths.downloads.appendingPathComponent(component.archive.url.lastPathComponent)
-            try await downloader.download(component.archive.url, to: zip,
-                                          expectedSize: component.archive.size,
-                                          sha1: component.archive.sha1) { p in
+            try await downloadWithFallback(component.archive.url, from: plan.mirror, to: zip,
+                                           expectedSize: component.archive.size,
+                                           sha1: component.archive.sha1) { p in
                 progress(.downloading(component: name, progress: p))
             }
             progress(.extracting(component: name))
@@ -194,6 +217,32 @@ public actor SDKBootstrap {
             try? FileManager.default.removeItem(at: zip)
         }
         progress(.finished)
+    }
+
+    /// Downloads from the plan's mirror; if that fails (a mirror lagging behind
+    /// the manifest, or an unreachable host) the same path is tried on the
+    /// other mirrors before giving up.
+    private func downloadWithFallback(_ url: URL, from mirror: DownloadMirror, to destination: URL,
+                                      expectedSize: Int64?, sha1: String?,
+                                      progress: @escaping @Sendable (DownloadProgress) -> Void) async throws {
+        var candidates = [url]
+        for other in mirrors where other != mirror {
+            if let alt = mirror.rewrite(url, to: other) { candidates.append(alt) }
+        }
+        var lastError: Error?
+        for candidate in candidates {
+            do {
+                try await downloader.download(candidate, to: destination, expectedSize: expectedSize, sha1: sha1, progress: progress)
+                return
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                Log.sdk.error("download from \(candidate.host ?? "?") failed: \(error.localizedDescription)")
+                Log.file("download \(candidate.absoluteString) failed: \(error.localizedDescription)")
+                lastError = error
+            }
+        }
+        throw lastError ?? MadroidKitError.download("no mirror could serve \(url.lastPathComponent)")
     }
 
     /// Extracts into a staging directory, then moves the zip's single
