@@ -1,0 +1,135 @@
+name: AndroidAppRunner
+options:
+  minimumXcodeGenVersion: 2.42.0
+  deploymentTarget:
+    macOS: "15.0"
+  generateEmptyDirectories: true
+configs:
+  Debug: debug
+  Release: release
+settings:
+  base:
+    SWIFT_VERSION: 6.0
+    MACOSX_DEPLOYMENT_TARGET: 15.0
+    SWIFT_EMIT_LOC_STRINGS: YES
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "0.1"
+    CURRENT_PROJECT_VERSION: 1
+    SWIFT_STRICT_CONCURRENCY: complete
+  configs:
+    Release:
+      CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
+      ENABLE_HARDENED_RUNTIME: YES
+packages:
+  grpc-swift-2:
+    url: https://github.com/grpc/grpc-swift-2.git
+    from: 2.4.0
+  grpc-swift-nio-transport:
+    url: https://github.com/grpc/grpc-swift-nio-transport.git
+    from: 2.9.0
+  grpc-swift-protobuf:
+    url: https://github.com/grpc/grpc-swift-protobuf.git
+    from: 2.4.0
+  swift-protobuf:
+    url: https://github.com/apple/swift-protobuf.git
+    from: 1.29.0
+targets:
+  EmulatorKit:
+    type: framework
+    platform: macOS
+    sources:
+      - path: EmulatorKit
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - package: grpc-swift-2
+        product: GRPCCore
+      - package: grpc-swift-nio-transport
+        product: GRPCNIOTransportHTTP2
+      - package: grpc-swift-protobuf
+        product: GRPCProtobuf
+      - package: swift-protobuf
+        product: SwiftProtobuf
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.madeye.androidapprunner.kit
+        DEFINES_MODULE: YES
+        GENERATE_INFOPLIST_FILE: YES
+        # Generated protobuf code is not ours to lint.
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: NO
+  AndroidAppRunner:
+    type: application
+    platform: macOS
+    sources:
+      - AndroidAppRunner
+    dependencies:
+      - target: EmulatorKit
+        embed: true
+    info:
+      path: AndroidAppRunner/Info.plist
+      properties:
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleDisplayName: Android App Runner
+        CFBundleName: Android App Runner
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSMinimumSystemVersion: $(MACOSX_DEPLOYMENT_TARGET)
+        LSApplicationCategoryType: public.app-category.utilities
+        ITSAppUsesNonExemptEncryption: false
+        NSPrincipalClass: NSApplication
+        NSMainStoryboardFile: ""
+        # Never let macOS terminate us silently; QEMU must be shut down cleanly.
+        NSSupportsAutomaticTermination: false
+        NSSupportsSuddenTermination: false
+        NSHumanReadableCopyright: "Copyright © 2026 Max Lv. MIT License."
+        CFBundleURLTypes:
+          - CFBundleURLName: io.github.madeye.androidapprunner.launch
+            CFBundleURLSchemes:
+              - androidrunner
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Android Package
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes:
+              - com.android.package-archive
+        UTImportedTypeDeclarations:
+          - UTTypeIdentifier: com.android.package-archive
+            UTTypeDescription: Android Package
+            UTTypeConformsTo:
+              - public.data
+              - public.archive
+            UTTypeTagSpecification:
+              public.filename-extension:
+                - apk
+              public.mime-type:
+                - application/vnd.android.package-archive
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.madeye.androidapprunner
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_APP_SANDBOX: NO
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: NO
+  EmulatorKitTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: EmulatorKitTests
+    dependencies:
+      - target: EmulatorKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.madeye.androidapprunner.tests
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  AndroidAppRunner:
+    build:
+      targets:
+        AndroidAppRunner: all
+        EmulatorKit: all
+        EmulatorKitTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - EmulatorKitTests

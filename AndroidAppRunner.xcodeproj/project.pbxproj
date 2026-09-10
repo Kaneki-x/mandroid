@@ -1,0 +1,688 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1A92F8FB1ACBE9094F550BCD /* GRPCProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = E82E8899E20A97A98C976ADD /* GRPCProtobuf */; };
+		22BBAC79AEE3987A28BFFAA9 /* EmulatorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */; };
+		244AA171119E4FBEE3079805 /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = E9C763E8C714FB6D2AF8BE67 /* SwiftProtobuf */; };
+		35DFD191990CFCB84F3BC907 /* EmulatorKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		42B7C4002103E0F4E01DEC8C /* EmulatorKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 751E66E02D4D1F70419BE025 /* EmulatorKit.swift */; };
+		46ACADA568FB2F10941D6895 /* EmulatorKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D627CC09813B0EB7A7D177 /* EmulatorKitTests.swift */; };
+		49B461F906EA57AF66F82DD2 /* EmulatorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */; };
+		4F6F4705BE6D5ED57A538507 /* emulator_controller.grpc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3647A3BC73BD40ACA4C3D58A /* emulator_controller.grpc.swift */; };
+		51233549F17D5450C31BA824 /* EmulatorKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		58503F6C6DF464212345C782 /* GRPCCore in Frameworks */ = {isa = PBXBuildFile; productRef = 445DC3386FDCE17BCCC2B066 /* GRPCCore */; };
+		58ECA5E40F03CB4DF6CEE9D5 /* emulator_controller.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03E372EFDD2E7209486A297 /* emulator_controller.pb.swift */; };
+		758C080466516C735A2811D3 /* GRPCNIOTransportHTTP2 in Frameworks */ = {isa = PBXBuildFile; productRef = DA1C401E4BC3BE10F92DECFD /* GRPCNIOTransportHTTP2 */; };
+		99DE1B08E68D655995C24AC8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D0B1023279E4B3259D504121 /* Assets.xcassets */; };
+		A90A5C5331FC3EB9D896D43C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CBF416B0A5B883B21FDA708 /* AppDelegate.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2AEA912A92544CA94C7BE806 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EC3898795CFFF28914F20A31 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4D851099FE8B7E8E0E55CE6B;
+			remoteInfo = EmulatorKit;
+		};
+		3D7B5257F735145D96E9B8DD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EC3898795CFFF28914F20A31 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4D851099FE8B7E8E0E55CE6B;
+			remoteInfo = EmulatorKit;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		25F682702F1D95D3E87CAF6A /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				35DFD191990CFCB84F3BC907 /* EmulatorKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6D889CFE35A29A056753EA4A /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				51233549F17D5450C31BA824 /* EmulatorKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1CBF416B0A5B883B21FDA708 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		3647A3BC73BD40ACA4C3D58A /* emulator_controller.grpc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = emulator_controller.grpc.swift; sourceTree = "<group>"; };
+		37D627CC09813B0EB7A7D177 /* EmulatorKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorKitTests.swift; sourceTree = "<group>"; };
+		3D1A220E29A385EEB559B9B6 /* AndroidAppRunner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AndroidAppRunner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		751E66E02D4D1F70419BE025 /* EmulatorKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorKit.swift; sourceTree = "<group>"; };
+		A94A28A5F13AB6760301C650 /* EmulatorKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EmulatorKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B03E372EFDD2E7209486A297 /* emulator_controller.pb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = emulator_controller.pb.swift; sourceTree = "<group>"; };
+		D0B1023279E4B3259D504121 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = EmulatorKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB8A8526ECA3D0D876A3F66F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		26276A988EA018592699D7F4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				49B461F906EA57AF66F82DD2 /* EmulatorKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		87628B9746AB948FD4819397 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				22BBAC79AEE3987A28BFFAA9 /* EmulatorKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E30AD0D5C97FD22B724A290E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				58503F6C6DF464212345C782 /* GRPCCore in Frameworks */,
+				758C080466516C735A2811D3 /* GRPCNIOTransportHTTP2 in Frameworks */,
+				1A92F8FB1ACBE9094F550BCD /* GRPCProtobuf in Frameworks */,
+				244AA171119E4FBEE3079805 /* SwiftProtobuf in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		12E9038520B21BBC37E204BC = {
+			isa = PBXGroup;
+			children = (
+				1FF19517648FCE3FEB1B1D36 /* AndroidAppRunner */,
+				7B73E415A5A95BD164E7A0E0 /* EmulatorKit */,
+				C8499387E47533D539759834 /* EmulatorKitTests */,
+				A114420DF28C6C4191EB99DD /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1FF19517648FCE3FEB1B1D36 /* AndroidAppRunner */ = {
+			isa = PBXGroup;
+			children = (
+				1CBF416B0A5B883B21FDA708 /* AppDelegate.swift */,
+				D0B1023279E4B3259D504121 /* Assets.xcassets */,
+				DB8A8526ECA3D0D876A3F66F /* Info.plist */,
+			);
+			path = AndroidAppRunner;
+			sourceTree = "<group>";
+		};
+		223CCCBF0ED7891AD8607FD3 /* Generated */ = {
+			isa = PBXGroup;
+			children = (
+				3647A3BC73BD40ACA4C3D58A /* emulator_controller.grpc.swift */,
+				B03E372EFDD2E7209486A297 /* emulator_controller.pb.swift */,
+			);
+			path = Generated;
+			sourceTree = "<group>";
+		};
+		2622BA47D953D85A8822C9D4 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Fixtures;
+			sourceTree = "<group>";
+		};
+		7B73E415A5A95BD164E7A0E0 /* EmulatorKit */ = {
+			isa = PBXGroup;
+			children = (
+				751E66E02D4D1F70419BE025 /* EmulatorKit.swift */,
+				223CCCBF0ED7891AD8607FD3 /* Generated */,
+			);
+			path = EmulatorKit;
+			sourceTree = "<group>";
+		};
+		A114420DF28C6C4191EB99DD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3D1A220E29A385EEB559B9B6 /* AndroidAppRunner.app */,
+				D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */,
+				A94A28A5F13AB6760301C650 /* EmulatorKitTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C8499387E47533D539759834 /* EmulatorKitTests */ = {
+			isa = PBXGroup;
+			children = (
+				37D627CC09813B0EB7A7D177 /* EmulatorKitTests.swift */,
+				2622BA47D953D85A8822C9D4 /* Fixtures */,
+			);
+			path = EmulatorKitTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1F1890C2C9F2EABC176ADBD4 /* EmulatorKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4F898BB496B8A79FB92CF2E7 /* Build configuration list for PBXNativeTarget "EmulatorKitTests" */;
+			buildPhases = (
+				B578AEA178D620FFC8541E4B /* Sources */,
+				87628B9746AB948FD4819397 /* Frameworks */,
+				25F682702F1D95D3E87CAF6A /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0665DC0351EE4A78A5FFF38C /* PBXTargetDependency */,
+			);
+			name = EmulatorKitTests;
+			packageProductDependencies = (
+			);
+			productName = EmulatorKitTests;
+			productReference = A94A28A5F13AB6760301C650 /* EmulatorKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		4D851099FE8B7E8E0E55CE6B /* EmulatorKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3B79D55C6FB40327ABC5C435 /* Build configuration list for PBXNativeTarget "EmulatorKit" */;
+			buildPhases = (
+				8A7EE1B35EDE53B5F0009F26 /* Sources */,
+				E30AD0D5C97FD22B724A290E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EmulatorKit;
+			packageProductDependencies = (
+				445DC3386FDCE17BCCC2B066 /* GRPCCore */,
+				DA1C401E4BC3BE10F92DECFD /* GRPCNIOTransportHTTP2 */,
+				E82E8899E20A97A98C976ADD /* GRPCProtobuf */,
+				E9C763E8C714FB6D2AF8BE67 /* SwiftProtobuf */,
+			);
+			productName = EmulatorKit;
+			productReference = D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		FA1D66FD67A4BB4B7B6BA0E3 /* AndroidAppRunner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FEC8470720A34C667B9F3149 /* Build configuration list for PBXNativeTarget "AndroidAppRunner" */;
+			buildPhases = (
+				2A6472BB1443E73527C1762A /* Sources */,
+				BD703C370112A6422F899A40 /* Resources */,
+				26276A988EA018592699D7F4 /* Frameworks */,
+				6D889CFE35A29A056753EA4A /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				663C922B3FBCF8C4471476BD /* PBXTargetDependency */,
+			);
+			name = AndroidAppRunner;
+			packageProductDependencies = (
+			);
+			productName = AndroidAppRunner;
+			productReference = 3D1A220E29A385EEB559B9B6 /* AndroidAppRunner.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EC3898795CFFF28914F20A31 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					1F1890C2C9F2EABC176ADBD4 = {
+						ProvisioningStyle = Automatic;
+					};
+					4D851099FE8B7E8E0E55CE6B = {
+						ProvisioningStyle = Automatic;
+					};
+					FA1D66FD67A4BB4B7B6BA0E3 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 950D81E6CA96820193F4B03B /* Build configuration list for PBXProject "AndroidAppRunner" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 12E9038520B21BBC37E204BC;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E0C800425DE5EB1FA341D6ED /* XCRemoteSwiftPackageReference "grpc-swift-2" */,
+				33D8F287E7AA7499BEAA3F50 /* XCRemoteSwiftPackageReference "grpc-swift-nio-transport" */,
+				100E13524928CBF321B6ED3B /* XCRemoteSwiftPackageReference "grpc-swift-protobuf" */,
+				7C6C962E089061188BB38151 /* XCRemoteSwiftPackageReference "swift-protobuf" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = A114420DF28C6C4191EB99DD /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FA1D66FD67A4BB4B7B6BA0E3 /* AndroidAppRunner */,
+				4D851099FE8B7E8E0E55CE6B /* EmulatorKit */,
+				1F1890C2C9F2EABC176ADBD4 /* EmulatorKitTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BD703C370112A6422F899A40 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				99DE1B08E68D655995C24AC8 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2A6472BB1443E73527C1762A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A90A5C5331FC3EB9D896D43C /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8A7EE1B35EDE53B5F0009F26 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				42B7C4002103E0F4E01DEC8C /* EmulatorKit.swift in Sources */,
+				4F6F4705BE6D5ED57A538507 /* emulator_controller.grpc.swift in Sources */,
+				58ECA5E40F03CB4DF6CEE9D5 /* emulator_controller.pb.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B578AEA178D620FFC8541E4B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46ACADA568FB2F10941D6895 /* EmulatorKitTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0665DC0351EE4A78A5FFF38C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4D851099FE8B7E8E0E55CE6B /* EmulatorKit */;
+			targetProxy = 2AEA912A92544CA94C7BE806 /* PBXContainerItemProxy */;
+		};
+		663C922B3FBCF8C4471476BD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4D851099FE8B7E8E0E55CE6B /* EmulatorKit */;
+			targetProxy = 3D7B5257F735145D96E9B8DD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		01D4DD0EFE7B0DE6BD8B34D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 0.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		4850D81515952E309F9E0B5F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				INFOPLIST_FILE = AndroidAppRunner/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.madeye.androidapprunner;
+				SDKROOT = macosx;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
+			};
+			name = Debug;
+		};
+		A1B68C693B6EF052FE5E9D6E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				INFOPLIST_FILE = AndroidAppRunner/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.madeye.androidapprunner;
+				SDKROOT = macosx;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
+			};
+			name = Release;
+		};
+		BF93804915886C9E68E3EC6A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.madeye.androidapprunner.tests;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		C964929F5ECE2A28023A4A32 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 0.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		E6242937DA4B5867376B0907 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.madeye.androidapprunner.tests;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		EE5C6250C97387E7F420924D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.madeye.androidapprunner.kit;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		F7653F32FD231E23B6C5BCE4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.madeye.androidapprunner.kit;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3B79D55C6FB40327ABC5C435 /* Build configuration list for PBXNativeTarget "EmulatorKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EE5C6250C97387E7F420924D /* Debug */,
+				F7653F32FD231E23B6C5BCE4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		4F898BB496B8A79FB92CF2E7 /* Build configuration list for PBXNativeTarget "EmulatorKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E6242937DA4B5867376B0907 /* Debug */,
+				BF93804915886C9E68E3EC6A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		950D81E6CA96820193F4B03B /* Build configuration list for PBXProject "AndroidAppRunner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				01D4DD0EFE7B0DE6BD8B34D8 /* Debug */,
+				C964929F5ECE2A28023A4A32 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FEC8470720A34C667B9F3149 /* Build configuration list for PBXNativeTarget "AndroidAppRunner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4850D81515952E309F9E0B5F /* Debug */,
+				A1B68C693B6EF052FE5E9D6E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		100E13524928CBF321B6ED3B /* XCRemoteSwiftPackageReference "grpc-swift-protobuf" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/grpc/grpc-swift-protobuf.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.0;
+			};
+		};
+		33D8F287E7AA7499BEAA3F50 /* XCRemoteSwiftPackageReference "grpc-swift-nio-transport" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/grpc/grpc-swift-nio-transport.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.9.0;
+			};
+		};
+		7C6C962E089061188BB38151 /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-protobuf.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.29.0;
+			};
+		};
+		E0C800425DE5EB1FA341D6ED /* XCRemoteSwiftPackageReference "grpc-swift-2" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/grpc/grpc-swift-2.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		445DC3386FDCE17BCCC2B066 /* GRPCCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E0C800425DE5EB1FA341D6ED /* XCRemoteSwiftPackageReference "grpc-swift-2" */;
+			productName = GRPCCore;
+		};
+		DA1C401E4BC3BE10F92DECFD /* GRPCNIOTransportHTTP2 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 33D8F287E7AA7499BEAA3F50 /* XCRemoteSwiftPackageReference "grpc-swift-nio-transport" */;
+			productName = GRPCNIOTransportHTTP2;
+		};
+		E82E8899E20A97A98C976ADD /* GRPCProtobuf */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 100E13524928CBF321B6ED3B /* XCRemoteSwiftPackageReference "grpc-swift-protobuf" */;
+			productName = GRPCProtobuf;
+		};
+		E9C763E8C714FB6D2AF8BE67 /* SwiftProtobuf */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7C6C962E089061188BB38151 /* XCRemoteSwiftPackageReference "swift-protobuf" */;
+			productName = SwiftProtobuf;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = EC3898795CFFF28914F20A31 /* Project object */;
+}
