@@ -95,8 +95,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if url.isFileURL, url.pathExtension.lowercased() == "apk" {
                 Task { try? await coordinator.installAPK(url) }
             } else if url.scheme == "androidrunner" {
-                // Phase 3: launcher stubs. Logged only for now.
-                Log.ui.info("open URL \(url.absoluteString)")
+                URLSchemeHandler(delegate: self).handle(url)
             }
         }
     }

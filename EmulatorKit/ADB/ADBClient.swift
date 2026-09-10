@@ -47,6 +47,25 @@ public actor ADBClient {
         return r.stdoutText
     }
 
+    /// Starts the adb server on our port and waits for it. Done before the
+    /// emulator launches: the emulator's own adb calls have short timeouts
+    /// and, if no server is listening yet, every one of them forks another
+    /// server that then fights for the port.
+    public func startServer(timeout: Duration = .seconds(90)) async throws {
+        let r = try await withThrowingTaskGroup(of: SubprocessResult.self) { group in
+            group.addTask { try await Subprocess.run(self.binary, arguments: ["-P", String(self.serverPort), "start-server"], environment: self.environment) }
+            group.addTask { try await Task.sleep(for: timeout); throw EmulatorKitError.timeout("adb start-server") }
+            let first = try await group.next()!
+            group.cancelAll()
+            return first
+        }
+        guard r.status == 0 else { throw EmulatorKitError.adb("start-server failed: \(r.stderrText)") }
+    }
+
+    public func killServer() async {
+        _ = try? await Subprocess.run(binary, arguments: ["-P", String(serverPort), "kill-server"], environment: environment)
+    }
+
     // MARK: Convenience
 
     public func getprop(_ name: String) async throws -> String {

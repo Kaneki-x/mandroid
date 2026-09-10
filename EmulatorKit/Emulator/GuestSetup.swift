@@ -10,6 +10,9 @@ public enum GuestSetup {
             "settings put system screen_off_timeout 2147483647",
             "svc power stayon true",
             "settings put global window_animation_scale 1.0",
+            // Gboard shows a "Try out your stylus" sheet on display 0 the first
+            // time a text field gets focus, and it swallows every keystroke.
+            "settings put secure stylus_handwriting_enabled 0",
         ]
         for c in commands {
             do { _ = try await adb.shell(c) } catch { Log.emulator.warning("guest setup '\(c)' failed: \(error.localizedDescription)") }

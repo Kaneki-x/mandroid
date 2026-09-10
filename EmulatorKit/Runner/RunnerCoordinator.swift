@@ -6,7 +6,9 @@ import Observation
 @MainActor
 @Observable
 public final class RunnerCoordinator {
-    public private(set) var state: RunnerState = .idle
+    public private(set) var state: RunnerState = .idle {
+        didSet { Log.runner.notice("state → \(String(describing: self.state).prefix(200), privacy: .public)") }
+    }
     public private(set) var session: EmulatorSession?
     public private(set) var sessions: [String: AppSession] = [:]   // by package
     public private(set) var installedPackages: [String] = []
@@ -36,7 +38,14 @@ public final class RunnerCoordinator {
             } else {
                 do {
                     let plan = try await bootstrap.makePlan()
-                    if plan.isEmpty { await boot() } else { state = .needsSetup(plan) }
+                    if plan.isEmpty {
+                        await boot()
+                    } else if UserDefaults.standard.bool(forKey: "autoSetup") {
+                        // `-autoSetup YES` skips the confirmation (integration tests).
+                        runSetup(plan)
+                    } else {
+                        state = .needsSetup(plan)
+                    }
                 } catch {
                     state = .failed(error.localizedDescription)
                 }
@@ -88,10 +97,13 @@ public final class RunnerCoordinator {
             var options = EmulatorLaunchOptions(avdName: avdName, consolePort: console, grpcPort: grpc, adbServerPort: adbPort)
             options.coldBoot = coldBoot
 
+            setStage("Starting adb")
+            let adb = ADBClient(paths: paths, serverPort: adbPort, serial: options.serial)
+            try await adb.startServer()
+
             setStage("Starting emulator")
             let process = try EmulatorProcess(paths: paths, options: options)
             try process.start()
-            let adb = ADBClient(paths: paths, serverPort: adbPort, serial: options.serial)
 
             let connection = try EmulatorConnection(port: grpc)
             setStage("Connecting to emulator")
@@ -99,6 +111,7 @@ public final class RunnerCoordinator {
                 try await connection.waitUntilReachable(timeout: .seconds(90))
             } catch {
                 process.terminate()
+                await adb.killServer()
                 throw EmulatorKitError.emulator("did not start:\n\(process.tailLog(lines: 12))")
             }
 
@@ -164,7 +177,7 @@ public final class RunnerCoordinator {
             try? await Task.sleep(for: .seconds(3))
             session.process.kill()
         }
-        _ = try? await session.adb.server(["kill-server"])
+        await session.adb.killServer()
         session.connection.shutdown()
         self.session = nil
         self.sessions = [:]

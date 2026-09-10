@@ -27,8 +27,19 @@ xcodegen generate
 xcodebuild -scheme AndroidAppRunner -configuration Debug build
 xcodebuild -scheme AndroidAppRunner test          # unit tests (no emulator needed)
 Scripts/gen-proto.sh                              # regenerate EmulatorKit/Generated
-Scripts/integration-test.sh                       # needs a booted emulator; not CI
+Scripts/integration-test.sh                       # boots the real emulator; not CI
 ```
+
+Use the default DerivedData location. A `-derivedDataPath` under `/Volumes/…`
+makes the `RegisterWithLaunchServices` build step hang on this machine
+(LaunchServices stalls on bundles on external volumes once a TCC prompt for
+that volume is pending). Never point the app at files under `/Volumes/…`
+either: opening them from the app blocks on a removable-volume permission
+dialog.
+
+Debug builds accept `-autoSetup YES` (skip the download confirmation) and
+`androidrunner://debug/…` URLs (snapshot, click, type, scroll, resize, close,
+quit) used by `Scripts/integration-test.sh`; see `DebugHooks.swift`.
 
 Before any push: `xcodegen generate && xcodebuild ... build && xcodebuild ... test`
 must pass and `Scripts/gen-proto.sh` must leave a clean tree.
