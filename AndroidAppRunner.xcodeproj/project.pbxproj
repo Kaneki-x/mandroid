@@ -22,6 +22,7 @@
 		289D7185D574918B95BCEB4A /* Frame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E15B909A31FE2A580B727FE /* Frame.swift */; };
 		293D404DAE8F4726FD9AF34F /* Unarchiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 326729D1BCD57A8030ABD49A /* Unarchiver.swift */; };
 		2A009FFB36499B75A61FD159 /* dumpsys-display-1secondary.txt in Resources */ = {isa = PBXBuildFile; fileRef = D380E3E46C4247FBF8144094 /* dumpsys-display-1secondary.txt */; };
+		2DE3DA1244FEB429341774D8 /* LauncherStubBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FBBDBE1702D1BA1ACC35F4 /* LauncherStubBuilder.swift */; };
 		33F3442434F8AEFB661F56F1 /* LibraryWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C746339D069D9C75EC0AF0 /* LibraryWindowController.swift */; };
 		35DFD191990CFCB84F3BC907 /* EmulatorKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D4B02D64CB0EB7E1330734E7 /* EmulatorKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3815486752618540E4A64590 /* PortAllocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB2B482FDA54FD15CD87E8FC /* PortAllocator.swift */; };
@@ -72,7 +73,9 @@
 		E03F70E70AB6F71FE619864F /* SDKPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EA92D29680826D012674D2 /* SDKPaths.swift */; };
 		E87B6C6710202565F7E26A3A /* EmulatorLaunchOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC00B8A031594370601237CE /* EmulatorLaunchOptions.swift */; };
 		EAC02BB7598820042B966354 /* DisplaySlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 294E2B8FA49832FA3696FD0F /* DisplaySlot.swift */; };
+		EF6D2D38570D34B0A6355B24 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAEEF3BF78AF9FAF1BB4502 /* SettingsView.swift */; };
 		F2139EDC7DB14F32EFFC28FF /* EmulatorKitError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51EC7F726A36760B28CD5675 /* EmulatorKitError.swift */; };
+		F2AC1D63DD397A732D6D1578 /* RunnerSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1DE1B6E9391BD8D85DA17B6 /* RunnerSettings.swift */; };
 		F5531E1CEA4BF9D98614DA52 /* WindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F511954533387288DA803D /* WindowManager.swift */; };
 		F5DA019E52B3A38BA6883E87 /* AVDStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D4EA976A18E4F28FCD41A6 /* AVDStore.swift */; };
 		F7210328D35EE488213C7D6D /* FrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9008F8515F05DA31D91B7D4E /* FrameView.swift */; };
@@ -130,6 +133,7 @@
 		009D1ACF63C4210B90F2FEBC /* aapt2-badging-shadowsocks.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "aapt2-badging-shadowsocks.txt"; sourceTree = "<group>"; };
 		0153680F5AF2A7C37781EC02 /* TaskListParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListParser.swift; sourceTree = "<group>"; };
 		02F0115005DC4168E79C27A4 /* CatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogTests.swift; sourceTree = "<group>"; };
+		03FBBDBE1702D1BA1ACC35F4 /* LauncherStubBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LauncherStubBuilder.swift; sourceTree = "<group>"; };
 		0881A55CC062026A15D2CA32 /* AppCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCatalog.swift; sourceTree = "<group>"; };
 		090CB98708F1393EC5B9734B /* repository2-3.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "repository2-3.xml"; sourceTree = "<group>"; };
 		0E15B909A31FE2A580B727FE /* Frame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Frame.swift; sourceTree = "<group>"; };
@@ -178,8 +182,10 @@
 		9E41CC3DF0666A4660E623D0 /* Subprocess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Subprocess.swift; sourceTree = "<group>"; };
 		A94A28A5F13AB6760301C650 /* EmulatorKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EmulatorKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AEC30370FCECC3FF55457B93 /* SHA1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SHA1.swift; sourceTree = "<group>"; };
+		AFAEEF3BF78AF9FAF1BB4502 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B03E372EFDD2E7209486A297 /* emulator_controller.pb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = emulator_controller.pb.swift; sourceTree = "<group>"; };
 		B1C746339D069D9C75EC0AF0 /* LibraryWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryWindowController.swift; sourceTree = "<group>"; };
+		B1DE1B6E9391BD8D85DA17B6 /* RunnerSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerSettings.swift; sourceTree = "<group>"; };
 		B2399BF0E6D0E828987F66A2 /* RunnerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerState.swift; sourceTree = "<group>"; };
 		B4D446A543E83E025525F79C /* PasteboardClipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardClipboard.swift; sourceTree = "<group>"; };
 		BF6BFED59A3A0E824F57984C /* APKBadging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APKBadging.swift; sourceTree = "<group>"; };
@@ -263,6 +269,7 @@
 				DB77D37C9747EC9CD8577F73 /* Launchers */,
 				A5287D9EBF922524881E8947 /* Library */,
 				8C012697E69B46C8D89504E9 /* Menu */,
+				838262D8A7FB6D4E7D5FC55A /* Settings */,
 				2F79E68DB859BAD92A6463D4 /* Setup */,
 			);
 			path = AndroidAppRunner;
@@ -375,6 +382,14 @@
 			path = Emulator;
 			sourceTree = "<group>";
 		};
+		838262D8A7FB6D4E7D5FC55A /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				AFAEEF3BF78AF9FAF1BB4502 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		8C012697E69B46C8D89504E9 /* Menu */ = {
 			isa = PBXGroup;
 			children = (
@@ -433,6 +448,7 @@
 			children = (
 				2236435C2D65817084826D99 /* EmulatorSession.swift */,
 				9527B63F45D781AEBA9D04D8 /* RunnerCoordinator.swift */,
+				B1DE1B6E9391BD8D85DA17B6 /* RunnerSettings.swift */,
 				B2399BF0E6D0E828987F66A2 /* RunnerState.swift */,
 			);
 			path = Runner;
@@ -473,6 +489,7 @@
 			isa = PBXGroup;
 			children = (
 				CB35C8405EAAE63FA357CAB9 /* DebugHooks.swift */,
+				03FBBDBE1702D1BA1ACC35F4 /* LauncherStubBuilder.swift */,
 				3D406DEAFE24E53816C357B7 /* URLSchemeHandler.swift */,
 			);
 			path = Launchers;
@@ -656,11 +673,13 @@
 				3E01067481E96C2BFAAD0567 /* AppWindowController.swift in Sources */,
 				1F59DE4DEB07109C6C023B9D /* DebugHooks.swift in Sources */,
 				F7210328D35EE488213C7D6D /* FrameView.swift in Sources */,
+				2DE3DA1244FEB429341774D8 /* LauncherStubBuilder.swift in Sources */,
 				D318CB2FFBFF093EA53D21CA /* LibraryView.swift in Sources */,
 				33F3442434F8AEFB661F56F1 /* LibraryWindowController.swift in Sources */,
 				FF7F0EBD274457C85F03BC0D /* MainMenu.swift in Sources */,
 				C80ACA01858586F47CDA12FB /* ParkedOverlayView.swift in Sources */,
 				CBF9B27B1A47FD6C45E718FB /* PasteboardClipboard.swift in Sources */,
+				EF6D2D38570D34B0A6355B24 /* SettingsView.swift in Sources */,
 				85AC3A481F64A86A0114DDD2 /* SetupView.swift in Sources */,
 				4E79C1FCE84DFF8BDEDF8B51 /* SetupWindowController.swift in Sources */,
 				9DF28E83C5BA4015CCEAAE13 /* URLSchemeHandler.swift in Sources */,
@@ -703,6 +722,7 @@
 				3815486752618540E4A64590 /* PortAllocator.swift in Sources */,
 				7ADCE4567CE528FBEF2668A7 /* RepositoryManifest.swift in Sources */,
 				7411697D9DF7527F3A5BF601 /* RunnerCoordinator.swift in Sources */,
+				F2AC1D63DD397A732D6D1578 /* RunnerSettings.swift in Sources */,
 				1250CDB8231B02324036E4D6 /* RunnerState.swift in Sources */,
 				3929B04E05535C6F100AB71B /* SDKBootstrap.swift in Sources */,
 				E03F70E70AB6F71FE619864F /* SDKPaths.swift in Sources */,

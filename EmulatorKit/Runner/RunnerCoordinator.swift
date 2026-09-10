@@ -91,11 +91,11 @@ public final class RunnerCoordinator {
             }
             var config = AVDConfig(systemImagePath: image.packagePath)
             config.name = avdName
-            if !avdStore.exists(avdName) {
-                try avdStore.write(config)
-            } else {
-                try avdStore.stripPersistedDisplays(avdName)
-            }
+            RunnerSettings.load().apply(to: &config)
+            // (Re)write the ini files every boot: picks up RAM/core changes and
+            // drops hw.displayN.* keys the emulator persisted. User data and
+            // snapshots live in other files and are untouched.
+            try avdStore.write(config)
 
             guard let console = PortAllocator.freeConsolePort(),
                   let grpc = PortAllocator.freePort(in: 8554...8654),

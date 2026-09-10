@@ -5,12 +5,29 @@ app gets its own window with a normal title bar, resizes like a Mac window,
 shares the clipboard, answers to Cmd shortcuts, and shows up in the Dock and
 Spotlight — no phone frame, no Android status or navigation bars.
 
-**Status: design stage.** There is no runnable app yet. The design and the
-phased plan live in [`docs/`](docs/):
+**Status: working prototype.** Phases 0–3 of the plan are implemented and
+exercised end to end (first-run download, boot, app windows with touch,
+keyboard, scroll, free resize, clipboard, launcher stubs). Not yet signed or
+notarized for distribution; build it from source. The design and the phased
+plan live in [`docs/`](docs/):
 
 - [docs/DESIGN.md](docs/DESIGN.md) — architecture, verified facts, mechanisms, risks
-- [docs/PLAN.md](docs/PLAN.md) — phases with "done when" criteria
-- [docs/SPIKE-NOTES.md](docs/SPIKE-NOTES.md) — open questions the first spike must answer
+- [docs/PLAN.md](docs/PLAN.md) — phases with "done when" criteria and status
+- [docs/SPIKE-NOTES.md](docs/SPIKE-NOTES.md) — measurements behind the design decisions
+- [docs/compat.md](docs/compat.md) — per-app compatibility notes
+
+## Building
+
+```bash
+brew install xcodegen protobuf   # protobuf only if you regenerate gRPC code
+xcodegen generate
+xcodebuild -scheme AndroidAppRunner -configuration Debug build
+open ~/Library/Developer/Xcode/DerivedData/AndroidAppRunner-*/Build/Products/Debug/AndroidAppRunner.app
+```
+
+On first launch the app lists what it will download (about 2.5 GB from
+`dl.google.com`) and installs everything under
+`~/Library/Application Support/AndroidAppRunner/`.
 
 ## How it works
 
@@ -38,10 +55,9 @@ clipboard are translated back the same way.
 
 ## Roadmap
 
-See [docs/PLAN.md](docs/PLAN.md). Phase 0 is a measurement spike; Phase 1 is
-a single-window MVP; Phase 2 adds multi-window, the app library and clipboard
-sync; Phase 3 adds Retina-crisp rendering, free resizing and per-app Dock
-launchers.
+See [docs/PLAN.md](docs/PLAN.md) for what is done. Next candidates: signed
+and notarized releases, an audio mute switch, an Android-side display
+provider to lift the three-window cap, and a macOS notification bridge.
 
 ## License
 

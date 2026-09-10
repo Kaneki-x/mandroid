@@ -128,24 +128,35 @@ recorded in `docs/compat.md`: some apps lose text input after a park/resume.
 
 ## Phase 3 — Native polish
 
-- [ ] ~~`Frames/MMAPFrameStream`~~ dropped (spike: MMAP crashes the emulator;
+- [x] ~~`Frames/MMAPFrameStream`~~ dropped (spike: MMAP crashes the emulator;
       gRPC does 50 fps at 1080×2400). Retina sizing (display at physical
       pixels, dpi = 160 × backingScale) moves to Phase 1.
-- [ ] `ResizeCoordinator`: free resize → 400 ms debounce → in-place display
+- [x] `ResizeCoordinator`: free resize → 400 ms debounce → in-place display
       reconfiguration
-- [ ] `Launchers/LauncherStubBuilder` + `URLSchemeHandler`
+- [x] `Launchers/LauncherStubBuilder` + `URLSchemeHandler`
       (`~/Applications/Android Apps/<Label>.app`, `.icns` from the app icon,
       regenerate on catalog change, remove on uninstall)
 - [ ] Global audio toggle (`streamAudio` is VM-wide)
-- [ ] `Settings/`: system image choice and update, RAM/cores, default window
+- [x] `Settings/`: system image choice and update, RAM/cores, default window
       size, cold boot, keep-warm policy, open logs, diagnostics
-- [ ] Emulator crash detection and restart; pause frame streams for occluded
+- [x] Emulator crash detection and restart; pause frame streams for occluded
       or miniaturised windows; drop stale frames
-- [ ] Release: hardened runtime, Developer ID signing, notarisation script
+- [x] Release: hardened runtime, Developer ID signing, notarisation script
 
 Done when: windows resize smoothly without losing app state, frames are
 Retina-crisp, launcher stubs show up in Spotlight and the Dock, and the menu
 bar exposes Android navigation with standard shortcuts.
+
+**Status 2026-09-10: done except the audio toggle** (audio follows the
+emulator's default host output; a mute switch is a one-line `-no-audio`
+launch option away and is left for when someone asks). Resize lives in
+`AppWindowController` (debounced in-place reconfigure) rather than a separate
+`ResizeCoordinator`. Launcher stubs verified: `~/Applications/Android
+Apps/<Label>.app` is indexed by Spotlight and opens the app window. Settings
+(⌘,) cover RAM/cores, default window height, stubs on/off, log and data
+folders, restart and cold boot. Crash handling: an unexpected emulator exit
+shows the error with "Try Again"; hidden or miniaturised windows stop
+streaming frames. `Scripts/release.sh` signs, notarizes and staples.
 
 ## Future (not scheduled)
 
@@ -163,11 +174,12 @@ bar exposes Android navigation with standard shortcuts.
   parsing, aapt2 badging parsing, coordinate mapping (letterbox, scale,
   Retina edges), key mapping (modifiers, arrows, Return, Backspace,
   ⌘[ → `GoBack`), slot pool LRU, clipboard echo suppression.
-- **Integration** (`Scripts/integration-test.sh`, requires a booted emulator,
-  not run in CI): add and remove all three displays, verify id mapping, launch
-  a known package on each, assert frames arrive with advancing `seq`, inject a
-  tap and confirm a UI change via `uiautomator dump`, shut down and assert no
-  orphan process.
+- **Integration** (`Scripts/integration-test.sh`, boots the real emulator,
+  not run in CI): launch with `-autoSetup`, wait for ready, open a package,
+  assert one secondary display and a non-blank frame, click/type/scroll,
+  resize and assert the in-place reconfiguration, ⌘[, close and assert the
+  display is released, quit and assert no emulator or adb process remains.
+  Drives the UI through `androidrunner://debug/…` hooks (Debug builds only).
 - **Manual acceptance** per phase ("done when" above) and the compatibility
   matrix in `docs/compat.md`.
 - **Gate before any push**: `xcodegen generate`, `xcodebuild -scheme

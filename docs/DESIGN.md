@@ -423,6 +423,22 @@ registers `androidrunner`; not `LSUIElement` (we own real windows).
 
 ## 5. Key mechanisms
 
+### 5.0 Field notes from the first end-to-end run
+
+- Start the adb server (`adb start-server` on our port) **before** launching
+  the emulator. The emulator's own adb helper calls time out while a fresh
+  server enumerates USB (~10 s on the test Mac) and each timed-out call forks
+  another server, which then fight for the port.
+- Gboard shows a "Try out your stylus" sheet on display 0 the first time a
+  field gets focus and swallows every key; `stylus_handwriting_enabled 0` in
+  `GuestSetup` prevents it. Anything the system puts on display 0 is one click
+  away in the Device Screen window.
+- Never hand the app a path under `/Volumes/…`: reading it blocks on macOS's
+  removable-volume permission dialog, and LaunchServices then also stalls
+  registering bundles from that volume.
+- After a park/resume cycle (task moved to display 0 and back) some apps stop
+  accepting text input until reopened (`docs/compat.md`).
+
 ### 5.1 Lifecycle
 
 1. **Setup** (`needsSetup`): show what will be downloaded and how big it is

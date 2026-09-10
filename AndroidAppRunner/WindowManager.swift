@@ -14,7 +14,8 @@ final class WindowManager {
     /// rectangle that fits the main screen.
     func defaultAppSize() -> NSSize {
         let visible = NSScreen.main?.visibleFrame.size ?? NSSize(width: 1440, height: 900)
-        let height = min(900, visible.height - 40)
+        let preferred = CGFloat(RunnerSettings.load().defaultWindowHeight)
+        let height = min(preferred, visible.height - 40)
         return NSSize(width: (height * 420 / 900).rounded(), height: height)
     }
 

@@ -254,6 +254,25 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
         }
     }
 
+    func windowDidMiniaturize(_ notification: Notification) { pauseFrames() }
+    func windowDidDeminiaturize(_ notification: Notification) { resumeFrames() }
+    func windowDidChangeOcclusionState(_ notification: Notification) {
+        guard let window else { return }
+        if window.occlusionState.contains(.visible) { resumeFrames() } else { pauseFrames() }
+    }
+
+    private var framesPaused = false
+    private func pauseFrames() {
+        guard !framesPaused, !isParked else { return }
+        framesPaused = true
+        frameTask?.cancel(); frameTask = nil
+    }
+    private func resumeFrames() {
+        guard framesPaused, !isParked else { return }
+        framesPaused = false
+        startFrames()
+    }
+
     func windowWillClose(_ notification: Notification) {
         frameTask?.cancel()
         resizeDebounce?.cancel()

@@ -17,6 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private(set) lazy var windows = WindowManager(coordinator: coordinator)
     private var setupWindow: SetupWindowController?
     private var libraryWindow: LibraryWindowController?
+    private var settingsWindow: SettingsWindowController?
     private var stateObservation: Task<Void, Never>?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -24,11 +25,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.mainMenu = MainMenu.build(delegate: self)
         NSApp.activate(ignoringOtherApps: true)
         observeState()
+        observeApps()
         coordinator.start()
     }
 
     /// Re-evaluates which top-level window should be visible whenever the
     /// coordinator state changes.
+    private var appsObservation: Task<Void, Never>?
+
+    private func observeApps() {
+        appsObservation = Task { @MainActor [weak self] in
+            while let self, !Task.isCancelled {
+                let apps = withObservationTracking { self.coordinator.apps } onChange: {}
+                if !apps.isEmpty, UserDefaults.standard.object(forKey: "launcherStubs") as? Bool ?? true {
+                    LauncherStubBuilder.sync(apps)
+                }
+                await withCheckedContinuation { cont in
+                    withObservationTracking { _ = self.coordinator.apps } onChange: { cont.resume() }
+                }
+            }
+        }
+    }
+
     private func observeState() {
         stateObservation = Task { @MainActor [weak self] in
             while let self, !Task.isCancelled {
@@ -67,6 +85,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func showDeviceScreen(_ sender: Any?) { windows.showDeviceScreen() }
+    @objc func showSettings(_ sender: Any?) {
+        if settingsWindow == nil { settingsWindow = SettingsWindowController(coordinator: coordinator, windows: windows) }
+        settingsWindow?.showWindow(nil)
+        settingsWindow?.window?.makeKeyAndOrderFront(nil)
+    }
     @objc func restartEmulator(_ sender: Any?) {
         windows.closeAll()
         Task { await coordinator.restart() }
