@@ -112,7 +112,7 @@ public final class RunnerCoordinator {
             // (Re)write the ini files every boot: picks up RAM/core changes and
             // drops hw.displayN.* keys the emulator persisted. User data and
             // snapshots live in other files and are untouched.
-            try avdStore.write(config)
+            let displayChanged = try avdStore.write(config)
 
             guard let console = PortAllocator.freeConsolePort(),
                   let grpc = PortAllocator.freePort(in: 8554...8654),
@@ -120,7 +120,7 @@ public final class RunnerCoordinator {
                 throw MadroidKitError.emulator("no free ports")
             }
             var options = EmulatorLaunchOptions(avdName: avdName, consolePort: console, grpcPort: grpc, adbServerPort: adbPort)
-            options.coldBoot = coldBoot
+            options.coldBoot = coldBoot || displayChanged
 
             setStage("Starting adb")
             let adb = ADBClient(paths: paths, serverPort: adbPort, serial: options.serial)
@@ -280,6 +280,13 @@ public final class RunnerCoordinator {
         guard let session else { throw MadroidKitError.emulator("not running") }
         if let existing = sessions[package] { return existing }
         let component = try await launcherComponent(for: package)
+        do {
+            try await session.adb.useWindowOrientation(for: package)
+        } catch {
+            // Older images or apps that reject overrides can still launch
+            // with Android's original compatibility layout.
+            Log.runner.warning("window orientation override for \(package) failed: \(error.localizedDescription)")
+        }
         let slot: DisplaySlot
         do {
             slot = try await session.displays.acquire(width: width, height: height, dpi: dpi)

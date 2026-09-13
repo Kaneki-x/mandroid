@@ -15,7 +15,7 @@ final class LibraryWindowController: NSWindowController {
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
         window.setContentSize(NSSize(width: 520, height: 420))
         window.isReleasedWhenClosed = false
-        window.setFrameAutosaveName("Library")
+        if !UITestMode.enabled { window.setFrameAutosaveName("Library") }
         window.center()
         super.init(window: window)
     }

@@ -5,8 +5,10 @@ holds the phase checklist and `docs/SPIKE-NOTES.md` the open measurements.
 
 ## Stack (fixed decisions)
 
-- **Pure Swift**: AppKit for windows/input/menus, SwiftUI for setup, library
+- **Swift host**: AppKit for windows/input/menus, SwiftUI for setup, library
   and settings views. No Rust, no Electron, no third-party UI frameworks.
+  A tiny dependency-free Java app_process helper configures secondary-display
+  IME policy through the guest framework; see DESIGN and Tools/guest-display.
 - **xcodegen** `project.yml` → `Madroid.xcodeproj` (never edit the
   xcodeproj by hand; regenerate). Targets: `MadroidKit` (framework, no
   AppKit UI), `Madroid` (app), `MadroidKitTests`.
@@ -29,7 +31,7 @@ xcodegen generate
 xcodebuild -scheme Madroid -configuration Debug build
 xcodebuild -scheme Madroid test          # unit tests (no emulator needed)
 Scripts/gen-proto.sh                              # regenerate MadroidKit/Generated
-Scripts/integration-test.sh                       # boots the real emulator; not CI
+python3 Scripts/run-ui-tests.py --app <Debug.app> --apk <app.apk> --package <package> # offscreen emulator
 ```
 
 Use the default DerivedData location. A `-derivedDataPath` under `/Volumes/…`

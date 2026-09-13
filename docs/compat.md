@@ -11,6 +11,7 @@ tried; keep one line per app.
 | ProxyDroid 3.4.0 | `org.proxydroid` | yes | — | — | Icon comes from an obfuscated resource name (`res/M2.png`); label/icon extraction works. |
 | Meow (Go) 0.3.4 | `io.github.madeye.meow.go` | yes | — | — | Adaptive icon resolved from the xxxhdpi raster. |
 | BaoLianDeng 1.6.0 | `io.github.baoliandeng` | yes | — | — | `aapt2` lists a pseudo density 65534 pointing at mdpi; the catalog ignores it. |
+| Bilibili | `tv.danmaku.bili` | yes | yes (age-selection screen) | yes (phone-number field with local IME routing) | Portrait-only age-selection activity fills the landscape display with the window-orientation overrides; verified full activity bounds and rendered frame. |
 | Settings (system) | `com.android.settings` | yes | yes | yes | Used for the spike; search typing verified. |
 | Camera (AOSP) | `com.android.camera2` | yes | — | — | Runtime permission dialog appears on the app's own display. |
 
@@ -18,8 +19,13 @@ tried; keep one line per app.
 
 New windows open in landscape by default (Settings ▸ Windows switches to
 portrait). Android ▸ Rotate Window (⌘R) swaps a window's width and height;
-the virtual display is reconfigured in place, so the app relays out without
-restarting. Android itself never reports a device rotation (the emulator
+the virtual display is reconfigured in place. Before launching an app, Madroid
+applies Android's `OVERRIDE_ANY_ORIENTATION` and
+`OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR` compatibility overrides so
+fixed-orientation activities follow the window's natural orientation instead
+of occupying a portrait letterbox. Android may recreate an activity to apply
+its new configuration. The overrides are per package in Madroid's isolated
+emulator; if unavailable, the app launches with Android's original behavior. Android itself never reports a device rotation (the emulator
 keeps rotation 0); apps see a configuration change, exactly as on a tablet
 whose window was resized.
 

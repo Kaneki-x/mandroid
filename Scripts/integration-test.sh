@@ -1,36 +1,33 @@
 #!/bin/zsh
 # End-to-end smoke test against the real emulator. Not run in CI.
 #
-# Prerequisites: a Debug build of the app (xcodebuild -scheme Madroid
-# -configuration Debug build), an SDK already installed under
-# ~/Library/Application Support/Madroid (or network + ~2.5 GB for the
-# first run), and an APK to install (APK=path, defaults to none).
-#
-# Drives the UI through the debug URL hooks (see Madroid/Launchers/
-# DebugHooks.swift) so no Screen Recording / Accessibility permission is needed.
+# Invoke through run-ui-tests.py, which creates an isolated hidden Debug app
+# and fresh guest data. No Accessibility or Screen Recording permissions needed.
 set -euo pipefail
 
 APP="${APP:-$(ls -d ~/Library/Developer/Xcode/DerivedData/Madroid-*/Build/Products/Debug/Madroid.app 2>/dev/null | head -1)}"
 APK="${APK:-}"
 PKG="${PKG:-com.github.shadowsocks}"
 OUT="${OUT:-$(mktemp -d /tmp/aar-it.XXXXXX)}"
-AS="$HOME/Library/Application Support/Madroid"
+SCRIPT_DIR="${0:A:h}"
+: "${UI_TEST_CONTROL:?Run through Scripts/run-ui-tests.py}"
+: "${UI_TEST_DATA_ROOT:?Run through Scripts/run-ui-tests.py}"
+AS="$UI_TEST_DATA_ROOT"
+url() { python3 "$SCRIPT_DIR/ui-test-command.py" "$1"; }
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 snap() {
-  rm -rf "$OUT/$1"; open "madroid://debug/snapshot?dir=$OUT/$1"
+  rm -rf "$OUT/$1"; url "madroid://debug/snapshot?dir=$OUT/$1"
   for i in $(seq 1 20); do sleep 0.5; [[ -f "$OUT/$1/state.txt" ]] && break; done
+  grep -q '^offscreen=true' "$OUT/$1/state.txt" || fail "not offscreen"
+  grep -q '^visibleWindows=0' "$OUT/$1/state.txt" || fail "test showed a window"
   cat "$OUT/$1/state.txt" 2>/dev/null; echo
 }
-hook() { open "madroid://debug/$1"; }
+hook() { url "madroid://debug/$1"; }
 
 [[ -d "$APP" ]] || fail "app not built: $APP"
-pkill -x Madroid 2>/dev/null || true
-sleep 1
-
-echo "==> launching $APP"
+echo "==> waiting for offscreen Madroid"
 T0=$(date +%s)
-open "$APP" --args -autoSetup YES
 for i in $(seq 1 120); do
   sleep 5
   snap boot >/dev/null 2>&1 || true
@@ -42,17 +39,23 @@ echo "==> ready after $(( $(date +%s) - T0 )) s"
 
 ADB="$AS/sdk/platform-tools/adb"
 PORT=$(grep -oE '^adbPort=[0-9]+' "$OUT/boot/state.txt" | cut -d= -f2)
+export ANDROID_SERIAL=$(sed -n 's/^serial=//p' "$OUT/boot/state.txt")
+[[ -n "$ANDROID_SERIAL" ]] || fail "missing test emulator serial"
 export ANDROID_ADB_SERVER_PORT="$PORT"
+export ANDROID_HOME="$AS/sdk" ANDROID_SDK_ROOT="$AS/sdk"
+export ANDROID_AVD_HOME="$AS/avd" ANDROID_EMULATOR_HOME="$AS/emulator-home"
 echo "==> adb server port $PORT"
+"$ADB" shell wm size | grep -F 'Physical size: 2560x1600' >/dev/null || fail "tablet resolution not active"
+"$ADB" shell wm density | grep -F 'Physical density: 320' >/dev/null || fail "tablet density not active"
 
 if [[ -n "$APK" ]]; then
   echo "==> installing $APK"
-  open -a "$APP" "$APK"; sleep 20
+  url "$(python3 -c 'import pathlib,sys; print(pathlib.Path(sys.argv[1]).resolve().as_uri())' "$APK")"; sleep 20
 fi
 snap installed; grep -q "$PKG" "$OUT/installed/state.txt" || fail "$PKG not installed"
 
 echo "==> opening $PKG"
-open "madroid://launch/$PKG"; sleep 8
+url "madroid://launch/$PKG"; sleep 8
 snap opened; grep -qF "sessions=[\"$PKG\"]" "$OUT/opened/state.txt" || fail "no session for $PKG"
 secondaries() { "$ADB" shell dumpsys display | grep -oE 'uniqueId="virtual:com.android.emulator.multidisplay:[0-9]+"' | sort -u | wc -l | tr -d ' '; }
 [[ $(secondaries) == 1 ]] || fail "expected one secondary display, got $(secondaries)"
@@ -69,8 +72,28 @@ echo "==> input: click, type, scroll, resize, back"
 hook "click?pkg=$PKG&x=210&y=450"; sleep 1
 hook "type?pkg=$PKG&text=abc"; sleep 1
 hook "scroll?pkg=$PKG&x=210&y=600&dy=-300"; sleep 1
-hook "resize?pkg=$PKG&w=700&h=480"; sleep 3
-"$ADB" shell dumpsys display | grep -qE 'multidisplay:1234562", 1400 x 960' || fail "display was not resized in place"
+# Send several sizes without waiting for Android to finish each update.
+# Verify the final guest resolution AND the actual streamed frame/input size.
+for size in '480&h=700' '800&h=420' '420&h=800' '1280&h=800'; do
+  hook "resize?pkg=$PKG&w=$size"
+  sleep 0.2
+done
+W=0 H=0
+for i in $(seq 1 20); do
+  snap resized >/dev/null
+  SCALE=$(sed -n "s/^rendered=$PKG .* scale=//p" "$OUT/resized/state.txt")
+  if [[ -n "$SCALE" ]]; then
+    W=$(awk "BEGIN {print int(1280 * $SCALE)}")
+    H=$(awk "BEGIN {print int(800 * $SCALE)}")
+    if grep -qF "rendered=$PKG pixels=${W}x${H} input=${W}x${H}" "$OUT/resized/state.txt" &&
+       "$ADB" shell dumpsys display | grep -E "multidisplay:1234562\", $W x $H" >/dev/null; then
+      break
+    fi
+  fi
+  sleep 0.5
+done
+grep -qF "rendered=$PKG pixels=${W}x${H} input=${W}x${H}" "$OUT/resized/state.txt" || fail "frame/input did not adopt final resolution"
+"$ADB" shell dumpsys display | grep -E "multidisplay:1234562\", $W x $H" >/dev/null || fail "display was not resized in place"
 hook "key?pkg=$PKG&code=33&chars=%5B&cmd=1"; sleep 1
 snap after_input >/dev/null
 
@@ -79,11 +102,7 @@ hook "close?pkg=$PKG"; sleep 3
 [[ $(secondaries) == 0 ]] || fail "secondary display not released"
 "$ADB" shell pidof "$PKG" >/dev/null && fail "$PKG still running after close" || true
 
-echo "==> quitting"
-hook quit
-for i in $(seq 1 40); do sleep 1; pgrep -x Madroid >/dev/null || break; done
-pgrep -x Madroid >/dev/null && fail "app did not quit"
-sleep 2
-pgrep -f 'qemu-system-aarch64 -avd runner' >/dev/null && fail "orphaned emulator"
-pgrep -f "adb -L tcp:$PORT" >/dev/null && fail "orphaned adb server"
+snap final >/dev/null
+grep -q '^offscreen=true' "$OUT/final/state.txt" || fail "not an offscreen test instance"
+grep -q '^visibleWindows=0' "$OUT/final/state.txt" || fail "test showed a window"
 echo "PASS (artifacts in $OUT)"

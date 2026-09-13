@@ -15,7 +15,9 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
 
     private let frameView = FrameView(frame: .zero)
     private var frameTask: Task<Void, Never>?
-    private var resizeDebounce: Task<Void, Never>?
+    private var resizeTask: Task<Void, Never>?
+    private var resizePending = false
+    private var isClosing = false
     private var watchdog: Task<Void, Never>?
     private var overlay: ParkedOverlayView?
     private(set) var isParked = false
@@ -35,7 +37,7 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
     private var pixelSize: (Int, Int) {
         switch target {
         case .app(let s): return (s.slot.width, s.slot.height)
-        case .device: return (coordinator.session?.deviceWidth ?? 1080, coordinator.session?.deviceHeight ?? 2400)
+        case .device: return (coordinator.session?.deviceWidth ?? 2560, coordinator.session?.deviceHeight ?? 1600)
         }
     }
 
@@ -47,7 +49,7 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
                               backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         window.tabbingMode = .disallowed
-        window.contentMinSize = NSSize(width: 240, height: 240)
+        window.contentMinSize = NSSize(width: 320, height: 320)
         window.backgroundColor = .black
         window.contentView = frameView
         super.init(window: window)
@@ -55,10 +57,10 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
         switch target {
         case .app(let s):
             window.title = coordinator.app(for: s.package)?.label ?? Self.displayName(for: s.package)
-            window.setFrameAutosaveName("app:\(s.package)")
+            if !UITestMode.enabled { window.setFrameAutosaveName("app:\(s.package)") }
         case .device:
             window.title = "Device Screen"
-            window.setFrameAutosaveName("device")
+            if !UITestMode.enabled { window.setFrameAutosaveName("device") }
             window.contentAspectRatio = logicalSize
         }
         if window.frame.origin == .zero { window.center() }
@@ -66,6 +68,7 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
         configureInput()
         startFrames()
         startWatchdog()
+        scheduleReconfigure() // Apply a restored window size to the guest too.
     }
 
     var package: String? { if case .app(let s) = target { return s.package } else { return nil } }
@@ -115,7 +118,7 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
 
     private func startFrames() {
         frameTask?.cancel()
-        guard let session = coordinator.session else { return }
+        guard !framesPaused, !isParked, !isClosing, let session = coordinator.session else { return }
         let display = emulatorDisplay
         let (w, h) = pixelSize
         let stream = session.frames
@@ -169,6 +172,8 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
     func park() async {
         guard case .app(let app) = target, !isParked else { return }
         isParked = true
+        resizePending = false
+        await resizeTask?.value
         frameTask?.cancel(); frameTask = nil
         watchdog?.cancel(); watchdog = nil
         await coordinator.parkApp(app)
@@ -223,7 +228,7 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
     }
 
     func windowDidResize(_ notification: Notification) {
-        guard case .app = target, !isParked, window?.inLiveResize == false else { return }
+        guard case .app = target, !isParked else { return }
         scheduleReconfigure()
     }
 
@@ -232,24 +237,35 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
         scheduleReconfigure()
     }
 
-    /// Resizes the virtual display in place to the window's physical pixels
-    /// (1 dp = 1 pt). Debounced so a drag produces a single reconfiguration.
+    /// Coalesce drag events while allowing only one guest reconfiguration at
+    /// a time. Cancelling a request after it reaches the emulator can leave
+    /// our slot and screenshot stream at the previous resolution.
     private func scheduleReconfigure() {
-        resizeDebounce?.cancel()
-        resizeDebounce = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(350))
-            guard !Task.isCancelled, let self, let window, case .app(let app) = target else { return }
-            let scale = window.backingScaleFactor
-            let size = frameView.bounds.size
-            let w = Int((size.width * scale).rounded()), h = Int((size.height * scale).rounded())
-            guard w != app.slot.width || h != app.slot.height else { return }
-            do {
-                let updated = try await coordinator.resizeApp(app, width: w, height: h, dpi: Int(160 * scale))
-                target = .app(updated)
-                configureInput()
-                startFrames()
-            } catch {
-                Log.ui.error("resize failed: \(error.localizedDescription)")
+        guard case .app = target, !isParked, !isClosing else { return }
+        resizePending = true
+        guard resizeTask == nil else { return }
+        resizeTask = Task { [weak self] in
+            guard let self else { return }
+            defer { resizeTask = nil }
+            while resizePending, !isParked, !isClosing {
+                try? await Task.sleep(for: .milliseconds(150))
+                guard !isParked, !isClosing, let window, case .app(let app) = target else { return }
+                resizePending = false
+                let scale = window.backingScaleFactor
+                let size = frameView.bounds.size
+                let (w, h, dpi) = DisplaySlotPool.sanitize(
+                    width: Int((size.width * scale).rounded()),
+                    height: Int((size.height * scale).rounded()), dpi: Int(160 * scale))
+                guard w != app.slot.width || h != app.slot.height || dpi != app.slot.dpi else { continue }
+                do {
+                    let updated = try await coordinator.resizeApp(app, width: w, height: h, dpi: dpi)
+                    guard !isParked, !isClosing else { return }
+                    target = .app(updated)
+                    configureInput()
+                    startFrames()
+                } catch {
+                    Log.ui.error("resize failed: \(error.localizedDescription)")
+                }
             }
         }
     }
@@ -263,7 +279,7 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
 
     private var framesPaused = false
     private func pauseFrames() {
-        guard !framesPaused, !isParked else { return }
+        guard !UITestMode.enabled, !framesPaused, !isParked else { return }
         framesPaused = true
         frameTask?.cancel(); frameTask = nil
     }
@@ -275,10 +291,14 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
 
     func windowWillClose(_ notification: Notification) {
         frameTask?.cancel()
-        resizeDebounce?.cancel()
+        isClosing = true
+        resizePending = false
         watchdog?.cancel()
         if case .app(let app) = target {
-            Task { await coordinator.closeApp(app) }
+            Task {
+                await resizeTask?.value
+                await coordinator.closeApp(app)
+            }
         }
         onClose?()
     }
