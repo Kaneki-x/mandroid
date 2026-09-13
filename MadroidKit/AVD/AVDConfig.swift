@@ -4,15 +4,17 @@ import Foundation
 /// template in DESIGN §3.4; everything is explicit so no device XML is needed.
 public struct AVDConfig: Sendable, Hashable {
     public var name: String = "runner"
-    public var displayName: String = "Madroid"
+    public var displayName: String = "Madroid (Pixel Tablet)"
     public var systemImagePath: String            // "system-images;android-36.1;google_apis_playstore;arm64-v8a"
     public var ramMB: Int = 4096
     public var cores: Int = 4
-    public var heapMB: Int = 336
+    public var heapMB: Int = 512
     public var dataPartitionMB: Int = 16384
-    public var lcdWidth: Int = 1080
-    public var lcdHeight: Int = 2400
-    public var lcdDensity: Int = 420
+    // Pixel Tablet resolution, with xhdpi logical density (1280×800 dp).
+    // Natural orientation is landscape because width exceeds height.
+    public var lcdWidth: Int = 2560
+    public var lcdHeight: Int = 1600
+    public var lcdDensity: Int = 320
     public var sdcardSizeMB: Int = 512
     public var gpuMode: String = "host"
 
@@ -50,7 +52,7 @@ public struct AVDConfig: Sendable, Hashable {
             ("hw.cpu.arch", cpuArch),
             ("hw.cpu.ncore", "\(cores)"),
             ("hw.dPad", "no"),
-            ("hw.device.manufacturer", "Generic"),
+            ("hw.device.manufacturer", "Google"),
             ("hw.gps", "yes"),
             ("hw.gpu.enabled", "yes"),
             ("hw.gpu.mode", gpuMode),

@@ -4,7 +4,7 @@ import Foundation
 public struct RunnerSettings: Sendable, Equatable {
     public var ramMB: Int = 4096
     public var cores: Int = 4
-    public var defaultWindowHeight: Int = 900
+    public var defaultWindowHeight: Int = 800
     public var launcherStubs: Bool = true
     /// New app windows open in landscape ("horizontal") unless changed.
     public var landscapeByDefault: Bool = true
@@ -42,7 +42,7 @@ public struct RunnerSettings: Sendable, Equatable {
     public func defaultWindowSize(screenWidth: Double, screenHeight: Double) -> (width: Double, height: Double) {
         let maxH = max(400, screenHeight - 40), maxW = max(400, screenWidth - 40)
         if landscapeByDefault {
-            var h = min(Double(defaultWindowHeight) * 0.72, maxH)
+            var h = min(Double(defaultWindowHeight), maxH)
             var w = (h * 1.6).rounded()
             if w > maxW { w = maxW; h = (w / 1.6).rounded() }
             return (w, h)

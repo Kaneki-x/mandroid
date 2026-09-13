@@ -7,10 +7,13 @@ import Observation
 final class AppDelegate: NSObject, NSApplicationDelegate {
     static func main() {
         let app = NSApplication.shared
+        if UserDefaults.standard.string(forKey: "uiTestControlDirectory") != nil, !UITestMode.enabled {
+            fatalError("Offscreen UI tests require a Debug build")
+        }
         migrateFromAndroidAppRunner()
         let delegate = AppDelegate()
         app.delegate = delegate
-        app.setActivationPolicy(.regular)
+        app.setActivationPolicy(UITestMode.enabled ? .prohibited : .regular)
         app.run()
     }
 
@@ -50,9 +53,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var stateObservation: Task<Void, Never>?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        coordinator.hostClipboard = PasteboardClipboard()
+        if !UITestMode.enabled { coordinator.hostClipboard = PasteboardClipboard() }
         NSApp.mainMenu = MainMenu.build(delegate: self)
-        NSApp.activate(ignoringOtherApps: true)
+        if !UITestMode.enabled { NSApp.activate(ignoringOtherApps: true) }
+        if UITestMode.enabled { Task { await UITestMode.receiveCommands(delegate: self) } }
         observeState()
         observeApps()
         coordinator.start()
@@ -66,7 +70,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appsObservation = Task { @MainActor [weak self] in
             while let self, !Task.isCancelled {
                 let apps = withObservationTracking { self.coordinator.apps } onChange: {}
-                if !apps.isEmpty, UserDefaults.standard.object(forKey: "launcherStubs") as? Bool ?? true {
+                if !UITestMode.enabled, !apps.isEmpty, UserDefaults.standard.object(forKey: "launcherStubs") as? Bool ?? true {
                     LauncherStubBuilder.sync(apps)
                 }
                 await withCheckedContinuation { cont in
@@ -104,20 +108,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func showSetup() {
         if setupWindow == nil { setupWindow = SetupWindowController(coordinator: coordinator) }
-        setupWindow?.showWindow(nil)
+        if !UITestMode.enabled { setupWindow?.showWindow(nil) }
     }
 
     @objc func showLibrary() {
         if libraryWindow == nil { libraryWindow = LibraryWindowController(coordinator: coordinator, windows: windows) }
-        libraryWindow?.showWindow(nil)
-        libraryWindow?.window?.makeKeyAndOrderFront(nil)
+        if !UITestMode.enabled {
+            libraryWindow?.showWindow(nil)
+            libraryWindow?.window?.makeKeyAndOrderFront(nil)
+        }
     }
 
     @objc func showDeviceScreen(_ sender: Any?) { windows.showDeviceScreen() }
     @objc func showSettings(_ sender: Any?) {
         if settingsWindow == nil { settingsWindow = SettingsWindowController(coordinator: coordinator, windows: windows) }
-        settingsWindow?.showWindow(nil)
-        settingsWindow?.window?.makeKeyAndOrderFront(nil)
+        if !UITestMode.enabled {
+            settingsWindow?.showWindow(nil)
+            settingsWindow?.window?.makeKeyAndOrderFront(nil)
+        }
     }
     @objc func restartEmulator(_ sender: Any?) {
         windows.closeAll()

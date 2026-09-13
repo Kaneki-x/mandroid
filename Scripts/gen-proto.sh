@@ -17,9 +17,8 @@ if [[ -z "$PROTOC" ]]; then
 fi
 
 echo "==> building protoc plugins (release)"
-( cd "$PLUGINS" && swift build -c release \
-    --product protoc-gen-swift \
-    --product protoc-gen-grpc-swift-2 >/dev/null )
+( cd "$PLUGINS" && swift build -c release --product protoc-gen-swift >/dev/null && \
+    swift build -c release --product protoc-gen-grpc-swift-2 >/dev/null )
 BIN="$(cd "$PLUGINS" && swift build -c release --show-bin-path)"
 
 mkdir -p "$OUT"

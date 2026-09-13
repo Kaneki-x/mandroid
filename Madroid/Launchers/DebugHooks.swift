@@ -57,7 +57,15 @@ struct DebugHooks {
         case "close":
             controller(q["pkg"])?.window?.performClose(nil)
         case "quit":
-            NSApp.terminate(nil)
+            if UITestMode.enabled {
+                Task {
+                    delegate.windows.closeAll()
+                    await delegate.coordinator.shutdown()
+                    exit(0)
+                }
+            } else {
+                NSApp.terminate(nil)
+            }
         default:
             break
         }
@@ -74,13 +82,16 @@ struct DebugHooks {
     private func snapshot(dir: String) {
         let base = URL(fileURLWithPath: dir)
         try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
-        var lines: [String] = ["state=\(delegate.coordinator.state)"]
-        for window in NSApp.windows where window.isVisible {
+        var lines: [String] = ["state=\(delegate.coordinator.state)", "offscreen=\(UITestMode.enabled)", "visibleWindows=\(NSApp.windows.filter(\.isVisible).count)"]
+        for window in NSApp.windows where window.isVisible || UITestMode.enabled {
             guard let view = window.contentView else { continue }
             let title = window.title.isEmpty ? "untitled-\(window.windowNumber)" : window.title
             let safe = title.replacingOccurrences(of: "/", with: "_")
             let scale = window.backingScaleFactor
             let size = view.bounds.size
+            if let frameView = view as? FrameView, let wc = window.windowController as? AppWindowController {
+                lines.append("rendered=\(wc.package ?? "device") pixels=\(Int(frameView.renderedPixelSize.width))x\(Int(frameView.renderedPixelSize.height)) input=\(frameView.displayWidth)x\(frameView.displayHeight) scale=\(scale)")
+            }
             let px = (Int(size.width * scale), Int(size.height * scale))
             guard px.0 > 0, px.1 > 0,
                   let ctx = CGContext(data: nil, width: px.0, height: px.1, bitsPerComponent: 8, bytesPerRow: 0,
@@ -125,7 +136,7 @@ struct DebugHooks {
 
     private func synthesizeDrag(in wc: AppWindowController, from a: CGPoint, to b: CGPoint, steps: Int) {
         guard let (window, start) = windowPoint(wc, a), let view = window.contentView as? FrameView else { return }
-        window.makeKeyAndOrderFront(nil)
+        if !UITestMode.enabled { window.makeKeyAndOrderFront(nil) }
         func ev(_ type: NSEvent.EventType, _ p: NSPoint) -> NSEvent? {
             NSEvent.mouseEvent(with: type, location: p, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
                                windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)
@@ -166,7 +177,7 @@ struct DebugHooks {
 
     private func synthesizeKey(in wc: AppWindowController, characters: String, keyCode: UInt16, flags: NSEvent.ModifierFlags) {
         guard let window = wc.window, let view = window.contentView as? FrameView else { return }
-        window.makeKeyAndOrderFront(nil)
+        if !UITestMode.enabled { window.makeKeyAndOrderFront(nil) }
         guard let e = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: flags,
                                        timestamp: ProcessInfo.processInfo.systemUptime, windowNumber: window.windowNumber,
                                        context: nil, characters: characters,

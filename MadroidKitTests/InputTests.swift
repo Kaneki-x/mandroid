@@ -87,6 +87,7 @@ import Testing
         var s = RunnerSettings()
         #expect(s.landscapeByDefault)
         let l = s.defaultWindowSize(screenWidth: 1440, screenHeight: 900)
+        #expect(l.width == 1280 && l.height == 800)
         #expect(l.width > l.height)
         #expect(abs(l.width / l.height - 1.6) < 0.01)
         s.landscapeByDefault = false

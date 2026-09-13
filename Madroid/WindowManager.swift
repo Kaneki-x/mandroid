@@ -10,8 +10,8 @@ final class WindowManager {
 
     init(coordinator: RunnerCoordinator) { self.coordinator = coordinator }
 
-    /// Default logical size for a new app window: a phone-like portrait
-    /// rectangle that fits the main screen.
+    /// Default logical size for a new app window: a tablet-sized landscape
+    /// rectangle that fits the main screen, unless portrait is selected.
     func defaultAppSize() -> NSSize {
         let visible = NSScreen.main?.visibleFrame.size ?? NSSize(width: 1440, height: 900)
         let s = RunnerSettings.load().defaultWindowSize(screenWidth: visible.width, screenHeight: visible.height)
@@ -21,8 +21,10 @@ final class WindowManager {
     func open(package: String) {
         Log.file("open \(package)")
         if let existing = appWindows[package] {
-            existing.showWindow(nil)
-            existing.window?.makeKeyAndOrderFront(nil)
+            if !UITestMode.enabled {
+                existing.showWindow(nil)
+                existing.window?.makeKeyAndOrderFront(nil)
+            }
             if existing.isParked { existing.resume() }
             return
         }
@@ -39,8 +41,10 @@ final class WindowManager {
                 wc.onClose = { [weak self] in self?.appWindows[package] = nil }
                 wc.makeRoom = { [weak self] in try await self?.makeRoomForNewWindow() }
                 appWindows[package] = wc
-                wc.showWindow(nil)
-                wc.window?.makeKeyAndOrderFront(nil)
+                if !UITestMode.enabled {
+                    wc.showWindow(nil)
+                    wc.window?.makeKeyAndOrderFront(nil)
+                }
             } catch {
                 presentError(error, title: "Could not open \(package)")
             }
@@ -60,23 +64,25 @@ final class WindowManager {
 
     func showDeviceScreen() {
         if let deviceWindow {
-            deviceWindow.showWindow(nil)
-            deviceWindow.window?.makeKeyAndOrderFront(nil)
+            if !UITestMode.enabled {
+                deviceWindow.showWindow(nil)
+                deviceWindow.window?.makeKeyAndOrderFront(nil)
+            }
             return
         }
         guard let session = coordinator.session else { return }
         let scale = NSScreen.main?.backingScaleFactor ?? 2
         let visible = NSScreen.main?.visibleFrame.size ?? NSSize(width: 1440, height: 900)
         var size = NSSize(width: CGFloat(session.deviceWidth) / scale, height: CGFloat(session.deviceHeight) / scale)
-        if size.height > visible.height - 40 {
-            let f = (visible.height - 40) / size.height
-            size = NSSize(width: (size.width * f).rounded(), height: (size.height * f).rounded())
-        }
+        let fit = min(1, (visible.width - 40) / size.width, (visible.height - 40) / size.height)
+        size = NSSize(width: (size.width * fit).rounded(), height: (size.height * fit).rounded())
         let wc = AppWindowController(coordinator: coordinator, target: .device, logicalSize: size)
         wc.onClose = { [weak self] in self?.deviceWindow = nil }
         deviceWindow = wc
-        wc.showWindow(nil)
-        wc.window?.makeKeyAndOrderFront(nil)
+        if !UITestMode.enabled {
+            wc.showWindow(nil)
+            wc.window?.makeKeyAndOrderFront(nil)
+        }
     }
 
     func closeAll() {
@@ -95,6 +101,7 @@ final class WindowManager {
     func presentError(_ error: Error, title: String) {
         lastError = "\(title): \(error.localizedDescription)"
         Log.file("ERROR \(title): \(error.localizedDescription)")
+        guard !UITestMode.enabled else { return }
         let alert = NSAlert()
         alert.messageText = title
         alert.informativeText = error.localizedDescription

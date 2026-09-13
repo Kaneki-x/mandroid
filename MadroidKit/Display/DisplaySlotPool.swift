@@ -8,6 +8,8 @@ public actor DisplaySlotPool {
 
     private let client: EmulatorClient
     private let adb: ADBClient
+    private var mutationInProgress = false
+    private var mutationWaiters: [CheckedContinuation<Void, Never>] = []
     private var slots: [Int: DisplaySlot] = [:]    // by emulatorIndex
 
     public init(client: EmulatorClient, adb: ADBClient) {
@@ -21,6 +23,9 @@ public actor DisplaySlotPool {
     /// Removes every secondary display. Called once after connecting because
     /// the emulator recreates displays persisted in the AVD `config.ini`.
     public func reset() async throws {
+        await beginMutation()
+        defer { endMutation() }
+        try Task.checkCancellation()
         slots = [:]
         try await client.setSecondaryDisplays([])
     }
@@ -28,6 +33,9 @@ public actor DisplaySlotPool {
     /// Creates a display of the given pixel size. Throws `.display` when all
     /// three slots are taken.
     public func acquire(width: Int, height: Int, dpi: Int) async throws -> DisplaySlot {
+        await beginMutation()
+        defer { endMutation() }
+        try Task.checkCancellation()
         guard let index = (1...Self.capacity).first(where: { slots[$0] == nil }) else {
             throw MadroidKitError.display("all \(Self.capacity) app windows are in use")
         }
@@ -36,6 +44,13 @@ public actor DisplaySlotPool {
         pending[index] = DisplaySlot(emulatorIndex: index, androidDisplayID: -1, width: w, height: h, dpi: d)
         try await push(pending)
         let androidID = try await waitForAndroidDisplay(index: index, width: w, height: h)
+        do {
+            try await adb.configureDisplayIME(androidID)
+        } catch {
+            // Do not leak a display when guest setup fails before allocation.
+            try? await push(slots)
+            throw error
+        }
         let slot = DisplaySlot(emulatorIndex: index, androidDisplayID: androidID, width: w, height: h, dpi: d)
         slots[index] = slot
         Log.display.info("acquired slot \(index) → android display \(androidID) \(w)x\(h)@\(d)")
@@ -44,6 +59,9 @@ public actor DisplaySlotPool {
 
     /// Resizes an existing display in place (the activity survives).
     public func resize(_ index: Int, width: Int, height: Int, dpi: Int) async throws -> DisplaySlot {
+        await beginMutation()
+        defer { endMutation() }
+        try Task.checkCancellation()
         guard var slot = slots[index] else { throw MadroidKitError.display("slot \(index) is not allocated") }
         let (w, h, d) = Self.sanitize(width: width, height: height, dpi: dpi)
         if slot.width == w, slot.height == h, slot.dpi == d { return slot }
@@ -57,6 +75,9 @@ public actor DisplaySlotPool {
     }
 
     public func release(_ index: Int) async throws {
+        await beginMutation()
+        defer { endMutation() }
+        try Task.checkCancellation()
         guard slots[index] != nil else { return }
         slots[index] = nil
         try await push(slots)
@@ -64,6 +85,24 @@ public actor DisplaySlotPool {
     }
 
     // MARK: Internals
+
+    // Actor methods are reentrant across awaits. A full-set RPC must finish
+    // before another window snapshots the slots, or it can undo that resize.
+    private func beginMutation() async {
+        if mutationInProgress {
+            await withCheckedContinuation { mutationWaiters.append($0) }
+        } else {
+            mutationInProgress = true
+        }
+    }
+
+    private func endMutation() {
+        if mutationWaiters.isEmpty {
+            mutationInProgress = false
+        } else {
+            mutationWaiters.removeFirst().resume()
+        }
+    }
 
     private func push(_ set: [Int: DisplaySlot]) async throws {
         let specs = set.values.sorted { $0.emulatorIndex < $1.emulatorIndex }
@@ -87,7 +126,7 @@ public actor DisplaySlotPool {
     }
 
     /// Emulator limits: dpi 120…640, each side ≥ 320 dp, ≤ 7680 px.
-    static func sanitize(width: Int, height: Int, dpi: Int) -> (Int, Int, Int) {
+    public static func sanitize(width: Int, height: Int, dpi: Int) -> (Int, Int, Int) {
         let d = min(max(dpi, 120), 640)
         let minPx = Int((320.0 * Double(d) / 160.0).rounded(.up))
         var w = min(max(width, minPx), 7680)

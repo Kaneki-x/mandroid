@@ -13,6 +13,7 @@ final class FrameView: NSView {
     private var scrollIdleTimer: Timer?
     private var lastFrameSequence: UInt32 = 0
     private(set) var hasFrame = false
+    private(set) var renderedPixelSize = NSSize.zero
     private var mouseIsDown = false
 
     override init(frame: NSRect) {
@@ -58,6 +59,7 @@ final class FrameView: NSView {
         CATransaction.setDisableActions(true)
         layer?.contents = image
         CATransaction.commit()
+        renderedPixelSize = NSSize(width: frame.width, height: frame.height)
         hasFrame = true
         lastFrameSequence = frame.sequence
     }

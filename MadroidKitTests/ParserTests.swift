@@ -51,6 +51,9 @@ import Testing
         #expect(ini.contains("skin.path=_no_skin\n"))
         #expect(ini.contains("showDeviceFrame=no\n"))
         #expect(!ini.contains("hw.device.name"))
+        #expect(ini.contains("hw.lcd.width=2560\n"))
+        #expect(ini.contains("hw.lcd.height=1600\n"))
+        #expect(ini.contains("hw.lcd.density=320\n"))
         #expect(!ini.contains("hw.display1"))
         let ptr = c.renderPointerINI(avdDirectory: URL(fileURLWithPath: "/x/avd/runner.avd"))
         #expect(ptr.contains("path=/x/avd/runner.avd\n"))
@@ -62,6 +65,24 @@ import Testing
         #expect(c.cpuArch == "x86_64")
         #expect(c.playStoreEnabled == false)
         #expect(c.renderConfigINI().contains("tag.display=Google APIs\n"))
+    }
+
+    @Test func displayMigrationPreservesAppsAndRequiresColdBootOnlyOnce() throws {
+        let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("tablet-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tmp) }
+        let store = AVDStore(paths: SDKPaths(root: tmp))
+        var phone = AVDConfig(systemImagePath: "system-images;android-36.1;google_apis_playstore;arm64-v8a")
+        phone.lcdWidth = 1080; phone.lcdHeight = 2400; phone.lcdDensity = 420
+        #expect(try store.write(phone) == false)
+        let data = store.directory(for: phone.name).appendingPathComponent("userdata-qemu.img")
+        try Data("installed apps".utf8).write(to: data)
+        let tablet = AVDConfig(systemImagePath: phone.systemImagePath)
+        #expect(try store.write(tablet) == true)
+        #expect(try Data(contentsOf: data) == Data("installed apps".utf8))
+        #expect(try store.write(tablet) == false)
+        var densityChange = tablet
+        densityChange.lcdDensity = 240
+        #expect(try store.write(densityChange) == true)
     }
 
     @Test func stripPersistedDisplays() throws {

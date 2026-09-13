@@ -7,6 +7,7 @@ public actor ADBClient {
     public let serverPort: Int
     public let serial: String
     private let environment: [String: String]
+    private var displayHelperDeployed = false
 
     public init(paths: SDKPaths, serverPort: Int, serial: String) {
         self.binary = paths.adbBinary
@@ -92,6 +93,39 @@ public actor ADBClient {
     public func startActivity(component: String, displayID: Int) async throws {
         let out = try await shell("am start --display \(displayID) -n \(component)")
         if out.contains("Error") { throw MadroidKitError.adb(out.trimmingCharacters(in: .whitespacesAndNewlines)) }
+    }
+
+    /// Bind keyboard input to this display before an app creates its editor.
+    /// With the default fallback-to-display-0 policy, Gboard can consume
+    /// hardware keys without delivering them to secondary-display editors.
+    public func configureDisplayIME(_ displayID: Int) async throws {
+        guard displayID > 0 else { return }
+        let guestPath = "/data/local/tmp/madroid-display-ime.jar"
+        if !displayHelperDeployed {
+            guard let helper = Bundle(for: ADBClient.self).url(forResource: "guest-display", withExtension: "jar") else {
+                throw MadroidKitError.adb("bundled display IME helper is missing")
+            }
+            _ = try await run(["push", helper.path, guestPath])
+            displayHelperDeployed = true
+        }
+        let output = try await shell("CLASSPATH=\(guestPath) app_process / DisplayIME \(displayID)")
+        guard output.contains("local-ime-ready") else {
+            throw MadroidKitError.adb("display IME setup failed: \(output)")
+        }
+    }
+
+    /// Let the desktop window's natural orientation drive activity layout.
+    /// Ignoring display rotation alone still letterboxes portrait activities.
+    /// These Android compatibility overrides also relax the activity bounds.
+    /// --no-kill preserves a running task when a parked window resumes.
+    public func useWindowOrientation(for package: String) async throws {
+        let quotedPackage = "'" + package.replacingOccurrences(of: "'", with: "'\"'\"'") + "'"
+        for change in ["OVERRIDE_ANY_ORIENTATION", "OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR"] {
+            let result = try await shell("am compat enable --no-kill \(change) \(quotedPackage)")
+            guard result.contains("Enabled change") else {
+                throw MadroidKitError.adb("orientation override unavailable: \(result)")
+            }
+        }
     }
 
     public func forceStop(_ package: String) async throws {

@@ -230,13 +230,13 @@ AVD without `avdmanager`: two files.
     image.sysdir.1=system-images/android-36.1/google_apis_playstore/arm64-v8a/
     PlayStore.enabled=true
     target=android-36.1
-    hw.device.name=medium_phone   # plain phone profile; multi-display requires it
-    hw.device.manufacturer=Generic
-    hw.lcd.width=1080
-    hw.lcd.height=2400
-    hw.lcd.density=420
-    skin.name=1080x2400
-    skin.path=1080x2400
+    hw.device.manufacturer=Google
+    hw.lcd.width=2560
+    hw.lcd.height=1600
+    hw.lcd.density=320
+    hw.initialOrientation=portrait # natural orientation; panel is landscape
+    skin.name=2560x1600
+    skin.path=_no_skin
     skin.dynamic=yes
     showDeviceFrame=no
     hw.keyboard=yes
@@ -263,7 +263,10 @@ AVD without `avdmanager`: two files.
     runtime.network.speed=full
 ```
 
-(Template: a real `avdmanager`-generated `Medium_Phone` API 36.1 AVD.) The
+The default uses Pixel Tablet resolution (2560×1600), a 320 dpi logical
+density (1280×800 dp), and the same ARM64 Google Play system image. Existing
+AVDs retain installed apps and data; changing display geometry skips loading
+the old quickboot snapshot on the next boot. The
 emulator ships no `devices.xml`; `hw.device.name` is a plain string with no
 catalogue lookup, so every `hw.*` value must be written explicitly and
 `hw.device.hash2` (an Android Studio artefact) is omitted.
@@ -550,9 +553,13 @@ user-initiated escape hatch for more windows (about 2 GB RAM each).
 
 ### 5.6 Resizing
 
-Phase 1: fixed display size, window aspect ratio locked, the emulator scales
-frames to the requested size. Phase 3: 400 ms after live resize ends,
-reconfigure the display in place (verified emulator path). Apps that do not
+App windows resize freely with a minimum content size of 320×320 points.
+During dragging, coalesce changes every 150 ms and reconfigure the guest
+display in place at the window’s physical pixel size and backing density.
+Only one update runs at a time; subsequent changes apply the latest size.
+Restart the screenshot stream and update input coordinates after Android
+reports the new resolution. Restored window sizes and monitor changes use
+the same path. Device Screen retains its fixed guest resolution. Apps that do not
 declare `configChanges` are destroyed and recreated by Android on a
 configuration change; that is their normal behaviour and is documented in the
 compatibility matrix.
@@ -597,3 +604,20 @@ and drops echoes so the two systems never ping-pong.
 - **`android-desktop` system image** (freeform windowing, API 34, no Play
   Store) as plan B if virtual-display compatibility proves poor across apps.
 - Physical devices over adb using the same provider abstraction.
+
+
+### Secondary-display input method routing
+
+Before launching an app, set its display's IME policy to LOCAL. The default
+fallback to display 0 allows Gboard to consume hardware keys without updating
+Bilibili's Compose phone-number field. This was reproduced with both emulator
+key events and `adb input`, and corrected by binding Gboard to the editor's
+display before launch.
+
+The macOS app remains Swift. A dependency-free Java `app_process` helper is a
+small exception to the original Swift-only implementation: it calls the guest
+framework's IWindowManager proxy by reflection. This avoids unstable hard-coded
+Binder transaction numbers. It requires no APK install, root, or background
+service. Its source is in `Tools/guest-display`, and its generated DEX JAR is
+bundled in MadroidKit. Rebuild with `Scripts/gen-guest-display.sh` (JDK 17 and
+`D8` pointing to Android build-tools 36.1.0). Runtime users need neither tool.

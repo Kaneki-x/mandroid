@@ -37,7 +37,11 @@ The app downloads the stock Android Emulator, platform-tools and a Google Play
 system image on first launch and boots the emulator headless. For every
 Android app you open it creates a private virtual display inside the emulator,
 launches the app on that display, and streams the display's pixels into a
-macOS window over the emulator's gRPC API. Mouse, keyboard, scroll and
+macOS window over the emulator's gRPC API. The built-in device uses a
+Pixel Tablet-sized 2560×1600 display at 320 dpi; app windows render at their
+own physical pixel size and reconfigure Android when resized. New windows
+default to 1280×800 points (2560×1600 pixels on a 2× Retina screen), scaled
+down to fit smaller screens. Mouse, keyboard, scroll and
 clipboard are translated back the same way.
 
 ## Requirements
@@ -60,6 +64,22 @@ clipboard are translated back the same way.
 See [docs/PLAN.md](docs/PLAN.md) for what is done. Next candidates: signed
 and notarized releases, an audio mute switch, an Android-side display
 provider to lift the three-window cap, and a macOS notification bridge.
+
+## Offscreen UI tests
+
+Build Debug, then run the real-emulator smoke test with an APK:
+
+```sh
+python3 Scripts/run-ui-tests.py --app /path/to/Madroid.app --apk /path/to/app.apk --package com.example.app
+```
+
+The launcher uses fresh guest data in `~/Library/Caches/madroid-ui-*`, reuses
+Madroid's installed SDK and tools, and shuts down its own process afterward.
+Windows stay hidden; input and resize commands use a private file queue.
+The test checks rendered frames, guest resolution, display cleanup, and zero
+visible windows. Screenshots and logs remain in the printed artifact directory.
+Python Pillow is required for the frame check. The Debug-only mode disables
+clipboard sharing and launcher creation, leaving the normal app session alone.
 
 ## License
 
