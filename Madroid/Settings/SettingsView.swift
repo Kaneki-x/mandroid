@@ -6,6 +6,11 @@ struct SettingsView: View {
     let windows: WindowManager
     @State private var settings = RunnerSettings.load()
     @State private var saved = RunnerSettings.load()
+    @State private var volume: Double = 0
+    @State private var volumeReady = false
+    @State private var applyingVolume = false
+    @State private var volumeError: String?
+
 
     private var needsRestart: Bool { settings.ramMB != saved.ramMB || settings.cores != saved.cores }
 
@@ -25,6 +30,22 @@ struct SettingsView: View {
                     Button("Restart Emulator") { restart(cold: false) }
                     Button("Cold Boot") { restart(cold: true) }
                 }
+            }
+            Section("Audio") {
+                HStack {
+                    Slider(value: $volume, in: 0...100, step: 1, label: { Text("Media volume") }, onEditingChanged: { editing in
+                        if !editing { applyVolume() }
+                    })
+                    .disabled(!volumeReady || applyingVolume || !coordinator.state.isReady)
+                    Text(volumeReady ? "\(Int(volume))%" : "—")
+                        .monospacedDigit().frame(width: 44, alignment: .trailing)
+                }
+                Text("Controls all Android apps. Changes apply immediately; 0% mutes media audio.")
+                    .font(.caption).foregroundStyle(.secondary)
+                if !coordinator.state.isReady {
+                    Text("Available when Android is running.").font(.caption).foregroundStyle(.secondary)
+                }
+                if let volumeError { Text(volumeError).font(.caption).foregroundStyle(.red) }
             }
             Section("Windows") {
                 Picker("New windows open", selection: $settings.landscapeByDefault) {
@@ -61,6 +82,15 @@ struct SettingsView: View {
         // A grouped Form has no intrinsic height (it is a scroll view), so the
         // hosting window would collapse to zero height without an explicit size.
         .frame(width: 500, height: 780)
+        .task(id: coordinator.state.isReady) {
+            volumeReady = false
+            guard coordinator.state.isReady, let adb = coordinator.session?.adb else { return }
+            do {
+                volume = Double(try await adb.mediaVolume().percent)
+                volumeReady = true
+                volumeError = nil
+            } catch { volumeError = error.localizedDescription }
+        }
         .onChange(of: settings) { _, new in
             new.save()
             if !new.launcherStubs {
@@ -68,6 +98,21 @@ struct SettingsView: View {
             } else if !coordinator.apps.isEmpty {
                 LauncherStubBuilder.sync(coordinator.apps)
             }
+        }
+    }
+
+    private func applyVolume() {
+        guard volumeReady, !applyingVolume, let adb = coordinator.session?.adb else { return }
+        applyingVolume = true
+        let requested = Int(volume)
+        Task {
+            defer { applyingVolume = false }
+            do {
+                let actual = try await adb.setMediaVolume(percent: requested)
+                volume = Double(actual.percent)
+                settings.mediaVolumePercent = actual.percent
+                volumeError = nil
+            } catch { volumeError = error.localizedDescription }
         }
     }
 

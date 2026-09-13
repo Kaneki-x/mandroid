@@ -2,6 +2,8 @@ import Foundation
 
 /// User-adjustable settings, persisted in `UserDefaults`.
 public struct RunnerSettings: Sendable, Equatable {
+    /// Nil preserves the guest volume until the user first adjusts it.
+    public var mediaVolumePercent: Int?
     public var ramMB: Int = 4096
     public var cores: Int = 4
     public var defaultWindowHeight: Int = 800
@@ -18,6 +20,7 @@ public struct RunnerSettings: Sendable, Equatable {
 
     public static func load(from defaults: UserDefaults = .standard) -> RunnerSettings {
         var s = RunnerSettings()
+        if let v = defaults.object(forKey: "mediaVolumePercent") as? Int, (0...100).contains(v) { s.mediaVolumePercent = v }
         if let v = defaults.object(forKey: "ramMB") as? Int, ramChoices.contains(v) { s.ramMB = v }
         if let v = defaults.object(forKey: "cores") as? Int, coreChoices.contains(v) { s.cores = v }
         if let v = defaults.object(forKey: "defaultWindowHeight") as? Int, (500...1600).contains(v) { s.defaultWindowHeight = v }
@@ -28,6 +31,7 @@ public struct RunnerSettings: Sendable, Equatable {
     }
 
     public func save(to defaults: UserDefaults = .standard) {
+        defaults.set(mediaVolumePercent, forKey: "mediaVolumePercent")
         defaults.set(ramMB, forKey: "ramMB")
         defaults.set(cores, forKey: "cores")
         defaults.set(defaultWindowHeight, forKey: "defaultWindowHeight")

@@ -7,8 +7,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/classes" "$TMP/dex"
-javac --release 8 -d "$TMP/classes" "$ROOT/Tools/guest-display/DisplayIME.java"
-"$D8" --min-api 31 --output "$TMP/dex" "$TMP/classes/DisplayIME.class"
+javac --release 8 -d "$TMP/classes" "$ROOT/Tools/guest-display/"*.java
+"$D8" --min-api 31 --output "$TMP/dex" "$TMP/classes/"*.class
 # Fixed timestamp and no extra fields make the checked-in resource reproducible.
 touch -t 200001010000 "$TMP/dex/classes.dex"
 ( cd "$TMP/dex" && zip -X -q "$TMP/guest-display.jar" classes.dex )

@@ -77,6 +77,9 @@ public struct SDKPaths: Sendable, Hashable {
         env["ANDROID_AVD_HOME"] = avdHome.path
         env["ANDROID_EMULATOR_HOME"] = emulatorHome.path
         env["ANDROID_ADB_SERVER_PORT"] = String(adbServerPort)
+        // Madroid only connects to its emulator. USB enumeration can block
+        // indefinitely in macOS IOKit when launched from the desktop.
+        env["ADB_USB"] = "0"
         // Keep any JDK out of the picture; the emulator does not need one.
         env.removeValue(forKey: "JAVA_HOME")
         return env
