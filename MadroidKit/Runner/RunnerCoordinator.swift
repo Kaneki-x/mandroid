@@ -151,6 +151,10 @@ public final class RunnerCoordinator {
                 Task { @MainActor in self.setStage(text) }
             }
             await GuestSetup.apply(adb: adb)
+            if let volume = RunnerSettings.load().mediaVolumePercent {
+                do { _ = try await adb.setMediaVolume(percent: volume) }
+                catch { Log.file("Could not restore media volume: \(error.localizedDescription)") }
+            }
 
             let client = EmulatorClient(connection: connection)
             let pool = DisplaySlotPool(client: client, adb: adb)

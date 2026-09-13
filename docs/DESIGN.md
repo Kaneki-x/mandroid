@@ -621,3 +621,16 @@ Binder transaction numbers. It requires no APK install, root, or background
 service. Its source is in `Tools/guest-display`, and its generated DEX JAR is
 bundled in MadroidKit. Rebuild with `Scripts/gen-guest-display.sh` (JDK 17 and
 `D8` pointing to Android build-tools 36.1.0). Runtime users need neither tool.
+
+### Native media volume
+
+Settings reads Android's STREAM_MUSIC range and controls its volume through the
+bundled `SetMediaVolume` app_process helper. The helper calls the guest's native
+AudioService with `com.android.shell`, matching its shell UID. The media_session
+shell command can silently ignore changes attributed to its server package on
+the current image, so the setter also verifies the applied volume. The selected
+percentage is persisted only after a successful change and restored after boot.
+No audio streaming or host-side playback is added.
+
+Madroid's private ADB environment sets `ADB_USB=0`: only emulator transports are
+needed, and physical USB enumeration can stall in IOKit during desktop launches.

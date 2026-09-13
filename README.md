@@ -44,6 +44,10 @@ default to 1280×800 points (2560×1600 pixels on a 2× Retina screen), scaled
 down to fit smaller screens. Mouse, keyboard, scroll and
 clipboard are translated back the same way.
 
+Settings includes a media-volume slider for all Android apps. It controls the
+guest's native media stream, supports mute, and restores your chosen level on
+restart. Audio continues to play through the emulator's native macOS backend.
+
 ## Requirements
 
 - A Mac with Apple silicon (M1 or later) running macOS 15 or later. Intel
@@ -72,6 +76,10 @@ Build Debug, then run the real-emulator smoke test with an APK:
 ```sh
 python3 Scripts/run-ui-tests.py --app /path/to/Madroid.app --apk /path/to/app.apk --package com.example.app
 ```
+
+For the volume controls alone, use `--test volume` instead of `--apk` and
+`--package`. This checks mute, full volume, and midpoint volume through the
+same native Android control path as Settings, then restores the previous level.
 
 The launcher uses fresh guest data in `~/Library/Caches/madroid-ui-*`, reuses
 Madroid's installed SDK and tools, and shuts down its own process afterward.

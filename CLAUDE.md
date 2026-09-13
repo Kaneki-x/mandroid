@@ -8,7 +8,7 @@ holds the phase checklist and `docs/SPIKE-NOTES.md` the open measurements.
 - **Swift host**: AppKit for windows/input/menus, SwiftUI for setup, library
   and settings views. No Rust, no Electron, no third-party UI frameworks.
   A tiny dependency-free Java app_process helper configures secondary-display
-  IME policy through the guest framework; see DESIGN and Tools/guest-display.
+  IME policy and native media volume through the guest framework; see DESIGN and Tools/guest-display.
 - **xcodegen** `project.yml` → `Madroid.xcodeproj` (never edit the
   xcodeproj by hand; regenerate). Targets: `MadroidKit` (framework, no
   AppKit UI), `Madroid` (app), `MadroidKitTests`.

@@ -10,14 +10,17 @@ import time
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--app', type=Path, required=True, help='Debug Madroid.app')
-parser.add_argument('--apk', type=Path, required=True)
+parser.add_argument('--apk', type=Path)
+parser.add_argument('--test', choices=['smoke', 'volume'], default='smoke')
 parser.add_argument('--package', default='com.github.shadowsocks')
 parser.add_argument('--sdk-data', type=Path, default=Path.home() / 'Library/Application Support/Madroid')
 args = parser.parse_args()
 app = args.app.resolve()
-apk = args.apk.resolve()
-if not (app / 'Contents/MacOS/Madroid').is_file() or not apk.is_file():
-    parser.error('App executable and APK must exist')
+apk = args.apk.resolve() if args.apk else None
+if not (app / 'Contents/MacOS/Madroid').is_file():
+    parser.error('App executable must exist')
+if args.test == 'smoke' and (apk is None or not apk.is_file()):
+    parser.error('The smoke test requires --apk')
 for name in ('sdk', 'tools'):
     if not (args.sdk_data / name).is_dir():
         parser.error(f'Missing installed {name} in --sdk-data')
@@ -28,14 +31,15 @@ control = root / 'control'
 control.mkdir()
 out = root / 'artifacts'
 out.mkdir()
-env = dict(os.environ, APP=str(app), APK=str(apk), PKG=args.package,
+env = dict(os.environ, APP=str(app), APK=str(apk) if apk else "", PKG=args.package,
            UI_TEST_DATA_ROOT=str(root), UI_TEST_CONTROL=str(control), OUT=str(out))
 print(f'Offscreen test data and artifacts: {root}', flush=True)
 with (root / 'host.log').open('w') as log:
     process = subprocess.Popen([str(app / 'Contents/MacOS/Madroid'),
         '-dataRoot', str(root), '-uiTestControlDirectory', str(control),
         '-launcherStubs', 'NO'], stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
-    test = subprocess.Popen(['zsh', str(Path(__file__).with_name('integration-test.sh'))],
+    script = 'volume-test.sh' if args.test == 'volume' else 'integration-test.sh'
+    test = subprocess.Popen(['zsh', str(Path(__file__).with_name(script))],
                             env=env, start_new_session=True)
     try:
         while test.poll() is None and process.poll() is None:

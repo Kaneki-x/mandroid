@@ -72,6 +72,7 @@
 		BBD16999E719D05B9AB1B8DC /* MadroidKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4A0B8CC15D4CC13B85617D9C /* MadroidKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		BCBF656E988DA3992021DB2F /* InputChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFA94FA87E2555DAF7EEFF0 /* InputChannel.swift */; };
 		BE4B1029CF81E8E7F8023D09 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC9024FE1074B14902AA1768 /* SettingsView.swift */; };
+		C375FCC0C9EF58A5A9325D80 /* MediaVolume.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9014373316B1094081D2AFD /* MediaVolume.swift */; };
 		C53CE348B54948915E4FD834 /* GRPCCore in Frameworks */ = {isa = PBXBuildFile; productRef = 541B03909587D655A035FFF6 /* GRPCCore */; };
 		C590CF47351E1D22D3CB8649 /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495AA588421958636240FE99 /* MainMenu.swift */; };
 		C652A3638DCF248AA8CFB0E3 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371217425235B49F2F3E6226 /* Log.swift */; };
@@ -82,6 +83,7 @@
 		D871AD5CCBEE0F1123090EEA /* ClipboardSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15FA882EA66D04AA1EF5411C /* ClipboardSync.swift */; };
 		DADD7DF0028603DFAD3CA337 /* aapt2-badging-shadowsocks.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4C31BA0D5041DF116607CEF2 /* aapt2-badging-shadowsocks.txt */; };
 		DD5B3A1B78E20E86915CCF16 /* UITestMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA42B5D1BAC1D58312F8C75 /* UITestMode.swift */; };
+		DF9068F5EE508EFA469BBC85 /* MediaVolumeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B31F80FFB5F3EE3B914D6A99 /* MediaVolumeTests.swift */; };
 		E007262ADE3EA2CB9AECC789 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 324A150D4CF73B3BC5C54351 /* Assets.xcassets */; };
 		E6BC1F8640F12CAFE1019F8A /* EmulatorLaunchOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B1EE9B8E811F9CDC3CBFFC0 /* EmulatorLaunchOptions.swift */; };
 		E72037C2A784FAA1CC10CE3E /* AppCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AD0D016CBE1D3D1406EC19 /* AppCatalog.swift */; };
@@ -194,6 +196,7 @@
 		AC7CFB0539EFDD7A73A75959 /* APKBadging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APKBadging.swift; sourceTree = "<group>"; };
 		AC9024FE1074B14902AA1768 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B247858814A0303ABF6FBBCB /* EmulatorProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorProcess.swift; sourceTree = "<group>"; };
+		B31F80FFB5F3EE3B914D6A99 /* MediaVolumeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaVolumeTests.swift; sourceTree = "<group>"; };
 		B4BB46CB9F7058FACA99EAD8 /* CatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogTests.swift; sourceTree = "<group>"; };
 		BEF27FB42B61BE14E29F5E6B /* ScrollGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollGesture.swift; sourceTree = "<group>"; };
 		BF737AAEB05399B6EE104261 /* DisplaySlot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplaySlot.swift; sourceTree = "<group>"; };
@@ -211,6 +214,7 @@
 		E5AEAC4F5C06A2E07427985A /* KeyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMap.swift; sourceTree = "<group>"; };
 		E65D46CB7589A2820F1476AB /* Fixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fixtures.swift; sourceTree = "<group>"; };
 		ECB2C08B95DD130C292C9683 /* AVDConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVDConfig.swift; sourceTree = "<group>"; };
+		F9014373316B1094081D2AFD /* MediaVolume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaVolume.swift; sourceTree = "<group>"; };
 		FE672E41ADA0F32F3E9D09BB /* MadroidKitError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MadroidKitError.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -264,6 +268,7 @@
 			children = (
 				4CF3671C752949B7BC5F7B8F /* ADBClient.swift */,
 				2C660538EA332DBBC4E4084E /* DumpsysDisplayParser.swift */,
+				F9014373316B1094081D2AFD /* MediaVolume.swift */,
 				42557C42270B69346F183DD4 /* PackageListParser.swift */,
 				0C65F1A7827536E21A211ED1 /* TaskListParser.swift */,
 			);
@@ -306,7 +311,6 @@
 				6897255EF0FAF405AD30AA2B /* WindowManager.swift */,
 				41321DD9C5E0A3109261F727 /* AppWindow */,
 				BFDFDC080F6F079DEA24AF57 /* Clipboard */,
-				7ADABB5EEE32EA35547D919F /* Device */,
 				C54188A379EF5422151434B6 /* Launchers */,
 				F6E012090BB2FC80271BA981 /* Library */,
 				5ECAF2B47A492B5B5636CBC7 /* Menu */,
@@ -387,13 +391,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		7ADABB5EEE32EA35547D919F /* Device */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Device;
-			sourceTree = "<group>";
-		};
 		7FE423B356D4437E7D7CC34D /* Display */ = {
 			isa = PBXGroup;
 			children = (
@@ -417,6 +414,7 @@
 				B4BB46CB9F7058FACA99EAD8 /* CatalogTests.swift */,
 				E65D46CB7589A2820F1476AB /* Fixtures.swift */,
 				A1A6585A9333132465C07E2C /* InputTests.swift */,
+				B31F80FFB5F3EE3B914D6A99 /* MediaVolumeTests.swift */,
 				86C99C8E31F705D1112BEB80 /* ParserTests.swift */,
 				4EF5C91608A0424D5CC4BAD6 /* PortAllocatorTests.swift */,
 				1832787B77BB4BED7FA9724C /* RepositoryManifestTests.swift */,
@@ -724,6 +722,7 @@
 				B4453A52DD2A676DE6660B21 /* CatalogTests.swift in Sources */,
 				ED3E21B62AF626B0F4E3B3E8 /* Fixtures.swift in Sources */,
 				2F48C64DFEBB6D3FA0335417 /* InputTests.swift in Sources */,
+				DF9068F5EE508EFA469BBC85 /* MediaVolumeTests.swift in Sources */,
 				965CC64444C360F919CA3A47 /* ParserTests.swift in Sources */,
 				46BFB6C89036473D57AE7AF9 /* PortAllocatorTests.swift in Sources */,
 				936BDAABBDB47141384858E6 /* RepositoryManifestTests.swift in Sources */,
@@ -762,6 +761,7 @@
 				160D6F5D568A3CBDD4AD21AE /* KeyMap.swift in Sources */,
 				C652A3638DCF248AA8CFB0E3 /* Log.swift in Sources */,
 				9BDD5B3C00E3869350623DB0 /* MadroidKitError.swift in Sources */,
+				C375FCC0C9EF58A5A9325D80 /* MediaVolume.swift in Sources */,
 				AFC9A39EB057BEC3F821B663 /* PackageListParser.swift in Sources */,
 				34E309F9D054C24FF01A2197 /* PortAllocator.swift in Sources */,
 				A525FC3313881D0B56AA1C84 /* RepositoryManifest.swift in Sources */,

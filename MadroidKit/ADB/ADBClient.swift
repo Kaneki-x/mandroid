@@ -100,6 +100,15 @@ public actor ADBClient {
     /// hardware keys without delivering them to secondary-display editors.
     public func configureDisplayIME(_ displayID: Int) async throws {
         guard displayID > 0 else { return }
+        try await deployGuestHelper()
+        let guestPath = "/data/local/tmp/madroid-display-ime.jar"
+        let output = try await shell("CLASSPATH=\(guestPath) app_process / DisplayIME \(displayID)")
+        guard output.contains("local-ime-ready") else {
+            throw MadroidKitError.adb("display IME setup failed: \(output)")
+        }
+    }
+
+    private func deployGuestHelper() async throws {
         let guestPath = "/data/local/tmp/madroid-display-ime.jar"
         if !displayHelperDeployed {
             guard let helper = Bundle(for: ADBClient.self).url(forResource: "guest-display", withExtension: "jar") else {
@@ -107,10 +116,6 @@ public actor ADBClient {
             }
             _ = try await run(["push", helper.path, guestPath])
             displayHelperDeployed = true
-        }
-        let output = try await shell("CLASSPATH=\(guestPath) app_process / DisplayIME \(displayID)")
-        guard output.contains("local-ime-ready") else {
-            throw MadroidKitError.adb("display IME setup failed: \(output)")
         }
     }
 
@@ -126,6 +131,29 @@ public actor ADBClient {
                 throw MadroidKitError.adb("orientation override unavailable: \(result)")
             }
         }
+    }
+
+    public func mediaVolume() async throws -> MediaVolume {
+        let output = try await shell("cmd media_session volume --stream 3 --get")
+        guard let volume = MediaVolume.parse(output) else {
+            throw MadroidKitError.adb("Could not read Android media volume: \(output)")
+        }
+        return volume
+    }
+
+    public func setMediaVolume(percent: Int) async throws -> MediaVolume {
+        let current = try await mediaVolume()
+        let level = current.level(forPercent: percent)
+        try await deployGuestHelper()
+        let output = try await shell("CLASSPATH=/data/local/tmp/madroid-display-ime.jar app_process / SetMediaVolume \(level)")
+        guard output.contains("media-volume-ready") else {
+            throw MadroidKitError.adb("Could not set Android media volume: \(output)")
+        }
+        let updated = try await mediaVolume()
+        guard updated.level == level else {
+            throw MadroidKitError.adb("Android did not apply the requested media volume")
+        }
+        return updated
     }
 
     public func forceStop(_ package: String) async throws {

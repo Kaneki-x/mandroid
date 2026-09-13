@@ -29,6 +29,12 @@ struct DebugHooks {
         switch cmd {
         case "snapshot": snapshot(dir: q["dir"] ?? NSTemporaryDirectory())
         case "settings": delegate.showSettings(nil)
+        case "volume":
+            guard let percent = Int(q["percent"] ?? ""), let adb = delegate.coordinator.session?.adb else { return }
+            Task {
+                do { _ = try await adb.setMediaVolume(percent: percent) }
+                catch { Log.file("debug volume: \(error.localizedDescription)") }
+            }
         case "click":
             guard let wc = controller(q["pkg"]), let x = Double(q["x"] ?? ""), let y = Double(q["y"] ?? "") else { return }
             synthesizeDrag(in: wc, from: CGPoint(x: x, y: y), to: CGPoint(x: x, y: y), steps: 0)
