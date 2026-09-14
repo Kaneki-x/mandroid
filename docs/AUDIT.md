@@ -1,6 +1,6 @@
 # Project audit — 2026-09-14
 
-Scope: handwritten Swift in Madroid and MadroidKit, unit tests, project.yml,
+Scope: handwritten Swift in Mandroid and MandroidKit, unit tests, project.yml,
 launch hooks, SDK bootstrap, guest Java helpers, generation, release,
 and emulator test scripts. Generated protobuf bindings were checked by
 regeneration; third-party dependency internals were not audited.

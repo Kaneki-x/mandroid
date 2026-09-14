@@ -13,4 +13,4 @@ javac --release 8 -classpath "$ANDROID_JAR" -d "$TMP/classes" "$ROOT/Tools/guest
 # Fixed timestamp and no extra fields make the checked-in resource reproducible.
 touch -t 200001010000 "$TMP/dex/classes.dex"
 ( cd "$TMP/dex" && zip -X -q "$TMP/guest-display.jar" classes.dex )
-cp "$TMP/guest-display.jar" "$ROOT/MadroidKit/Resources/guest-display.jar"
+cp "$TMP/guest-display.jar" "$ROOT/MandroidKit/Resources/guest-display.jar"

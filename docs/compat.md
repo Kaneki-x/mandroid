@@ -1,7 +1,7 @@
 # App compatibility notes
 
 Observed behaviour of apps running on a secondary emulator display inside an
-Madroid window. Environment: emulator 37.1.11, Google Play
+Mandroid window. Environment: emulator 37.1.11, Google Play
 arm64 image API 36.1, display flags 1225. Update this table as apps are
 tried; keep one line per app.
 
@@ -19,12 +19,12 @@ tried; keep one line per app.
 
 New windows open in landscape by default (Settings ▸ Windows switches to
 portrait). Android ▸ Rotate Window (⌘R) swaps a window's width and height;
-the virtual display is reconfigured in place. Before launching an app, Madroid
+the virtual display is reconfigured in place. Before launching an app, Mandroid
 applies Android's `OVERRIDE_ANY_ORIENTATION` and
 `OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR` compatibility overrides so
 fixed-orientation activities follow the window's natural orientation instead
 of occupying a portrait letterbox. Android may recreate an activity to apply
-its new configuration. The overrides are per package in Madroid's isolated
+its new configuration. The overrides are per package in Mandroid's isolated
 emulator; if unavailable, the app launches with Android's original behavior. Android itself never reports a device rotation (the emulator
 keeps rotation 0); apps see a configuration change, exactly as on a tablet
 whose window was resized.
@@ -51,7 +51,7 @@ Android audio is played by the emulator's own CoreAudio backend, VM-wide.
 That backend binds to the Mac's **default output device at the moment the
 guest opens its audio stream** (in practice, at boot) and does not follow
 later changes in System Settings ▸ Sound. If sound seems missing, check which
-device was the default when Madroid started (a Bluetooth speaker or a
+device was the default when Mandroid started (a Bluetooth speaker or a
 monitor's HDMI output are common surprises) and restart the emulator
 (Android ▸ Restart) after switching outputs. The guest side can be checked
 with `adb shell dumpsys audio` (player states) and the host side with
