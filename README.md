@@ -109,3 +109,15 @@ existing SDK, Android virtual device, installed apps, and icon cache from
 and copies your preferences. Android App Runner installations are also supported.
 Existing Mandroid data is never overwritten. Old `madroid://` links still work,
 and generated app launchers are updated to use `mandroid://`.
+
+## Per-app HTTP proxies
+
+Right-click an app in the library and choose **HTTP Proxy…**. Enable the proxy,
+enter its host and port, and save. Each app can use a different proxy at the
+same time. Use `localhost` for a proxy running on your Mac. Settings survive
+restarts; turning off one app's proxy leaves the others configured.
+
+This configures Android's HTTP proxy recommendation, including HTTPS CONNECT.
+Apps that ignore Android HTTP proxy settings remain direct. The helper uses
+Android's VPN connection, replacing any other active Android VPN. No TLS
+certificates are installed and encrypted traffic is not decrypted.

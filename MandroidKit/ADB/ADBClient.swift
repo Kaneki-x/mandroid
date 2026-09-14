@@ -8,6 +8,7 @@ public actor ADBClient {
     public let serial: String
     private let environment: [String: String]
     private var displayHelperDeployed = false
+    private var proxyAgentDeployed = false
 
     public init(paths: SDKPaths, serverPort: Int, serial: String) {
         self.binary = paths.adbBinary
@@ -141,6 +142,15 @@ public actor ADBClient {
             _ = try await run(["push", helper.path, guestPath])
             displayHelperDeployed = true
         }
+    }
+
+    func deployProxyAgent() async throws {
+        guard !proxyAgentDeployed else { return }
+        guard let apk = Bundle(for: ADBClient.self).url(forResource: "proxy-agent", withExtension: "apk") else {
+            throw MandroidKitError.adb("Bundled Android proxy helper is missing")
+        }
+        try await run(["install", "-r", apk.path], timeout: .seconds(120))
+        proxyAgentDeployed = true
     }
 
     /// Let the desktop window's natural orientation drive activity layout.
