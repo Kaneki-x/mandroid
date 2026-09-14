@@ -8,6 +8,7 @@ struct LibraryView: View {
     let windows: WindowManager
     @State private var search = ""
     @State private var dropTargeted = false
+    @State private var proxyApp: AppInfo?
 
     private var filtered: [AppInfo] {
         let q = search.trimmingCharacters(in: .whitespaces).lowercased()
@@ -19,6 +20,9 @@ struct LibraryView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            if let error = coordinator.proxyError {
+                Text("HTTP proxy setup failed: \(error)").font(.callout).foregroundStyle(.red).padding(10)
+            }
             if coordinator.apps.isEmpty {
                 emptyState
             } else {
@@ -35,6 +39,7 @@ struct LibraryView: View {
                                             windows.appWindows[app.package]?.window?.performClose(nil)
                                         }
                                     }
+                                    Button("HTTP Proxy…") { proxyApp = app }
                                     Divider()
                                     Button("Uninstall…", role: .destructive) { confirmUninstall(app) }
                                 }
@@ -58,6 +63,7 @@ struct LibraryView: View {
             }
             .padding(10)
         }
+        .sheet(item: $proxyApp) { app in AppProxyView(app: app, coordinator: coordinator) }
         .searchable(text: $search, placement: .toolbar, prompt: "Search apps")
         .frame(minWidth: 460, minHeight: 320)
         .onDrop(of: [UTType.fileURL], isTargeted: $dropTargeted) { providers in

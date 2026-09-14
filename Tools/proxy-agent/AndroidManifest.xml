@@ -1,0 +1,16 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="io.github.madeye.mandroid.proxy" android:versionCode="1" android:versionName="1">
+    <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="36" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <application android:label="Mandroid HTTP Proxy" android:allowBackup="false" android:usesCleartextTraffic="true">
+        <activity android:name=".ConfigureActivity" android:exported="true" android:permission="android.permission.DUMP" android:theme="@android:style/Theme.Translucent.NoTitleBar" android:excludeFromRecents="true" />
+        <provider android:name=".StatusProvider" android:authorities="io.github.madeye.mandroid.proxy.status" android:exported="true" android:permission="android.permission.DUMP" />
+        <service android:name=".ProxyService" android:exported="true" android:permission="android.permission.BIND_VPN_SERVICE" android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="HTTP proxy selection for individual Android apps managed by Mandroid" />
+            <intent-filter><action android:name="android.net.VpnService" /></intent-filter>
+        </service>
+    </application>
+</manifest>

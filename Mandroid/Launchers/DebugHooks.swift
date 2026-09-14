@@ -29,6 +29,19 @@ struct DebugHooks {
         switch cmd {
         case "snapshot": snapshot(dir: q["dir"] ?? NSTemporaryDirectory())
         case "settings": delegate.showSettings(nil)
+        case "proxy":
+            guard let package = q["pkg"] else { return }
+            Task {
+                do {
+                    let endpoint: HTTPProxyEndpoint?
+                    if q["off"] == "1" { endpoint = nil }
+                    else {
+                        guard let host = q["host"], let port = Int(q["port"] ?? "") else { return }
+                        endpoint = try HTTPProxyEndpoint(host: host, port: port)
+                    }
+                    try await delegate.coordinator.setHTTPProxy(endpoint, for: package)
+                } catch { Log.file("debug proxy: \(error.localizedDescription)") }
+            }
         case "volume":
             guard let percent = Int(q["percent"] ?? ""), let adb = delegate.coordinator.session?.adb else { return }
             Task {

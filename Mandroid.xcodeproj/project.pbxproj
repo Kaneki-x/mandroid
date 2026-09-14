@@ -22,6 +22,8 @@
 		26596DADD30E895238D979E1 /* MandroidKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E3EBD02845AA73DAB1A6BEF8 /* MandroidKit.framework */; };
 		2956E519FF7E58F0CAB5E537 /* dumpsys-display-0only.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3E22BE59D5B4E341E083891B /* dumpsys-display-0only.txt */; };
 		2B01A437E721A3566272BD44 /* ADBClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C65349DBB2EA8395C63E55 /* ADBClient.swift */; };
+		2E8224C18133B6A58DDE0E24 /* proxy-agent.apk in Resources */ = {isa = PBXBuildFile; fileRef = 7989D6ECDD251AAA5E517B89 /* proxy-agent.apk */; };
+		308932A4547F01DC338B9327 /* AppProxyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05E3D8D73C25821980720D7F /* AppProxyTests.swift */; };
 		32FB224EE27EAD34F6D50934 /* LauncherStubBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CA57E57B95AE22134C1E9C8 /* LauncherStubBuilder.swift */; };
 		33A7D28766027E7C46687D3F /* Subprocess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C26B1DC044AE793A2CA9408 /* Subprocess.swift */; };
 		34DCBE5B97CD020796A1351F /* AppWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55DA50087CE3FCBA56353A14 /* AppWindowController.swift */; };
@@ -33,6 +35,7 @@
 		407A8753EE4BABD7F642049B /* Fixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6811683DF5318ABF587E2333 /* Fixtures.swift */; };
 		41BAA771990606C4529171BC /* ParkedOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DE4A7E717C8676F19AF5A01 /* ParkedOverlayView.swift */; };
 		446CFC09E215508235EF61BA /* APKBadging.swift in Sources */ = {isa = PBXBuildFile; fileRef = A22C4002AC149141CE2CCFEA /* APKBadging.swift */; };
+		469D5D4A324C60D0952848A0 /* ADBClient+AppProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B6332F07ED146B775935E59 /* ADBClient+AppProxy.swift */; };
 		4CC46AA221A6EC77BCBB285C /* RunnerCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16BF2F8305C02F1E8E553ECE /* RunnerCoordinator.swift */; };
 		4F1A02EE0DB0CA2E4820E00D /* Frame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B34C727643E7E72B325A772 /* Frame.swift */; };
 		4FF890186A809726BAAF7FC2 /* AppMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCFDF475DAD0EB0CACFD2245 /* AppMigration.swift */; };
@@ -54,6 +57,7 @@
 		74A93C1F77047983F9AF98C6 /* InputChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC417C37F335A7C64F188777 /* InputChannel.swift */; };
 		763AB37F01BD333C36956296 /* SDKPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D06550EAA0A96BB8CB36BC /* SDKPaths.swift */; };
 		7700A4B60AEF1DB5DC123672 /* dumpsys-display-1secondary.txt in Resources */ = {isa = PBXBuildFile; fileRef = C163D4A3B4515AECBAC00BD2 /* dumpsys-display-1secondary.txt */; };
+		7AE0BF2997499CBC7BD4B223 /* HTTPProxyEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DA9A484A063F185D0AD4420 /* HTTPProxyEndpoint.swift */; };
 		820B8C8D33AA97A29C83B088 /* MandroidKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E3EBD02845AA73DAB1A6BEF8 /* MandroidKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		84538782C4DCD2DB0AB6EB68 /* AVDConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A2D91E25EFC7A1E2703034 /* AVDConfig.swift */; };
 		875091EB49C033602956E670 /* GuestSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFFD778394E844C309B038E7 /* GuestSetup.swift */; };
@@ -73,6 +77,7 @@
 		B2DA180DC86E66C5C044B049 /* GRPCCore in Frameworks */ = {isa = PBXBuildFile; productRef = 17B27CC7ECC0679E3B7D1E78 /* GRPCCore */; };
 		B84370C1FA055B031EC1EA83 /* WindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573F637DED923589D2EA7A4D /* WindowManager.swift */; };
 		BE7BB2EA4A9B4702690989EC /* AppCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B83297A94905C8AB9B23F9C3 /* AppCatalog.swift */; };
+		C74B91BD02E590AA9175CEFB /* AppProxyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D696C8B2F08DE35734A372F0 /* AppProxyView.swift */; };
 		C799C337A2138CB133871FA2 /* GRPCProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = D0A6D278C7A47F529FEE5404 /* GRPCProtobuf */; };
 		CDE305331380AF7CBD85F64C /* Unarchiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 452642B45534C755FF9E3CC4 /* Unarchiver.swift */; };
 		D0AD9DA64E84B6D390110921 /* UITestMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6779B6FF861E9BD4662EA422 /* UITestMode.swift */; };
@@ -141,6 +146,7 @@
 
 /* Begin PBXFileReference section */
 		0474DE5D80286AB4EFFC76CB /* SDKBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKBootstrap.swift; sourceTree = "<group>"; };
+		05E3D8D73C25821980720D7F /* AppProxyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppProxyTests.swift; sourceTree = "<group>"; };
 		08F68DF1547E8385DD5C111B /* PasteboardClipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardClipboard.swift; sourceTree = "<group>"; };
 		0CA57E57B95AE22134C1E9C8 /* LauncherStubBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LauncherStubBuilder.swift; sourceTree = "<group>"; };
 		0F844F828334E854BE651303 /* PortAllocatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortAllocatorTests.swift; sourceTree = "<group>"; };
@@ -155,12 +161,14 @@
 		1F57E157A54D12371B3287E5 /* TaskListParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListParser.swift; sourceTree = "<group>"; };
 		22DD162AE710D7293ABAE6DA /* RepositoryManifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryManifest.swift; sourceTree = "<group>"; };
 		259DC05229C3C583DD81182C /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		2B6332F07ED146B775935E59 /* ADBClient+AppProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ADBClient+AppProxy.swift"; sourceTree = "<group>"; };
 		2CFC50724898B32D7CC77A08 /* AAPT2Fetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AAPT2Fetcher.swift; sourceTree = "<group>"; };
 		2F3481CEAFB41E623B50A605 /* AuditRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditRegressionTests.swift; sourceTree = "<group>"; };
 		3112787BCD2CFEB6E6A41B16 /* GRPCFrameStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRPCFrameStream.swift; sourceTree = "<group>"; };
 		3193E87696207FEEEFD9B8C5 /* RunnerSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerSettings.swift; sourceTree = "<group>"; };
 		3B34C727643E7E72B325A772 /* Frame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Frame.swift; sourceTree = "<group>"; };
 		3C5C06B40C73CFB7A58BF53B /* RunnerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerState.swift; sourceTree = "<group>"; };
+		3DA9A484A063F185D0AD4420 /* HTTPProxyEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPProxyEndpoint.swift; sourceTree = "<group>"; };
 		3E22BE59D5B4E341E083891B /* dumpsys-display-0only.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "dumpsys-display-0only.txt"; sourceTree = "<group>"; };
 		41FB3548E919B9B9C44A7761 /* SetupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupWindowController.swift; sourceTree = "<group>"; };
 		452642B45534C755FF9E3CC4 /* Unarchiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unarchiver.swift; sourceTree = "<group>"; };
@@ -180,6 +188,7 @@
 		6DE4A7E717C8676F19AF5A01 /* ParkedOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParkedOverlayView.swift; sourceTree = "<group>"; };
 		759F9FA0196823EB903E42BC /* MediaVolume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaVolume.swift; sourceTree = "<group>"; };
 		782AB065419FE991C79921CE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		7989D6ECDD251AAA5E517B89 /* proxy-agent.apk */ = {isa = PBXFileReference; path = "proxy-agent.apk"; sourceTree = "<group>"; };
 		7A060D4CAD73DA56209C2447 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AABAAC0B4AC9941A2D95201 /* MandroidKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MandroidKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E6C6EC4702A6E611DFB62D7 /* aapt2-maven-metadata.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "aapt2-maven-metadata.xml"; sourceTree = "<group>"; };
@@ -210,6 +219,7 @@
 		CDDC728FEC8C95305485F555 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		D11E38C038FB4B3588521DD2 /* DumpsysDisplayParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DumpsysDisplayParser.swift; sourceTree = "<group>"; };
 		D34956E2C8525B2923BD5DB9 /* repository2-3.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "repository2-3.xml"; sourceTree = "<group>"; };
+		D696C8B2F08DE35734A372F0 /* AppProxyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppProxyView.swift; sourceTree = "<group>"; };
 		D8606B63E97ACE543CFD3493 /* MediaVolumeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaVolumeTests.swift; sourceTree = "<group>"; };
 		D9850A27EBA910D608B21E5D /* PortAllocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortAllocator.swift; sourceTree = "<group>"; };
 		DB937303F6A23EDA3C41AFEE /* URLSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeHandler.swift; sourceTree = "<group>"; };
@@ -294,6 +304,7 @@
 			isa = PBXGroup;
 			children = (
 				47C65349DBB2EA8395C63E55 /* ADBClient.swift */,
+				2B6332F07ED146B775935E59 /* ADBClient+AppProxy.swift */,
 				D11E38C038FB4B3588521DD2 /* DumpsysDisplayParser.swift */,
 				759F9FA0196823EB903E42BC /* MediaVolume.swift */,
 				C489BE2152005B66250C0ABB /* PackageListParser.swift */,
@@ -463,6 +474,7 @@
 				8C6DEB96CC95D7616B16C237 /* Frames */,
 				D7AE80EE0661981B1AEBEA1F /* Generated */,
 				789E83CEF135FEA105396E66 /* Input */,
+				E0A1EE4916C545A0989344D1 /* Proxy */,
 				DCC2908D0FA96D105FC25C25 /* Resources */,
 				62324783658A6E69B1E3746F /* Runner */,
 				88E18CEF6A86EAF7F5CB77E7 /* SDK */,
@@ -474,6 +486,7 @@
 		B6FE4CE5AB76CB99A48936A6 /* Library */ = {
 			isa = PBXGroup;
 			children = (
+				D696C8B2F08DE35734A372F0 /* AppProxyView.swift */,
 				259DC05229C3C583DD81182C /* LibraryView.swift */,
 				4BB8014AB35C738E335559BD /* LibraryWindowController.swift */,
 			);
@@ -523,6 +536,7 @@
 			isa = PBXGroup;
 			children = (
 				F094A6E1BC089B2693B13E3E /* AppMigrationTests.swift */,
+				05E3D8D73C25821980720D7F /* AppProxyTests.swift */,
 				2F3481CEAFB41E623B50A605 /* AuditRegressionTests.swift */,
 				AE44AA57BFC4862E28A97484 /* CatalogTests.swift */,
 				6811683DF5318ABF587E2333 /* Fixtures.swift */,
@@ -549,8 +563,17 @@
 			isa = PBXGroup;
 			children = (
 				1B295493DF380A14E7678370 /* guest-display.jar */,
+				7989D6ECDD251AAA5E517B89 /* proxy-agent.apk */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		E0A1EE4916C545A0989344D1 /* Proxy */ = {
+			isa = PBXGroup;
+			children = (
+				3DA9A484A063F185D0AD4420 /* HTTPProxyEndpoint.swift */,
+			);
+			path = Proxy;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -696,6 +719,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E377C462F430226BDAF01C2 /* guest-display.jar in Resources */,
+				2E8224C18133B6A58DDE0E24 /* proxy-agent.apk in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -707,6 +731,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6DC9A901C87D8826C8D92CF7 /* AppDelegate.swift in Sources */,
+				C74B91BD02E590AA9175CEFB /* AppProxyView.swift in Sources */,
 				34DCBE5B97CD020796A1351F /* AppWindowController.swift in Sources */,
 				05D232786974587E475E9966 /* DebugHooks.swift in Sources */,
 				3527AAD84254AF8D34B7EEB6 /* FrameView.swift in Sources */,
@@ -730,6 +755,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3E2808F8E2220D9787390C22 /* AppMigrationTests.swift in Sources */,
+				308932A4547F01DC338B9327 /* AppProxyTests.swift in Sources */,
 				00EBD9C62DC4790FF40C7C6B /* AuditRegressionTests.swift in Sources */,
 				042A528ECE7E1A97BEF0C932 /* CatalogTests.swift in Sources */,
 				407A8753EE4BABD7F642049B /* Fixtures.swift in Sources */,
@@ -747,6 +773,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F6A7DC84B7247B1E506DA65D /* AAPT2Fetcher.swift in Sources */,
+				469D5D4A324C60D0952848A0 /* ADBClient+AppProxy.swift in Sources */,
 				2B01A437E721A3566272BD44 /* ADBClient.swift in Sources */,
 				446CFC09E215508235EF61BA /* APKBadging.swift in Sources */,
 				84538782C4DCD2DB0AB6EB68 /* AVDConfig.swift in Sources */,
@@ -769,6 +796,7 @@
 				4F1A02EE0DB0CA2E4820E00D /* Frame.swift in Sources */,
 				400DF40E5CA1F033D0C6024A /* GRPCFrameStream.swift in Sources */,
 				875091EB49C033602956E670 /* GuestSetup.swift in Sources */,
+				7AE0BF2997499CBC7BD4B223 /* HTTPProxyEndpoint.swift in Sources */,
 				8D4ED6A726DA7E4EAAAE88B0 /* IconExtractor.swift in Sources */,
 				74A93C1F77047983F9AF98C6 /* InputChannel.swift in Sources */,
 				D31CB0D9A9380FA508B0B53C /* InputRouter.swift in Sources */,

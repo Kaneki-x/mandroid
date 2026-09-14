@@ -25,7 +25,7 @@ public enum InstalledApps {
             let s = line.trimmingCharacters(in: .whitespaces)
             guard s.hasPrefix("package:") else { return nil }
             let parts = s.dropFirst("package:".count).split(separator: " ")
-            guard let pkg = parts.first else { return nil }
+            guard let pkg = parts.first, pkg != ADBClient.proxyAgentPackage else { return nil }
             let vc = parts.dropFirst().first { $0.hasPrefix("versionCode:") }
                 .flatMap { Int($0.dropFirst("versionCode:".count)) } ?? 0
             return (String(pkg), vc)

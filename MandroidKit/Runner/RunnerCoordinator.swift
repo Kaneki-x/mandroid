@@ -32,6 +32,10 @@ public final class RunnerCoordinator {
     /// Set by the app to enable clipboard sync (needs AppKit's pasteboard).
     public var hostClipboard: (any HostClipboard)?
 
+    public private(set) var appProxies: [String: HTTPProxyEndpoint] = [:]
+    public private(set) var proxyError: String?
+    private var savingProxy = false
+
     public let paths: SDKPaths
     public let bootstrap: SDKBootstrap
     public let avdStore: AVDStore
@@ -44,6 +48,8 @@ public final class RunnerCoordinator {
         self.paths = paths
         self.bootstrap = SDKBootstrap(paths: paths)
         self.avdStore = AVDStore(paths: paths)
+        do { appProxies = try AppProxyStore.load(at: paths.root) }
+        catch { proxyError = error.localizedDescription }
     }
 
     // MARK: Lifecycle
@@ -177,6 +183,7 @@ public final class RunnerCoordinator {
                 }
             }
             await GuestSetup.apply(adb: adb)
+            await restoreAppProxies(adb: adb)
             if let volume = RunnerSettings.load().mediaVolumePercent {
                 do { _ = try await adb.setMediaVolume(percent: volume) }
                 catch { Log.file("Could not restore media volume: \(error.localizedDescription)", paths: paths) }
@@ -348,6 +355,7 @@ public final class RunnerCoordinator {
 
     /// Creates a display and launches (or brings back) the app on it.
     public func openApp(package: String, width: Int, height: Int, dpi: Int) async throws -> AppSession {
+        if let proxyError { throw MandroidKitError.adb("App HTTP proxies are not active: \(proxyError)") }
         guard state.isReady, let session else { throw MandroidKitError.emulator("not running") }
         guard !changingPackages.contains(package) else { throw MandroidKitError.display("app operation already in progress") }
         if let existing = sessions[package] { return existing }
@@ -434,9 +442,37 @@ public final class RunnerCoordinator {
         return updated
     }
 
+    private func restoreAppProxies(adb: ADBClient) async {
+        do {
+            appProxies = try AppProxyStore.load(at: paths.root)
+            try await adb.applyAppProxies(appProxies)
+            proxyError = nil
+        } catch {
+            proxyError = error.localizedDescription
+        }
+    }
+
+    public func setHTTPProxy(_ proxy: HTTPProxyEndpoint?, for package: String) async throws {
+        guard !savingProxy else { throw MandroidKitError.adb("Another proxy change is still being applied") }
+        savingProxy = true
+        defer { savingProxy = false }
+        var next = appProxies
+        next[package] = proxy
+        let adb = session?.adb
+        if let adb { try await adb.applyAppProxies(next) }
+        do { try AppProxyStore.save(next, at: paths.root) }
+        catch {
+            if let adb { try? await adb.applyAppProxies(appProxies) }
+            throw error
+        }
+        appProxies = next
+        proxyError = nil
+    }
+
     public func installAPK(_ url: URL) async throws {
         guard let session else { throw MandroidKitError.emulator("not running") }
         try await session.adb.install(apk: url)
+        await restoreAppProxies(adb: session.adb)
         await refreshApps()
     }
 
@@ -444,6 +480,7 @@ public final class RunnerCoordinator {
         guard let session else { throw MandroidKitError.emulator("not running") }
         if let app = sessions[package] ?? parked[package] { await closeApp(app) }
         try await session.adb.uninstall(package)
+        if appProxies[package] != nil { try await setHTTPProxy(nil, for: package) }
         await catalog?.invalidate(package: package)
         await refreshApps()
     }

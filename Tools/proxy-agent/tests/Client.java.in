@@ -1,0 +1,53 @@
+package PACKAGE;
+
+import android.app.Activity;
+import android.os.Bundle;
+import java.net.*;
+import java.io.*;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import javax.net.ssl.*;
+import org.json.JSONObject;
+
+/** Test fixture only; not included in the bundled helper. Uses normal Android proxy selection. */
+public class Main extends Activity {
+    public void onCreate(Bundle state) {
+        super.onCreate(state);
+        String address = getIntent().getStringExtra("url");
+        String certificate = getIntent().getStringExtra("certificate");
+        new Thread(() -> {
+            JSONObject result = new JSONObject();
+            try {
+                URL url = new URL(address);
+                result.put("proxy", ProxySelector.getDefault().select(url.toURI()).toString());
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                if (connection instanceof HttpsURLConnection && certificate != null) {
+                    // Trust only the generated fixture certificate, retaining HTTPS hostname verification.
+                    byte[] pinned = android.util.Base64.decode(certificate, 0);
+                    SSLContext tls = SSLContext.getInstance("TLS");
+                    tls.init(null, new TrustManager[]{new X509TrustManager() {
+                        public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+                        public void checkClientTrusted(X509Certificate[] chain, String auth) { throw new UnsupportedOperationException(); }
+                        public void checkServerTrusted(X509Certificate[] chain, String auth) throws java.security.cert.CertificateException {
+                            if (chain.length == 0 || !Arrays.equals(chain[0].getEncoded(), pinned)) throw new java.security.cert.CertificateException("Unexpected test certificate");
+                            chain[0].checkValidity();
+                        }
+                    }}, null);
+                    ((HttpsURLConnection) connection).setSSLSocketFactory(tls.getSocketFactory());
+                }
+                connection.setConnectTimeout(10000); connection.setReadTimeout(10000);
+                ByteArrayOutputStream body = new ByteArrayOutputStream();
+                try (InputStream input = connection.getInputStream()) {
+                    byte[] buffer = new byte[4096]; int count;
+                    while ((count = input.read(buffer)) != -1) body.write(buffer, 0, count);
+                }
+                result.put("body", body.toString("UTF-8"));
+            } catch (Exception error) {
+                try { result.put("error", error.toString()); } catch (Exception ignored) { }
+            }
+            try (FileOutputStream output = openFileOutput("result", 0)) { output.write(result.toString().getBytes("UTF-8")); }
+            catch (Exception ignored) { }
+            finish();
+        }).start();
+    }
+}

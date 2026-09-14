@@ -639,3 +639,30 @@ No audio streaming or host-side playback is added.
 
 Mandroid's private ADB environment sets `ADB_USB=0`: only emulator transports are
 needed, and physical USB enumeration can stall in IOKit during desktop launches.
+
+### Per-app HTTP proxy settings
+
+The library's HTTP Proxy sheet stores independent host/port endpoints by Android
+package in `<root>/app-proxies.json`. Localhost endpoints use the emulator's
+`10.0.2.2` alias to reach a proxy on the Mac. The host reapplies settings after
+boot and package changes and waits for a revision-specific acknowledgement.
+
+A bundled, signed Android APK (`Tools/proxy-agent`) uses the public
+`VpnService.Builder.addAllowedApplication` and `setHttpProxy` APIs to recommend a
+loopback HTTP proxy only to configured apps. Its listener looks up the client
+UID with `ConnectivityManager.getConnectionOwnerUid`, then bridges that
+connection to the corresponding upstream HTTP proxy. HTTP and HTTPS CONNECT
+bytes are forwarded without TLS interception. Unknown UIDs are rejected;
+shared-UID apps cannot be assigned conflicting endpoints. The helper is hidden
+from the library, and only the Android shell/system can access its configuration
+activity and status provider (the DUMP permission).
+
+This is an HTTP proxy setting, not a forced tunnel for arbitrary app traffic.
+Apps that ignore Android's proxy recommendation remain direct. No IP routes are
+captured, and apps outside the allowed list retain their normal network.
+Android provides one VPN connection per user, so this feature replaces another
+Android VPN if one is active. See the [Android VPN proxy API](https://developer.android.com/reference/android/net/VpnService.Builder#setHttpProxy(android.net.ProxyInfo)).
+
+Rebuild the APK using `Scripts/gen-proxy-agent.sh` with JDK 17, `ANDROID_JAR`,
+`ANDROID_BUILD_TOOLS`, `KEYSTORE_PATH`, `KEY_ALIAS`, and `KEYSTORE_PASSWORD`.
+Use the same signing key for upgrades. Runtime users need no Android build tools.
