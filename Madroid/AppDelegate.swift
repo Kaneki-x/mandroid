@@ -70,7 +70,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appsObservation = Task { @MainActor [weak self] in
             while let self, !Task.isCancelled {
                 let apps = withObservationTracking { self.coordinator.apps } onChange: {}
-                if !UITestMode.enabled, !apps.isEmpty, UserDefaults.standard.object(forKey: "launcherStubs") as? Bool ?? true {
+                if !UITestMode.enabled, self.coordinator.state.isReady, UserDefaults.standard.object(forKey: "launcherStubs") as? Bool ?? true {
                     LauncherStubBuilder.sync(apps)
                 }
                 await withCheckedContinuation { cont in
@@ -156,7 +156,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard coordinator.session != nil else { return .terminateNow }
         Task { @MainActor in
             windows.closeAll()
             await coordinator.shutdown()
@@ -168,7 +167,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func application(_ application: NSApplication, open urls: [URL]) {
         for url in urls {
             if url.isFileURL, url.pathExtension.lowercased() == "apk" {
-                Task { try? await coordinator.installAPK(url) }
+                URLSchemeHandler(delegate: self).whenReady {
+                    Task {
+                        do { try await self.coordinator.installAPK(url) }
+                        catch { self.windows.presentError(error, title: "Install failed") }
+                    }
+                }
             } else if url.scheme == "madroid" {
                 URLSchemeHandler(delegate: self).handle(url)
             }

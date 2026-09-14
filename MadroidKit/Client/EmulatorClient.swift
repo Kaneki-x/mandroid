@@ -35,6 +35,12 @@ public struct EmulatorClient: Sendable {
 
     public init(connection: EmulatorConnection) { self.connection = connection }
 
+    private var commandOptions: CallOptions {
+        var options = CallOptions.defaults
+        options.timeout = .seconds(10)
+        return options
+    }
+
     public func status() async throws -> (version: String, booted: Bool, uptimeMs: Int64) {
         let s = try await controller.getStatus(Google_Protobuf_Empty())
         return (s.version, s.booted, Int64(s.uptime))
@@ -59,7 +65,7 @@ public struct EmulatorClient: Sendable {
             req.displays.append(d)
         }
         do {
-            return try await controller.setDisplayConfigurations(req)
+            return try await controller.setDisplayConfigurations(req, options: commandOptions)
         } catch let e as RPCError {
             throw MadroidKitError.display("setDisplayConfigurations: \(e.code) \(e.message)")
         }
@@ -94,6 +100,6 @@ public struct EmulatorClient: Sendable {
     public func requestShutdown() async throws {
         var s = Android_Emulation_Control_VmRunState()
         s.state = .shutdown
-        _ = try await controller.setVmState(s)
+        _ = try await controller.setVmState(s, options: commandOptions)
     }
 }

@@ -21,6 +21,7 @@ public enum Subprocess {
         stdin: Data? = nil
     ) async throws -> SubprocessResult {
         let process = Process()
+        let lifecycle = ProcessLifecycle(process)
         process.executableURL = executable
         process.arguments = arguments
         if let environment { process.environment = environment }
@@ -34,7 +35,7 @@ public enum Subprocess {
         let outHandle = out.fileHandleForReading
         let errHandle = err.fileHandleForReading
 
-        return try await withTaskCancellationHandler {
+        let result = try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { (cont: CheckedContinuation<SubprocessResult, Error>) in
                 let group = DispatchGroup()
                 let box = ResultBox()
@@ -57,17 +58,50 @@ public enum Subprocess {
                     }
                 }
                 do {
-                    try process.run()
+                    try lifecycle.start()
                     if let inPipe, let stdin {
-                        inPipe.fileHandleForWriting.write(stdin)
-                        try? inPipe.fileHandleForWriting.close()
+                        DispatchQueue.global().async {
+                            try? inPipe.fileHandleForWriting.write(contentsOf: stdin)
+                            try? inPipe.fileHandleForWriting.close()
+                        }
                     }
                 } catch {
+                    try? out.fileHandleForWriting.close()
+                    try? err.fileHandleForWriting.close()
+                    try? inPipe?.fileHandleForWriting.close()
                     cont.resume(throwing: error)
                 }
             }
         } onCancel: {
-            if process.isRunning { process.terminate() }
+            lifecycle.cancel()
+        }
+        try Task.checkCancellation()
+        return result
+    }
+
+    /// Serializes cancellation with launch so a pre-cancelled task cannot
+    /// spawn an unowned process. Escalate when a child ignores SIGTERM.
+    private final class ProcessLifecycle: @unchecked Sendable {
+        private let lock = NSLock()
+        private let process: Process
+        private var cancelled = false
+        init(_ process: Process) { self.process = process }
+        func start() throws {
+            try lock.withLock {
+                if cancelled { throw CancellationError() }
+                try process.run()
+            }
+        }
+        func cancel() {
+            lock.withLock {
+                cancelled = true
+                if process.isRunning { process.terminate() }
+            }
+            DispatchQueue.global().asyncAfter(deadline: .now() + 1) { [self] in
+                lock.withLock {
+                    if process.isRunning { Darwin.kill(process.processIdentifier, SIGKILL) }
+                }
+            }
         }
     }
 

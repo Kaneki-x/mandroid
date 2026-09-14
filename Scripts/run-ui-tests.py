@@ -4,6 +4,7 @@ import argparse
 import os
 from pathlib import Path
 import signal
+import shutil
 import subprocess
 import tempfile
 import time
@@ -25,6 +26,12 @@ for name in ('sdk', 'tools'):
     if not (args.sdk_data / name).is_dir():
         parser.error(f'Missing installed {name} in --sdk-data')
 root = Path(tempfile.mkdtemp(prefix='madroid-ui-', dir=Path.home() / 'Library/Caches'))
+if apk is not None:
+    # Read user-selected inputs from the shell, then let the hidden app use
+    # its own cache. Downloads/external volumes may require a visible TCC prompt.
+    staged_apk = root / 'input.apk'
+    shutil.copy2(apk, staged_apk)
+    apk = staged_apk
 for name in ('sdk', 'tools'):
     (root / name).symlink_to((args.sdk_data / name).resolve(), target_is_directory=True)
 control = root / 'control'
@@ -39,17 +46,28 @@ with (root / 'host.log').open('w') as log:
         '-dataRoot', str(root), '-uiTestControlDirectory', str(control),
         '-launcherStubs', 'NO'], stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
     script = 'volume-test.sh' if args.test == 'volume' else 'integration-test.sh'
-    test = subprocess.Popen(['zsh', str(Path(__file__).with_name(script))],
-                            env=env, start_new_session=True)
+    test = None
     try:
+        test = subprocess.Popen(['zsh', str(Path(__file__).with_name(script))],
+                                env=env, start_new_session=True)
         while test.poll() is None and process.poll() is None:
             time.sleep(0.2)
         if test.poll() is None:
             raise RuntimeError(f'Test app exited early; see {root}/host.log')
     finally:
-        if test.poll() is None:
-            os.killpg(test.pid, signal.SIGTERM)
-            test.wait(timeout=10)
+        if test is not None and test.poll() is None:
+            try:
+                os.killpg(test.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+            try:
+                test.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                try:
+                    os.killpg(test.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                test.wait()
         command = control / f'{time.time_ns()}.tmp'
         command.write_text('madroid://debug/quit')
         command.rename(command.with_suffix('.command'))

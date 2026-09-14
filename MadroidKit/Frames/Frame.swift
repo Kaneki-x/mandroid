@@ -9,7 +9,12 @@ public struct Frame: Sendable {
     public let timestampUs: UInt64
 
     public var bytesPerRow: Int { width * 4 }
-    public var isComplete: Bool { pixels.count >= width * height * 4 }
+    public var isComplete: Bool {
+        guard width > 0, height > 0 else { return false }
+        let (area, areaOverflow) = width.multipliedReportingOverflow(by: height)
+        let (bytes, byteOverflow) = area.multipliedReportingOverflow(by: 4)
+        return !areaOverflow && !byteOverflow && pixels.count >= bytes
+    }
 }
 
 /// Source of frames for one display. Implementations may drop frames when

@@ -7,6 +7,7 @@ final class WindowManager {
     let coordinator: RunnerCoordinator
     private(set) var appWindows: [String: AppWindowController] = [:]
     private(set) var deviceWindow: AppWindowController?
+    private var opening: [String: Task<Void, Never>] = [:]
 
     init(coordinator: RunnerCoordinator) { self.coordinator = coordinator }
 
@@ -28,9 +29,11 @@ final class WindowManager {
             if existing.isParked { existing.resume() }
             return
         }
+        guard opening[package] == nil else { return }
         let size = defaultAppSize()
         let scale = NSScreen.main?.backingScaleFactor ?? 2
-        Task { @MainActor in
+        opening[package] = Task { @MainActor in
+            defer { opening[package] = nil }
             do {
                 try await makeRoomForNewWindow()
                 let app = try await coordinator.openApp(package: package,
@@ -45,7 +48,10 @@ final class WindowManager {
                     wc.showWindow(nil)
                     wc.window?.makeKeyAndOrderFront(nil)
                 }
+            } catch is CancellationError {
+                return
             } catch {
+                guard !Task.isCancelled else { return }
                 presentError(error, title: "Could not open \(package)")
             }
         }
@@ -86,6 +92,7 @@ final class WindowManager {
     }
 
     func closeAll() {
+        opening.values.forEach { $0.cancel() }
         for wc in appWindows.values { wc.close() }
         appWindows = [:]
         deviceWindow?.close()

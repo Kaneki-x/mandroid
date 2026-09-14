@@ -18,11 +18,12 @@ public final class EmulatorConnection: Sendable {
 
     /// Call options for screenshot RPCs. The NIO transport sizes its inbound
     /// decoder from `maxRequestMessageBytes` (spike item 10), so both limits
-    /// are raised to 64 MiB.
+    /// are raised to 256 MiB to fit the largest supported 7680×7680 RGBA
+    /// display (225 MiB), including the protobuf envelope.
     public static var largeMessageOptions: CallOptions {
         var o = CallOptions.defaults
-        o.maxRequestMessageBytes = 64 << 20
-        o.maxResponseMessageBytes = 64 << 20
+        o.maxRequestMessageBytes = 256 << 20
+        o.maxResponseMessageBytes = 256 << 20
         return o
     }
 

@@ -42,6 +42,7 @@
 		709829F32C8B9CE2028DAA62 /* GRPCNIOTransportHTTP2 in Frameworks */ = {isa = PBXBuildFile; productRef = 64DBC801959929BAFE0DF298 /* GRPCNIOTransportHTTP2 */; };
 		79DC64E1ED8F2676F9B323DC /* IconExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978C9042775172368213B6A4 /* IconExtractor.swift */; };
 		7BEA42871B8524F441E72A64 /* Subprocess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECB7BAB81E41F5155DCDBE6 /* Subprocess.swift */; };
+		80947DFF7D233D1B7AF5B466 /* LauncherStubBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E212C1AA08DAABC713DAE07 /* LauncherStubBuilder.swift */; };
 		8449A2CBDE7AFD0851EA2485 /* ParkedOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1812C470EFB1B70320AAA1 /* ParkedOverlayView.swift */; };
 		89FC524313D00573F1A83964 /* AVDConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB2C08B95DD130C292C9683 /* AVDConfig.swift */; };
 		8C03369A40913C78CCC49FA0 /* DownloadMirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = D764AAC18B06926AF51A101F /* DownloadMirror.swift */; };
@@ -72,6 +73,7 @@
 		BBD16999E719D05B9AB1B8DC /* MadroidKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4A0B8CC15D4CC13B85617D9C /* MadroidKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		BCBF656E988DA3992021DB2F /* InputChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFA94FA87E2555DAF7EEFF0 /* InputChannel.swift */; };
 		BE4B1029CF81E8E7F8023D09 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC9024FE1074B14902AA1768 /* SettingsView.swift */; };
+		BE5E60A8AF2E4080E64720D7 /* AuditRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8758D98207DC7E336568C377 /* AuditRegressionTests.swift */; };
 		C375FCC0C9EF58A5A9325D80 /* MediaVolume.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9014373316B1094081D2AFD /* MediaVolume.swift */; };
 		C53CE348B54948915E4FD834 /* GRPCCore in Frameworks */ = {isa = PBXBuildFile; productRef = 541B03909587D655A035FFF6 /* GRPCCore */; };
 		C590CF47351E1D22D3CB8649 /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495AA588421958636240FE99 /* MainMenu.swift */; };
@@ -181,6 +183,7 @@
 		7EEF432604A0D7ADB20E7E62 /* emulator_controller.grpc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = emulator_controller.grpc.swift; sourceTree = "<group>"; };
 		86559A436E9653F7F65F2993 /* sys-img2-3-google_apis_playstore.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "sys-img2-3-google_apis_playstore.xml"; sourceTree = "<group>"; };
 		86C99C8E31F705D1112BEB80 /* ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParserTests.swift; sourceTree = "<group>"; };
+		8758D98207DC7E336568C377 /* AuditRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditRegressionTests.swift; sourceTree = "<group>"; };
 		8A904CC299CB94D3C818D45C /* Downloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloader.swift; sourceTree = "<group>"; };
 		9287E3E429B90976B1BC06B6 /* SDKBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKBootstrap.swift; sourceTree = "<group>"; };
 		93951F74B81FE56031140106 /* emulator_controller.pb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = emulator_controller.pb.swift; sourceTree = "<group>"; };
@@ -411,6 +414,7 @@
 		91BBF6ADE037AD40413753D2 /* MadroidKitTests */ = {
 			isa = PBXGroup;
 			children = (
+				8758D98207DC7E336568C377 /* AuditRegressionTests.swift */,
 				B4BB46CB9F7058FACA99EAD8 /* CatalogTests.swift */,
 				E65D46CB7589A2820F1476AB /* Fixtures.swift */,
 				A1A6585A9333132465C07E2C /* InputTests.swift */,
@@ -719,9 +723,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BE5E60A8AF2E4080E64720D7 /* AuditRegressionTests.swift in Sources */,
 				B4453A52DD2A676DE6660B21 /* CatalogTests.swift in Sources */,
 				ED3E21B62AF626B0F4E3B3E8 /* Fixtures.swift in Sources */,
 				2F48C64DFEBB6D3FA0335417 /* InputTests.swift in Sources */,
+				80947DFF7D233D1B7AF5B466 /* LauncherStubBuilder.swift in Sources */,
 				DF9068F5EE508EFA469BBC85 /* MediaVolumeTests.swift in Sources */,
 				965CC64444C360F919CA3A47 /* ParserTests.swift in Sources */,
 				46BFB6C89036473D57AE7AF9 /* PortAllocatorTests.swift in Sources */,

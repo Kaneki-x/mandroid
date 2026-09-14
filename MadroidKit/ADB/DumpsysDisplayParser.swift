@@ -58,7 +58,8 @@ public enum DumpsysDisplayParser {
     private static func size(after marker: String, in s: String) -> (Int, Int)? {
         guard let r = s.range(of: marker) else { return nil }
         let rest = s[r.upperBound...]
-        let comps = rest.split(separator: ",", maxSplits: 1)[0].split(separator: " ")
+        guard let rawSize = rest.split(separator: ",", maxSplits: 1).first else { return nil }
+        let comps = rawSize.split(separator: " ")
         guard comps.count >= 3, comps[1] == "x", let w = Int(comps[0]), let h = Int(comps[2]) else { return nil }
         return (w, h)
     }

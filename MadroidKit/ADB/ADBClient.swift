@@ -37,13 +37,19 @@ public actor ADBClient {
         return r.stdoutText
     }
 
+    @discardableResult
     public func shell(_ command: String, timeout: Duration = .seconds(30)) async throws -> String {
         try await run(["shell", command], timeout: timeout)
     }
 
     /// Server-level command without `-s` (e.g. `kill-server`, `devices`).
     public func server(_ args: [String]) async throws -> String {
-        let r = try await Subprocess.run(binary, arguments: ["-P", String(serverPort)] + args, environment: environment)
+        let r = try await withThrowingTaskGroup(of: SubprocessResult.self) { group in
+            group.addTask { try await Subprocess.run(self.binary, arguments: ["-P", String(self.serverPort)] + args, environment: self.environment) }
+            group.addTask { try await Task.sleep(for: .seconds(30)); throw MadroidKitError.timeout("adb server command") }
+            defer { group.cancelAll() }
+            return try await group.next()!
+        }
         guard r.status == 0 else { throw MadroidKitError.adb(r.stderrText) }
         return r.stdoutText
     }
@@ -64,13 +70,19 @@ public actor ADBClient {
     }
 
     public func killServer() async {
-        _ = try? await Subprocess.run(binary, arguments: ["-P", String(serverPort), "kill-server"], environment: environment)
+        _ = try? await server(["kill-server"])
     }
 
     // MARK: Convenience
 
+    /// adb shell takes a command string; Process argument boundaries do not
+    /// survive the remote shell. Quote every interpolated string argument.
+    public nonisolated static func shellQuote(_ value: String) -> String {
+        "'" + value.replacingOccurrences(of: "'", with: "'\"'\"'") + "'"
+    }
+
     public func getprop(_ name: String) async throws -> String {
-        try await shell("getprop \(name)").trimmingCharacters(in: .whitespacesAndNewlines)
+        try await shell("getprop \(Self.shellQuote(name))").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     public func isBootCompleted() async -> Bool {
@@ -85,13 +97,13 @@ public actor ADBClient {
 
     /// `com.example/.MainActivity` for the launcher activity of `package`.
     public func launcherComponent(of package: String) async throws -> String? {
-        let out = try await shell("cmd package resolve-activity --brief -c android.intent.category.LAUNCHER \(package)")
+        let out = try await shell("cmd package resolve-activity --brief -c android.intent.category.LAUNCHER \(Self.shellQuote(package))")
         return out.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }
             .last { $0.contains("/") && !$0.hasPrefix("priority") }
     }
 
     public func startActivity(component: String, displayID: Int) async throws {
-        let out = try await shell("am start --display \(displayID) -n \(component)")
+        let out = try await shell("am start --display \(displayID) -n \(Self.shellQuote(component))")
         if out.contains("Error") { throw MadroidKitError.adb(out.trimmingCharacters(in: .whitespacesAndNewlines)) }
     }
 
@@ -124,7 +136,7 @@ public actor ADBClient {
     /// These Android compatibility overrides also relax the activity bounds.
     /// --no-kill preserves a running task when a parked window resumes.
     public func useWindowOrientation(for package: String) async throws {
-        let quotedPackage = "'" + package.replacingOccurrences(of: "'", with: "'\"'\"'") + "'"
+        let quotedPackage = Self.shellQuote(package)
         for change in ["OVERRIDE_ANY_ORIENTATION", "OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR"] {
             let result = try await shell("am compat enable --no-kill \(change) \(quotedPackage)")
             guard result.contains("Enabled change") else {
@@ -157,7 +169,7 @@ public actor ADBClient {
     }
 
     public func forceStop(_ package: String) async throws {
-        try await shell("am force-stop \(package)")
+        try await shell("am force-stop \(Self.shellQuote(package))")
     }
 
     public func install(apk: URL) async throws {
@@ -178,6 +190,6 @@ public actor ADBClient {
 
     public func keyevent(_ key: String, displayID: Int? = nil) async throws {
         let d = displayID.map { "-d \($0) " } ?? ""
-        try await shell("input \(d)keyevent \(key)")
+        try await shell("input \(d)keyevent \(Self.shellQuote(key))")
     }
 }

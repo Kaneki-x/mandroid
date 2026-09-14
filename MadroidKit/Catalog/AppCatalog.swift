@@ -65,12 +65,14 @@ public actor AppCatalog {
         onUpdate(result)
         var tool: URL?
         for (i, app) in installed.enumerated() where load(app.package, app.versionCode) == nil {
+            try Task.checkCancellation()
             do {
                 if tool == nil { tool = try await aapt2.ensureInstalled() }
                 let info = try await resolve(package: app.package, versionCode: app.versionCode, aapt2: tool!)
                 result[i] = info
                 onUpdate(result)
             } catch {
+                try Task.checkCancellation()
                 Log.sdk.warning("catalog: \(app.package): \(error.localizedDescription)")
             }
         }
@@ -108,7 +110,7 @@ public actor AppCatalog {
     private func resolve(package pkg: String, versionCode vc: Int, aapt2: URL) async throws -> AppInfo {
         let dir = entryDir(pkg, vc)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        let pathsOut = try await adb.shell("pm path \(pkg)")
+        let pathsOut = try await adb.shell("pm path \(ADBClient.shellQuote(pkg))")
         guard let remote = pathsOut.split(whereSeparator: \.isNewline)
             .map({ $0.trimmingCharacters(in: .whitespaces) })
             .first(where: { $0.hasPrefix("package:") && $0.hasSuffix("base.apk") })?

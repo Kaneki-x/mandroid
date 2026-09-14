@@ -293,7 +293,7 @@ never modify or re-sign the emulator tree.
   `apple/swift-protobuf` 1.31+. All three gRPC packages require macOS 15.0,
   which is our deployment target.
 - The NIO transport's default maximum message size is 4 MiB. A 1080×2400
-  RGBA frame is 10.4 MB, so the limit is raised to 64 MiB in the
+  RGBA frame is 10.4 MB, so the limit is raised to 256 MiB (covering 7680×7680 RGBA) in the
   `CallOptions` of every screenshot call. Spike finding: in
   grpc-swift-nio-transport 2.9 the inbound decoder takes its cap from
   **`maxRequestMessageBytes`**, not `maxResponseMessageBytes`, so both are

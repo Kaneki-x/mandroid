@@ -62,13 +62,16 @@ public final class EmulatorProcess: @unchecked Sendable {
 
     /// Waits for exit, giving up after `timeout`. Returns whether it exited.
     public func waitForExit(timeout: Duration) async -> Bool {
-        await withTaskGroup(of: Bool.self) { group in
-            group.addTask { _ = await self.waitForExit(); return true }
-            group.addTask { try? await Task.sleep(for: timeout); return false }
-            let first = await group.next() ?? false
-            group.cancelAll()
-            return first
+        // A task group must join every child; cancelling a continuation-based
+        // wait does not wake it, so racing waitForExit() against sleep hangs.
+        let deadline = ContinuousClock.now + timeout
+        while isRunning {
+            let remaining = deadline - ContinuousClock.now
+            guard remaining > .zero, !Task.isCancelled else { return false }
+            do { try await Task.sleep(for: min(remaining, .milliseconds(20))) }
+            catch { return false }
         }
+        return true
     }
 
     public func terminate() { if process.isRunning { process.terminate() } }

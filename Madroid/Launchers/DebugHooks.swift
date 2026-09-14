@@ -62,6 +62,8 @@ struct DebugHooks {
             controller(q["pkg"])?.rotateWindow(nil)
         case "close":
             controller(q["pkg"])?.window?.performClose(nil)
+        case "park":
+            if let wc = controller(q["pkg"]) { Task { await wc.park() } }
         case "quit":
             if UITestMode.enabled {
                 Task {

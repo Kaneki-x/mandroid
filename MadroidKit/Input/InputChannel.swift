@@ -8,6 +8,7 @@ public actor InputChannel {
     private let client: EmulatorClient
     private var continuation: AsyncStream<PBInputEvent>.Continuation?
     private var task: Task<Void, Never>?
+    private var generation = UUID()
 
     public init(client: EmulatorClient) { self.client = client }
 
@@ -15,6 +16,8 @@ public actor InputChannel {
         if continuation != nil, task?.isCancelled == false { return }
         let (stream, cont) = AsyncStream<PBInputEvent>.makeStream(bufferingPolicy: .unbounded)
         continuation = cont
+        let generation = UUID()
+        self.generation = generation
         let controller = client.controller
         task = Task { [weak self] in
             do {
@@ -24,11 +27,12 @@ public actor InputChannel {
             } catch {
                 Log.input.error("input stream closed: \(error.localizedDescription)")
             }
-            await self?.streamEnded()
+            await self?.streamEnded(generation: generation)
         }
     }
 
-    private func streamEnded() {
+    private func streamEnded(generation: UUID) {
+        guard self.generation == generation else { return }
         continuation?.finish()
         continuation = nil
         task = nil

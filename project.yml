@@ -119,6 +119,7 @@ targets:
     platform: macOS
     sources:
       - path: MadroidKitTests
+      - path: Madroid/Launchers/LauncherStubBuilder.swift
     dependencies:
       - target: MadroidKit
     settings:
