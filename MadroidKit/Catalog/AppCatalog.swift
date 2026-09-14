@@ -64,7 +64,7 @@ public actor AppCatalog {
         var result = installed.map { load($0.package, $0.versionCode) ?? placeholder($0.package, $0.versionCode) }
         onUpdate(result)
         var tool: URL?
-        for (i, app) in installed.enumerated() where load(app.package, app.versionCode) == nil {
+        for (i, app) in installed.enumerated() where load(app.package, app.versionCode, requireCurrentIcon: true) == nil {
             try Task.checkCancellation()
             do {
                 if tool == nil { tool = try await aapt2.ensureInstalled() }
@@ -95,15 +95,27 @@ public actor AppCatalog {
                        versionName: "", launcherComponent: nil, iconFile: nil)
     }
 
-    private func load(_ pkg: String, _ vc: Int) -> AppInfo? {
-        let dir = entryDir(pkg, vc)
-        guard let data = try? Data(contentsOf: dir.appendingPathComponent("meta.json")),
-              var info = try? JSONDecoder().decode(AppInfo.self, from: data) else { return nil }
+    // Version the extraction strategy independently from the installed APK.
+    // Older metadata remains useful while its icon is repaired in the background.
+    struct CacheEntry: Codable {
+        var iconVersion: Int
+        var app: AppInfo
+    }
+
+    private func load(_ pkg: String, _ vc: Int, requireCurrentIcon: Bool = false) -> AppInfo? {
+        Self.loadCache(in: entryDir(pkg, vc), requireCurrentIcon: requireCurrentIcon)
+    }
+
+    static func loadCache(in dir: URL, requireCurrentIcon: Bool = false) -> AppInfo? {
+        guard let data = try? Data(contentsOf: dir.appendingPathComponent("meta.json")) else { return nil }
+        let entry = try? JSONDecoder().decode(CacheEntry.self, from: data)
+        guard var info = entry?.app ?? (try? JSONDecoder().decode(AppInfo.self, from: data)) else { return nil }
         // Re-anchor the icon path in case the root moved.
         if info.iconFile != nil {
             let f = dir.appendingPathComponent("icon")
             info.iconFile = FileManager.default.fileExists(atPath: f.path) ? f : nil
         }
+        if requireCurrentIcon && (entry?.iconVersion != 1 || info.iconFile == nil) { return nil }
         return info
     }
 
@@ -126,7 +138,15 @@ public actor AppCatalog {
             throw MadroidKitError.adb("aapt2 badging failed for \(pkg): \(r.stderrText.prefix(200))")
         }
         var iconFile: URL?
-        if let bytes = try? await IconExtractor.icon(fromAPK: apk, badging: badging), !bytes.isEmpty {
+        let renderedIcon = try? await adb.launcherIcon(of: pkg)
+        let bytes: Data?
+        if let renderedIcon {
+            bytes = renderedIcon
+        } else {
+            // Keep a best-effort raster icon if Android rendering is temporarily unavailable.
+            bytes = try? await IconExtractor.icon(fromAPK: apk, badging: badging)
+        }
+        if let bytes, !bytes.isEmpty {
             let f = dir.appendingPathComponent("icon")
             try bytes.write(to: f)
             iconFile = f
@@ -135,7 +155,8 @@ public actor AppCatalog {
         if component == nil { component = try? await adb.launcherComponent(of: pkg) }
         let info = AppInfo(package: pkg, label: badging.label(), versionCode: badging.versionCode,
                            versionName: badging.versionName, launcherComponent: component, iconFile: iconFile)
-        try JSONEncoder().encode(info).write(to: dir.appendingPathComponent("meta.json"))
+        try JSONEncoder().encode(CacheEntry(iconVersion: renderedIcon == nil ? 0 : 1, app: info))
+            .write(to: dir.appendingPathComponent("meta.json"), options: .atomic)
         return info
     }
 
