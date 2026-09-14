@@ -22,8 +22,14 @@ public struct ClipboardEchoGuard: Sendable, Equatable {
     public func shouldSendToGuest(_ text: String) -> Bool {
         !text.isEmpty && text != lastReceivedFromGuest && text != lastSentToGuest
     }
-    public mutating func noteReceivedFromGuest(_ text: String) { lastReceivedFromGuest = text }
-    public mutating func noteSentToGuest(_ text: String) { lastSentToGuest = text }
+    public mutating func noteReceivedFromGuest(_ text: String) {
+        lastReceivedFromGuest = text
+        lastSentToGuest = nil
+    }
+    public mutating func noteSentToGuest(_ text: String) {
+        lastSentToGuest = text
+        lastReceivedFromGuest = nil
+    }
 }
 
 /// Two-way text clipboard sync built on `ClipboardEchoGuard`.

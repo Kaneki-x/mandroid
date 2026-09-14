@@ -8,7 +8,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PLUGINS="$ROOT/Tools/protoc-plugins"
-OUT="$ROOT/MadroidKit/Generated"
+OUT="${GENERATED_OUTPUT_DIR:-$ROOT/MadroidKit/Generated}"
 PROTOC="${PROTOC:-$(command -v protoc || true)}"
 
 if [[ -z "$PROTOC" ]]; then
@@ -21,8 +21,8 @@ echo "==> building protoc plugins (release)"
     swift build -c release --product protoc-gen-grpc-swift-2 >/dev/null )
 BIN="$(cd "$PLUGINS" && swift build -c release --show-bin-path)"
 
-mkdir -p "$OUT"
-setopt null_glob; rm -f "$OUT"/*.pb.swift "$OUT"/*.grpc.swift; unsetopt null_glob
+STAGING=$(mktemp -d)
+trap 'rm -rf "$STAGING"' EXIT
 
 echo "==> protoc ($("$PROTOC" --version))"
 "$PROTOC" \
@@ -31,13 +31,17 @@ echo "==> protoc ($("$PROTOC" --version))"
   --plugin=protoc-gen-grpc-swift-2="$BIN/protoc-gen-grpc-swift-2" \
   --swift_opt=Visibility=Public \
   --swift_opt=FileNaming=DropPath \
-  --swift_out="$OUT" \
+  --swift_out="$STAGING" \
   --grpc-swift-2_opt=Visibility=Public \
   --grpc-swift-2_opt=Client=true \
   --grpc-swift-2_opt=Server=false \
   --grpc-swift-2_opt=FileNaming=DropPath \
-  --grpc-swift-2_out="$OUT" \
+  --grpc-swift-2_out="$STAGING" \
   "$ROOT"/Protos/*.proto
 
+# Keep committed sources intact if protoc or either plugin fails.
+mkdir -p "$OUT"
+setopt null_glob; rm -f "$OUT"/*.pb.swift "$OUT"/*.grpc.swift; unsetopt null_glob
+cp "$STAGING/"*.swift "$OUT/"
 echo "==> wrote:"
 ls -1 "$OUT"

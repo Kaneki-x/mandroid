@@ -6,15 +6,25 @@ import Foundation
 public actor DisplaySlotPool {
     public static let capacity = 3
 
-    private let client: EmulatorClient
-    private let adb: ADBClient
+    private let setDisplays: @Sendable ([DisplaySpec]) async throws -> Void
+    private let readDisplays: @Sendable () async throws -> String
+    private let configureIME: @Sendable (Int) async throws -> Void
     private var mutationInProgress = false
     private var mutationWaiters: [CheckedContinuation<Void, Never>] = []
     private var slots: [Int: DisplaySlot] = [:]    // by emulatorIndex
 
     public init(client: EmulatorClient, adb: ADBClient) {
-        self.client = client
-        self.adb = adb
+        setDisplays = { _ = try await client.setSecondaryDisplays($0) }
+        readDisplays = { try await adb.dumpsysDisplay() }
+        configureIME = { try await adb.configureDisplayIME($0) }
+    }
+
+    init(setDisplays: @escaping @Sendable ([DisplaySpec]) async throws -> Void,
+         readDisplays: @escaping @Sendable () async throws -> String,
+         configureIME: @escaping @Sendable (Int) async throws -> Void) {
+        self.setDisplays = setDisplays
+        self.readDisplays = readDisplays
+        self.configureIME = configureIME
     }
 
     public var activeSlots: [DisplaySlot] { slots.values.sorted { $0.emulatorIndex < $1.emulatorIndex } }
@@ -26,8 +36,8 @@ public actor DisplaySlotPool {
         await beginMutation()
         defer { endMutation() }
         try Task.checkCancellation()
+        try await setDisplays([])
         slots = [:]
-        try await client.setSecondaryDisplays([])
     }
 
     /// Creates a display of the given pixel size. Throws `.display` when all
@@ -43,9 +53,10 @@ public actor DisplaySlotPool {
         var pending = slots
         pending[index] = DisplaySlot(emulatorIndex: index, androidDisplayID: -1, width: w, height: h, dpi: d)
         try await push(pending)
-        let androidID = try await waitForAndroidDisplay(index: index, width: w, height: h)
+        let androidID: Int
         do {
-            try await adb.configureDisplayIME(androidID)
+            androidID = try await waitForAndroidDisplay(index: index, width: w, height: h)
+            try await configureIME(androidID)
         } catch {
             // Do not leak a display when guest setup fails before allocation.
             try? await push(slots)
@@ -69,7 +80,12 @@ public actor DisplaySlotPool {
         var pending = slots
         pending[index] = slot
         try await push(pending)
-        slot.androidDisplayID = try await waitForAndroidDisplay(index: index, width: w, height: h)
+        do {
+            slot.androidDisplayID = try await waitForAndroidDisplay(index: index, width: w, height: h)
+        } catch {
+            try? await push(slots)
+            throw error
+        }
         slots[index] = slot
         return slot
     }
@@ -79,8 +95,10 @@ public actor DisplaySlotPool {
         defer { endMutation() }
         try Task.checkCancellation()
         guard slots[index] != nil else { return }
-        slots[index] = nil
-        try await push(slots)
+        var pending = slots
+        pending[index] = nil
+        try await push(pending)
+        slots = pending
         Log.display.info("released slot \(index)")
     }
 
@@ -107,7 +125,7 @@ public actor DisplaySlotPool {
     private func push(_ set: [Int: DisplaySlot]) async throws {
         let specs = set.values.sorted { $0.emulatorIndex < $1.emulatorIndex }
             .map { DisplaySpec(index: $0.emulatorIndex, width: $0.width, height: $0.height, dpi: $0.dpi) }
-        try await client.setSecondaryDisplays(specs)
+        try await setDisplays(specs)
     }
 
     /// Polls `dumpsys display` until the display with the emulator's uniqueId
@@ -115,7 +133,7 @@ public actor DisplaySlotPool {
     private func waitForAndroidDisplay(index: Int, width: Int, height: Int) async throws -> Int {
         let deadline = ContinuousClock.now + .seconds(10)
         while ContinuousClock.now < deadline {
-            let displays = DumpsysDisplayParser.parse(try await adb.dumpsysDisplay())
+            let displays = DumpsysDisplayParser.parse(try await readDisplays())
             if let d = displays.first(where: { $0.emulatorIndex == index }),
                d.width == width, d.height == height {
                 return d.displayID

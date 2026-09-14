@@ -18,6 +18,7 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
     private var resizeTask: Task<Void, Never>?
     private var resizePending = false
     private var isClosing = false
+    private var isResuming = false
     private var watchdog: Task<Void, Never>?
     private var overlay: ParkedOverlayView?
     private(set) var isParked = false
@@ -88,17 +89,17 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
         frameView.displayWidth = w
         frameView.displayHeight = h
         frameView.onTouch = { [weak self] x, y, id, pressure in
-            guard let self, let session = coordinator.session else { return }
+            guard let self, !isParked, !isClosing, let session = coordinator.session else { return }
             let display = emulatorDisplay
             Task { await session.input.touch(display: display, x: x, y: y, identifier: id, pressure: pressure) }
         }
         frameView.onFirstTouch = { [weak self] in
-            guard let self, let session = coordinator.session else { return }
+            guard let self, !isParked, !isClosing, let session = coordinator.session else { return }
             let id = androidDisplayID
             Task { await session.router.noteTouch(androidDisplayID: id) }
         }
         frameView.onKey = { [weak self] action in
-            guard let self, let session = coordinator.session else { return }
+            guard let self, !isParked, !isClosing, let session = coordinator.session else { return }
             Task {
                 await self.ensureFocus()
                 await session.input.perform(action)
@@ -107,7 +108,7 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
     }
 
     private func ensureFocus() async {
-        guard let session = coordinator.session else { return }
+        guard !isParked, !isClosing, let session = coordinator.session else { return }
         switch target {
         case .app(let s): await session.router.ensureKeyboardFocus(on: s)
         case .device: await session.router.ensureKeyboardFocusOnDeviceScreen()
@@ -186,15 +187,19 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
     }
 
     func resume() {
-        guard case .app(let app) = target, isParked, let window else { return }
+        guard case .app(let app) = target, isParked, !isResuming, !isClosing, let window else { return }
+        isResuming = true
         Task { @MainActor in
+            defer { isResuming = false }
             let scale = window.backingScaleFactor
             let size = frameView.bounds.size
             do {
                 try await makeRoom?()
+                guard !isClosing else { return }
                 let fresh = try await coordinator.openApp(package: app.package,
                                                           width: Int(size.width * scale), height: Int(size.height * scale),
                                                           dpi: Int(160 * scale))
+                guard !isClosing else { await coordinator.closeApp(fresh); return }
                 target = .app(fresh)
                 isParked = false
                 overlay?.removeFromSuperview(); overlay = nil
@@ -333,6 +338,7 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
 
     /// ⇧⌘S: saves the current display as PNG on the Desktop.
     @objc func saveScreenshot(_ sender: Any?) {
+        guard !isParked, !isClosing else { return }
         let (w, h) = pixelSize
         let display = emulatorDisplay
         let name = (package.map { coordinator.app(for: $0)?.label ?? $0 } ?? "Device Screen")
@@ -352,7 +358,7 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
     }
 
     private func sendKey(_ action: KeyAction) {
-        guard let session = coordinator.session else { return }
+        guard !isParked, !isClosing, let session = coordinator.session else { return }
         Task {
             await ensureFocus()
             await session.input.perform(action)

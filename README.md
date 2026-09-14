@@ -89,6 +89,14 @@ visible windows. Screenshots and logs remain in the printed artifact directory.
 Python Pillow is required for the frame check. The Debug-only mode disables
 clipboard sharing and launcher creation, leaving the normal app session alone.
 
+## Local audit workflow
+
+Run `Scripts/audit.sh` to build Debug and Release, run unit tests, check script
+syntax, and verify generated protobuf sources. Add
+`--apk /path/to/app.apk --package com.example.app` for isolated real-emulator
+checks, including repeated launches and closing a parked window after its
+display is reused. See [the audit report](docs/AUDIT.md) for findings and scope.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

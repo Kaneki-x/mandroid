@@ -50,11 +50,21 @@ echo "==> adb server port $PORT"
 
 if [[ -n "$APK" ]]; then
   echo "==> installing $APK"
-  url "$(python3 -c 'import pathlib,sys; print(pathlib.Path(sys.argv[1]).resolve().as_uri())' "$APK")"; sleep 20
+  url "$(python3 -c 'import pathlib,sys; print(pathlib.Path(sys.argv[1]).resolve().as_uri())' "$APK")"
+  for i in {1..60}; do
+    sleep 2
+    snap installed >/dev/null
+    grep -qF "\"$PKG\"" "$OUT/installed/state.txt" && break
+    if grep -q '^lastError=.' "$OUT/installed/state.txt"; then
+      cat "$OUT/installed/state.txt"; fail "APK installation failed"
+    fi
+  done
 fi
-snap installed; grep -q "$PKG" "$OUT/installed/state.txt" || fail "$PKG not installed"
+snap installed; grep -qF "\"$PKG\"" "$OUT/installed/state.txt" || fail "$PKG not installed"
 
 echo "==> opening $PKG"
+url "madroid://launch/$PKG"
+url "madroid://launch/$PKG"
 url "madroid://launch/$PKG"; sleep 8
 snap opened; grep -qF "sessions=[\"$PKG\"]" "$OUT/opened/state.txt" || fail "no session for $PKG"
 secondaries() { "$ADB" shell dumpsys display | grep -oE 'uniqueId="virtual:com.android.emulator.multidisplay:[0-9]+"' | sort -u | wc -l | tr -d ' '; }
@@ -94,15 +104,25 @@ for i in $(seq 1 20); do
 done
 grep -qF "rendered=$PKG pixels=${W}x${H} input=${W}x${H}" "$OUT/resized/state.txt" || fail "frame/input did not adopt final resolution"
 "$ADB" shell dumpsys display | grep -E "multidisplay:1234562\", $W x $H" >/dev/null || fail "display was not resized in place"
-hook "key?pkg=$PKG&code=33&chars=%5B&cmd=1"; sleep 1
 snap after_input >/dev/null
 
-echo "==> closing window"
+echo "==> closing a parked window after its slot is reused"
+hook "park?pkg=$PKG"; sleep 3
+[[ $(secondaries) == 0 ]] || fail "parking did not release display"
+url 'madroid://launch/com.android.settings'; sleep 8
+[[ $(secondaries) == 1 ]] || fail "replacement display not allocated"
 hook "close?pkg=$PKG"; sleep 3
+[[ $(secondaries) == 1 ]] || fail "parked close removed another app's display"
+snap parked_closed >/dev/null
+grep -qF 'sessions=["com.android.settings"]' "$OUT/parked_closed/state.txt" || fail "replacement session was lost"
+hook 'close?pkg=com.android.settings'; sleep 3
 [[ $(secondaries) == 0 ]] || fail "secondary display not released"
 "$ADB" shell pidof "$PKG" >/dev/null && fail "$PKG still running after close" || true
 
 snap final >/dev/null
 grep -q '^offscreen=true' "$OUT/final/state.txt" || fail "not an offscreen test instance"
 grep -q '^visibleWindows=0' "$OUT/final/state.txt" || fail "test showed a window"
+echo "==> native media volume and Settings"
+mkdir -p "$OUT/volume"
+OUT="$OUT/volume" zsh "$SCRIPT_DIR/volume-test.sh"
 echo "PASS (artifacts in $OUT)"

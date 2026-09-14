@@ -62,7 +62,7 @@ must pass and `Scripts/gen-proto.sh` must leave a clean tree.
   `InputRouter`'s focus policy.
 - Touch up events must send `pressure: 0` for the same identifier.
 - Raise **both** `maxRequestMessageBytes` and `maxResponseMessageBytes`
-  (64 MiB) for screenshot calls; the NIO transport sizes its inbound decoder
+  (256 MiB, covering 7680×7680 RGBA) for screenshot calls; the NIO transport sizes its inbound decoder
   from the request limit. Default is 4 MiB.
 - Emulator display *N* ↔ Android `uniqueId
   "virtual:com.android.emulator.multidisplay:123456<N+1>"`; logical ids are

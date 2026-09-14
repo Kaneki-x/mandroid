@@ -16,11 +16,13 @@ cd "$ROOT"
 xcodegen generate
 rm -rf "$OUT"; mkdir -p "$OUT"
 xcodebuild -scheme Madroid -configuration Release \
-  -derivedDataPath "$OUT/DerivedData" \
   CODE_SIGN_IDENTITY="$DEVELOPER_ID" DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_STYLE=Manual \
   OTHER_CODE_SIGN_FLAGS="--timestamp --options runtime" \
   build | tail -3
-APP="$OUT/DerivedData/Build/Products/Release/Madroid.app"
+# Keep builds in Xcode's normal DerivedData location: LaunchServices can
+# stall while registering applications built under an external volume.
+xcodebuild -scheme Madroid -configuration Release -showBuildSettings -json > "$OUT/settings.json"
+APP=$(python3 -c 'import json,sys; s=next(t["buildSettings"] for t in json.load(open(sys.argv[1])) if t["target"]=="Madroid"); print(s["TARGET_BUILD_DIR"]+"/"+s["FULL_PRODUCT_NAME"])' "$OUT/settings.json")
 cp -R "$APP" "$OUT/"
 APP="$OUT/Madroid.app"
 

@@ -26,6 +26,7 @@ public actor Downloader {
         sha1: String?,
         progress: @escaping @Sendable (DownloadProgress) -> Void
     ) async throws {
+        try Task.checkCancellation()
         let fm = FileManager.default
         if fm.fileExists(atPath: destination.path) {
             if let sha1, (try? SHA1.hex(ofFileAt: destination)) == sha1 {
@@ -83,15 +84,27 @@ public actor Downloader {
         let (bytes, response) = try await session.bytes(for: request)
         guard let http = response as? HTTPURLResponse else { throw MadroidKitError.download("no HTTP response") }
         var received: Int64
+        var rangeTotal: Int64?
         switch http.statusCode {
         case 206:
+            guard let range = http.value(forHTTPHeaderField: "Content-Range"),
+                  range.hasPrefix("bytes "),
+                  let slash = range.firstIndex(of: "/"),
+                  let total = Int64(range[range.index(after: slash)...]),
+                  let dash = range[..<slash].firstIndex(of: "-"),
+                  let start = Int64(range[range.index(range.startIndex, offsetBy: 6)..<dash]),
+                  let end = Int64(range[range.index(after: dash)..<slash]),
+                  start == existing, end >= start, total > end else {
+                throw MadroidKitError.download("invalid resume range for \(url.lastPathComponent)")
+            }
+            rangeTotal = total
             try handle.seekToEnd(); received = existing
         case 200:
             try handle.truncate(atOffset: 0); received = 0
         default:
             throw MadroidKitError.download("HTTP \(http.statusCode) for \(url.lastPathComponent)")
         }
-        let total: Int64? = expectedSize ?? (http.expectedContentLength > 0 ? http.expectedContentLength + (http.statusCode == 206 ? existing : 0) : nil)
+        let total: Int64? = expectedSize ?? rangeTotal ?? (http.expectedContentLength >= 0 ? http.expectedContentLength : nil)
 
         var buffer = Data(); buffer.reserveCapacity(1 << 20)
         var lastReport = Date.distantPast
@@ -112,6 +125,9 @@ public actor Downloader {
         if !buffer.isEmpty {
             try handle.write(contentsOf: buffer)
             received += Int64(buffer.count)
+        }
+        if let total, received != total {
+            throw MadroidKitError.download("incomplete download: expected \(total) bytes, received \(received)")
         }
         progress(DownloadProgress(received: received, total: total ?? received))
     }

@@ -37,15 +37,17 @@ struct URLSchemeHandler {
     }
 
     /// Runs `action` once the emulator is booted (waits up to 5 minutes).
-    private func whenReady(_ action: @escaping @MainActor () -> Void) {
+    func whenReady(_ action: @escaping @MainActor () -> Void) {
         let coordinator = delegate.coordinator
         Task { @MainActor in
             let deadline = ContinuousClock.now + .seconds(300)
             while !coordinator.state.isReady && ContinuousClock.now < deadline {
                 if case .failed = coordinator.state { return }
-                try? await Task.sleep(for: .milliseconds(500))
+                do { try await Task.sleep(for: .milliseconds(500)) } catch { return }
             }
-            if coordinator.state.isReady { action() }
+            if coordinator.state.isReady { action() } else {
+                delegate.windows.presentError(MadroidKitError.timeout("Android did not become ready"), title: "Could not complete request")
+            }
         }
     }
 }

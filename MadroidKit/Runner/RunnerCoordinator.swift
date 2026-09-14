@@ -38,6 +38,7 @@ public final class RunnerCoordinator {
     public var avdName = "runner"
 
     private var bootTask: Task<Void, Never>?
+    private var changingPackages = Set<String>()
 
     public init(paths: SDKPaths = .default) {
         self.paths = paths
@@ -51,57 +52,78 @@ public final class RunnerCoordinator {
     public func start() {
         guard case .idle = state else { return }
         state = .checking
-        Task {
+        bootTask = Task {
+            defer { bootTask = nil }
             if bootstrap.isReady {
-                await boot()
+                await boot(coldBoot: false, isRetry: false)
             } else {
                 do {
                     await bootstrap.setMirrors(RunnerSettings.load().mirrors)
                     let plan = try await bootstrap.makePlan()
+                    try Task.checkCancellation()
                     if plan.isEmpty {
-                        await boot()
+                        await boot(coldBoot: false, isRetry: false)
                     } else if UserDefaults.standard.bool(forKey: "autoSetup") {
                         // `-autoSetup YES` skips the confirmation (integration tests).
-                        runSetup(plan)
+                        await performSetup(plan)
                     } else {
                         state = .needsSetup(plan)
                     }
                 } catch {
-                    state = .failed(error.localizedDescription)
+                    if !Task.isCancelled { state = .failed(error.localizedDescription) }
                 }
             }
         }
     }
 
     public func runSetup(_ plan: BootstrapPlan) {
+        guard bootTask == nil else { return }
+        bootTask = Task {
+            defer { bootTask = nil }
+            await performSetup(plan)
+        }
+    }
+
+    private func performSetup(_ plan: BootstrapPlan) async {
         state = .settingUp(.fetchingManifests)
-        Task {
-            do {
-                try await bootstrap.run(plan) { phase in
-                    Task { @MainActor in self.state = .settingUp(phase) }
+        do {
+            try await bootstrap.run(plan) { phase in
+                Task { @MainActor in
+                    if case .settingUp = self.state { self.state = .settingUp(phase) }
                 }
-                await boot()
-            } catch {
-                state = .failed(error.localizedDescription)
             }
+            try Task.checkCancellation()
+            await boot(coldBoot: false, isRetry: false)
+        } catch {
+            if !Task.isCancelled { state = .failed(error.localizedDescription) }
         }
     }
 
     public func retry() {
+        guard bootTask == nil else { return }
         state = .idle
         start()
     }
 
-    private func setStage(_ s: String) { state = .booting(s) }
+    private func setStage(_ s: String) {
+        if case .shuttingDown = state { return }
+        state = .booting(s)
+    }
 
     public func boot(coldBoot: Bool = false) async {
-        await boot(coldBoot: coldBoot, isRetry: false)
+        if let bootTask { await bootTask.value; return }
+        let task = Task { await boot(coldBoot: coldBoot, isRetry: false) }
+        bootTask = task
+        await task.value
+        bootTask = nil
     }
 
     private func boot(coldBoot: Bool, isRetry: Bool) async {
         guard session == nil else { return }
-        var launched: (process: EmulatorProcess, adb: ADBClient)?
+        var launched: EmulatorProcess?
+        var startedADB: ADBClient?
         do {
+            try Task.checkCancellation()
             setStage("Preparing virtual device")
             guard let image = bootstrap.installedSystemImage() else {
                 throw MadroidKitError.avd("no system image installed")
@@ -124,12 +146,14 @@ public final class RunnerCoordinator {
 
             setStage("Starting adb")
             let adb = ADBClient(paths: paths, serverPort: adbPort, serial: options.serial)
+            startedADB = adb
             try await adb.startServer()
+            try Task.checkCancellation()
 
             setStage("Starting emulator")
             let process = try EmulatorProcess(paths: paths, options: options)
             try process.start()
-            launched = (process, adb)
+            launched = process
 
             let connection = try EmulatorConnection(port: grpc)
             setStage("Connecting to emulator")
@@ -148,7 +172,9 @@ public final class RunnerCoordinator {
                 case .waitingForBoot: text = "Android is booting"
                 case .booted: text = "Finishing up"
                 }
-                Task { @MainActor in self.setStage(text) }
+                Task { @MainActor in
+                    if case .booting = self.state { self.setStage(text) }
+                }
             }
             await GuestSetup.apply(adb: adb)
             if let volume = RunnerSettings.load().mediaVolumePercent {
@@ -165,13 +191,19 @@ public final class RunnerCoordinator {
                 displays: pool, input: InputChannel(client: client), router: InputRouter(adb: adb),
                 frames: GRPCFrameStream(client: client),
                 deviceWidth: config.lcdWidth, deviceHeight: config.lcdHeight, deviceDpi: config.lcdDensity)
+            var sync: ClipboardSync?
+            if let hostClipboard {
+                let clipboard = ClipboardSync(client: client, host: hostClipboard)
+                await clipboard.start()
+                sync = clipboard
+            }
+            if Task.isCancelled {
+                await sync?.stop()
+                throw CancellationError()
+            }
             self.session = session
             self.catalog = AppCatalog(paths: paths, adb: adb, mirrors: RunnerSettings.load().mirrors)
-            if let hostClipboard {
-                let sync = ClipboardSync(client: client, host: hostClipboard)
-                await sync.start()
-                self.clipboard = sync
-            }
+            self.clipboard = sync
             state = .ready
             watchProcess(session)
             await refreshApps()
@@ -179,11 +211,13 @@ public final class RunnerCoordinator {
             Log.runner.error("boot failed: \(error.localizedDescription)")
             Log.file("boot failed: \(error.localizedDescription.prefix(300))")
             if let launched {
-                launched.process.terminate()
-                _ = await launched.process.waitForExit(timeout: .seconds(5))
-                launched.process.kill()
-                await launched.adb.killServer()
+                launched.terminate()
+                _ = await launched.waitForExit(timeout: .seconds(5))
+                launched.kill()
             }
+            // Cleanup must run outside the cancelled startup task.
+            if let startedADB { await Task.detached { await startedADB.killServer() }.value }
+            if Task.isCancelled { return }
             // An emulator that dies during boot is almost always a bad quickboot
             // snapshot (e.g. the previous run was killed while saving it). Drop
             // the snapshot and cold boot once before giving up.
@@ -201,7 +235,17 @@ public final class RunnerCoordinator {
     private func watchProcess(_ session: EmulatorSession) {
         Task {
             let status = await session.process.waitForExit()
-            guard self.session?.options.consolePort == session.options.consolePort else { return }
+            guard self.session?.process === session.process else { return }
+            if case .shuttingDown = state { return }
+            await clipboard?.stop()
+            clipboard = nil
+            await session.input.close()
+            session.connection.shutdown()
+            await session.adb.killServer()
+            guard self.session?.process === session.process else { return }
+            refreshTask?.cancel()
+            catalog = nil
+            apps = []
             self.session = nil
             self.sessions = [:]
             self.parked = [:]
@@ -214,8 +258,23 @@ public final class RunnerCoordinator {
     /// Clean shutdown: stop apps, ask QEMU to power off (saves the quickboot
     /// snapshot), then escalate to SIGTERM/SIGKILL. Never leaves an orphan.
     public func shutdown() async {
-        guard let session else { return }
+        if let shutdownTask { await shutdownTask.value; return }
+        let task = Task { await performShutdown() }
+        shutdownTask = task
+        await task.value
+        shutdownTask = nil
+    }
+
+    private var shutdownTask: Task<Void, Never>?
+
+    private func performShutdown() async {
         state = .shuttingDown
+        bootTask?.cancel()
+        await bootTask?.value
+        bootTask = nil
+        refreshTask?.cancel()
+        catalog = nil
+        guard let session else { apps = []; state = .idle; return }
         await clipboard?.stop()
         clipboard = nil
         await session.input.close()
@@ -248,17 +307,25 @@ public final class RunnerCoordinator {
     // MARK: Apps
 
     private var refreshTask: Task<Void, Never>?
+    private var refreshGeneration = UUID()
 
     /// Reloads the app list: cached entries immediately, then labels/icons
     /// for anything new as they resolve.
     public func refreshApps() async {
         guard let catalog else { return }
+        let generation = UUID()
+        refreshGeneration = generation
         refreshTask?.cancel()
-        if let quick = try? await catalog.cached() { apps = quick }
+        let quick = try? await catalog.cached()
+        guard refreshGeneration == generation, state.isReady else { return }
+        if let quick { apps = quick }
         refreshTask = Task { [weak self] in
             do {
                 _ = try await catalog.refresh { list in
-                    Task { @MainActor in self?.apps = list }
+                    Task { @MainActor in
+                        guard let self, self.refreshGeneration == generation, self.state.isReady else { return }
+                        self.apps = list
+                    }
                 }
             } catch {
                 Log.runner.warning("catalog refresh failed: \(error.localizedDescription)")
@@ -281,8 +348,11 @@ public final class RunnerCoordinator {
 
     /// Creates a display and launches (or brings back) the app on it.
     public func openApp(package: String, width: Int, height: Int, dpi: Int) async throws -> AppSession {
-        guard let session else { throw MadroidKitError.emulator("not running") }
+        guard state.isReady, let session else { throw MadroidKitError.emulator("not running") }
+        guard !changingPackages.contains(package) else { throw MadroidKitError.display("app operation already in progress") }
         if let existing = sessions[package] { return existing }
+        changingPackages.insert(package)
+        defer { changingPackages.remove(package) }
         let component = try await launcherComponent(for: package)
         do {
             try await session.adb.useWindowOrientation(for: package)
@@ -300,6 +370,10 @@ public final class RunnerCoordinator {
         }
         do {
             try await session.adb.startActivity(component: component, displayID: slot.androidDisplayID)
+            try Task.checkCancellation()
+            guard self.session?.process === session.process, state.isReady else {
+                throw MadroidKitError.emulator("session ended while opening app")
+            }
         } catch {
             Log.file("openApp \(package): am start failed: \(error.localizedDescription)")
             try? await session.displays.release(slot.emulatorIndex)
@@ -315,7 +389,7 @@ public final class RunnerCoordinator {
 
     /// Frees the slot but keeps the Android task alive (it moves to display 0).
     public func parkApp(_ app: AppSession) async {
-        guard let session else { return }
+        guard let session, sessions[app.package]?.instanceID == app.instanceID else { return }
         sessions[app.package] = nil
         parked[app.package] = app
         try? await session.displays.release(app.slot.emulatorIndex)
@@ -328,11 +402,19 @@ public final class RunnerCoordinator {
 
     public func closeApp(_ app: AppSession) async {
         guard let session else { return }
+        let active = sessions[app.package]
+        guard active?.instanceID == app.instanceID || parked[app.package]?.instanceID == app.instanceID,
+              !changingPackages.contains(app.package) else { return }
+        changingPackages.insert(app.package)
+        defer { changingPackages.remove(app.package) }
         sessions[app.package] = nil
         parked[app.package] = nil
         try? await session.adb.forceStop(app.package)
-        try? await session.displays.release(app.slot.emulatorIndex)
-        await session.router.forget(androidDisplayID: app.slot.androidDisplayID)
+        // A parked window's old index may now belong to another app.
+        if let active {
+            try? await session.displays.release(active.slot.emulatorIndex)
+            await session.router.forget(androidDisplayID: active.slot.androidDisplayID)
+        }
     }
 
     /// True while Android still hosts a task on the app's display.
@@ -342,11 +424,13 @@ public final class RunnerCoordinator {
     }
 
     public func resizeApp(_ app: AppSession, width: Int, height: Int, dpi: Int) async throws -> AppSession {
-        guard let session else { throw MadroidKitError.emulator("not running") }
+        guard let session, sessions[app.package]?.instanceID == app.instanceID else {
+            throw MadroidKitError.emulator("app session ended")
+        }
         let slot = try await session.displays.resize(app.slot.emulatorIndex, width: width, height: height, dpi: dpi)
         var updated = app
         updated.slot = slot
-        sessions[app.package] = updated
+        if sessions[app.package]?.instanceID == app.instanceID { sessions[app.package] = updated }
         return updated
     }
 
@@ -373,7 +457,12 @@ public final class RunnerCoordinator {
     }
 
     /// Restarts the emulator (cold boot when requested).
+    private var restarting = false
+
     public func restart(coldBoot: Bool = false) async {
+        guard !restarting else { return }
+        restarting = true
+        defer { restarting = false }
         await shutdown()
         await boot(coldBoot: coldBoot)
     }

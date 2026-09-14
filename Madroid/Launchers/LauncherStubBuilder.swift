@@ -18,14 +18,17 @@ enum LauncherStubBuilder {
     static let legacyMarker = "io.github.madeye.androidapprunner.stub"
 
     /// Rebuilds the stub set to match `apps`; stale stubs we created are removed.
-    static func sync(_ apps: [AppInfo]) {
+    static func sync(_ apps: [AppInfo], at directory: URL = directory) {
         let fm = FileManager.default
         do { try fm.createDirectory(at: directory, withIntermediateDirectories: true) } catch { return }
         var wanted = Set<String>()
         for app in apps {
-            let name = safeName(app.label)
+            // Package identity prevents equal labels (including case-only
+            // differences on APFS) from overwriting one another.
+            let name = "\(safeName(app.label)) (\(SHA1.hex(of: Data(app.package.utf8)).prefix(12)))"
             wanted.insert("\(name).app")
             let bundle = directory.appendingPathComponent("\(name).app", isDirectory: true)
+            guard !fm.fileExists(atPath: bundle.path) || isOurs(bundle) else { continue }
             if needsUpdate(bundle, app: app) {
                 try? write(bundle, app: app)
             }
@@ -37,8 +40,12 @@ enum LauncherStubBuilder {
     }
 
     static func remove(package: String, label: String) {
-        let bundle = directory.appendingPathComponent("\(safeName(label)).app", isDirectory: true)
-        if isOurs(bundle) { try? FileManager.default.removeItem(at: bundle) }
+        for bundle in (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? [] {
+            let plist = NSDictionary(contentsOf: bundle.appendingPathComponent("Contents/Info.plist"))
+            if isOurs(bundle), plist?["AndroidPackage"] as? String == package {
+                try? FileManager.default.removeItem(at: bundle)
+            }
+        }
     }
 
     // MARK: Internals
@@ -46,7 +53,10 @@ enum LauncherStubBuilder {
     private static func safeName(_ label: String) -> String {
         let bad = CharacterSet(charactersIn: "/:\\")
         let cleaned = label.components(separatedBy: bad).joined(separator: "-").trimmingCharacters(in: .whitespaces)
-        return cleaned.isEmpty ? "Android App" : cleaned
+        // Leave space for the identity suffix within the filesystem limit.
+        var limited = cleaned
+        while limited.utf8.count > 180 { limited.removeLast() }
+        return limited.isEmpty ? "Android App" : limited
     }
 
     private static func isOurs(_ bundle: URL) -> Bool {
@@ -70,7 +80,7 @@ enum LauncherStubBuilder {
 
         let script = """
         #!/bin/sh
-        exec /usr/bin/open "madroid://launch/\(app.package)"
+        exec /usr/bin/open \(ADBClient.shellQuote("madroid://launch/" + app.package.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!))
 
         """
         let exe = macos.appendingPathComponent("launch")

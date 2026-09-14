@@ -19,6 +19,7 @@ public struct DisplaySlot: Sendable, Hashable, Identifiable {
 /// A running app bound to a slot.
 public struct AppSession: Sendable, Hashable, Identifiable {
     public var id: String { package }
+    public let instanceID = UUID()
     public let package: String
     public let launcherComponent: String
     public var slot: DisplaySlot

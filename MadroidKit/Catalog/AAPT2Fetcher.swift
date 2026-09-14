@@ -22,6 +22,7 @@ public actor AAPT2Fetcher {
 
     /// Returns the binary URL, downloading it on first use.
     public func ensureInstalled() async throws -> URL {
+        try Task.checkCancellation()
         if isInstalled { return paths.aapt2Binary }
         let (version, mirror) = await latestStableVersion()
         let jar = paths.downloads.appendingPathComponent("aapt2-\(version)-osx.jar")
@@ -29,12 +30,14 @@ public actor AAPT2Fetcher {
         let downloader = Downloader(session: session)
         var lastError: Error?
         for candidate in [mirror] + mirrors.filter({ $0 != mirror }) {
+            try Task.checkCancellation()
             let jarURL = candidate.aapt2Base.appendingPathComponent("\(version)/aapt2-\(version)-osx.jar")
             do {
                 try await downloader.download(jarURL, to: jar, expectedSize: nil, sha1: nil) { _ in }
                 lastError = nil
                 break
             } catch {
+                try Task.checkCancellation()
                 Log.sdk.error("aapt2 from \(candidate.host) failed: \(error.localizedDescription)")
                 lastError = error
             }
@@ -56,6 +59,7 @@ public actor AAPT2Fetcher {
     /// version and the preferred mirror when none does.
     func latestStableVersion() async -> (version: String, mirror: DownloadMirror) {
         for mirror in mirrors {
+            if Task.isCancelled { break }
             var request = URLRequest(url: mirror.aapt2Base.appendingPathComponent("maven-metadata.xml"))
             request.timeoutInterval = 20
             guard let (data, response) = try? await session.data(for: request),

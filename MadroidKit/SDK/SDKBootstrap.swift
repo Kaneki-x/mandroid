@@ -111,6 +111,7 @@ public actor SDKBootstrap {
                 Log.sdk.info("using download mirror \(mirror.id)")
                 return result
             } catch {
+                try Task.checkCancellation()
                 Log.sdk.error("manifests from \(mirror.host) failed: \(error.localizedDescription)")
                 Log.file("mirror \(mirror.id) unreachable: \(error.localizedDescription)")
                 lastError = error
@@ -200,6 +201,7 @@ public actor SDKBootstrap {
         try paths.createDirectories()
         try writeLicenses(plan.licenses)
         for component in plan.components {
+            try Task.checkCancellation()
             let name = component.displayName
             let zip = paths.downloads.appendingPathComponent(component.archive.url.lastPathComponent)
             try await downloadWithFallback(component.archive.url, from: plan.mirror, to: zip,
@@ -232,6 +234,7 @@ public actor SDKBootstrap {
             } catch is CancellationError {
                 throw CancellationError()
             } catch {
+                try Task.checkCancellation()
                 Log.sdk.error("download from \(candidate.host ?? "?") failed: \(error.localizedDescription)")
                 Log.file("download \(candidate.absoluteString) failed: \(error.localizedDescription)")
                 lastError = error
