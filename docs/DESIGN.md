@@ -413,9 +413,11 @@ and scale aware). `KeyMap` converts `NSEvent` to `KeyboardEvent`.
 
 **Catalog/** — `InstalledApps` (`pm list packages -3`, `pm path`, version
 codes), `APKBadging` (`aapt2 dump badging` on pulled APKs → label, icon
-entries), `IconExtractor` (`unzip -p` the best PNG density; adaptive-icon XML
-falls back to raster densities, then a letter tile), `AppInstaller`
-(`adb install`), `AppCatalogCache` (disk cache keyed by package + versionCode).
+entries), Android `RenderAppIcon` (resolves the launcher activity icon and renders
+adaptive/vector/split resources to PNG), `IconExtractor` (best-effort raster
+fallback if guest rendering fails), `AppInstaller`
+(`adb install`), `AppCatalogCache` (disk cache keyed by package + versionCode,
+with an icon strategy version so legacy or missing icons are refreshed).
 
 **Runner/** — `RunnerCoordinator` is a `@MainActor` observable state machine:
 `needsSetup → downloading → booting → ready → error`, owning the process, the
@@ -620,7 +622,10 @@ framework's IWindowManager proxy by reflection. This avoids unstable hard-coded
 Binder transaction numbers. It requires no APK install, root, or background
 service. Its source is in `Tools/guest-display`, and its generated DEX JAR is
 bundled in MadroidKit. Rebuild with `Scripts/gen-guest-display.sh` (JDK 17 and
-`D8` pointing to Android build-tools 36.1.0). Runtime users need neither tool.
+`D8` pointing to Android build-tools 36.1.0, and `ANDROID_JAR` pointing to
+an installed platform android.jar). The same JAR includes `RenderAppIcon`,
+which loads the launcher activity icon through Android PackageManager and
+renders it to PNG. Runtime users need no Java or Android build tools.
 
 ### Native media volume
 

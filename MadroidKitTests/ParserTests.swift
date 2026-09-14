@@ -98,3 +98,52 @@ import Testing
         try? FileManager.default.removeItem(at: tmp)
     }
 }
+
+@Suite struct CatalogIconCacheTests {
+    private func fixture(version: Int?, hasIcon: Bool = true) throws -> URL {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let info = AppInfo(package: "com.example.app", label: "Example", versionCode: 1,
+                           versionName: "1", launcherComponent: "com.example.app/.Main",
+                           iconFile: hasIcon ? URL(fileURLWithPath: "/old/cache/icon") : nil)
+        let data = try version.map { try JSONEncoder().encode(AppCatalog.CacheEntry(iconVersion: $0, app: info)) }
+            ?? JSONEncoder().encode(info)
+        try data.write(to: dir.appendingPathComponent("meta.json"))
+        if hasIcon { try Data([1]).write(to: dir.appendingPathComponent("icon")) }
+        return dir
+    }
+
+    @Test func legacyMetadataIsVisibleButIconIsRefreshed() throws {
+        let dir = try fixture(version: nil)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        #expect(AppCatalog.loadCache(in: dir)?.label == "Example")
+        #expect(AppCatalog.loadCache(in: dir)?.iconFile == dir.appendingPathComponent("icon"))
+        #expect(AppCatalog.loadCache(in: dir, requireCurrentIcon: true) == nil)
+    }
+
+    @Test func renderedIconSurvivesRootMoveWithoutRepeatedExtraction() throws {
+        let dir = try fixture(version: 1)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        #expect(AppCatalog.loadCache(in: dir, requireCurrentIcon: true)?.iconFile == dir.appendingPathComponent("icon"))
+    }
+
+    @Test func missingIconIsRetriedEvenWithCurrentMetadata() throws {
+        let dir = try fixture(version: 1)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        try FileManager.default.removeItem(at: dir.appendingPathComponent("icon"))
+        #expect(AppCatalog.loadCache(in: dir)?.label == "Example")
+        #expect(AppCatalog.loadCache(in: dir, requireCurrentIcon: true) == nil)
+    }
+
+    @Test func fallbackAndPreviouslyAbsentIconsAreRetried() throws {
+        for version in [nil, 0, 1] as [Int?] {
+            let dir = try fixture(version: version, hasIcon: false)
+            defer { try? FileManager.default.removeItem(at: dir) }
+            #expect(AppCatalog.loadCache(in: dir)?.label == "Example")
+            #expect(AppCatalog.loadCache(in: dir, requireCurrentIcon: true) == nil)
+        }
+        let dir = try fixture(version: 0)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        #expect(AppCatalog.loadCache(in: dir, requireCurrentIcon: true) == nil)
+    }
+}

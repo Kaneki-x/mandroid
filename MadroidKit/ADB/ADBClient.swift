@@ -120,6 +120,18 @@ public actor ADBClient {
         }
     }
 
+    /// Render the launcher's resolved Drawable in Android, where adaptive icons,
+    /// vector resources and split APKs can be interpreted correctly.
+    public func launcherIcon(of package: String) async throws -> Data {
+        try await deployGuestHelper()
+        let output = try await shell("CLASSPATH=/data/local/tmp/madroid-display-ime.jar app_process / RenderAppIcon \(Self.shellQuote(package))")
+        guard let png = Data(base64Encoded: output.trimmingCharacters(in: .whitespacesAndNewlines)),
+              png.starts(with: [137, 80, 78, 71, 13, 10, 26, 10]) else {
+            throw MadroidKitError.adb("invalid launcher icon for \(package)")
+        }
+        return png
+    }
+
     private func deployGuestHelper() async throws {
         let guestPath = "/data/local/tmp/madroid-display-ime.jar"
         if !displayHelperDeployed {
