@@ -5,7 +5,7 @@
 # and fresh guest data. No Accessibility or Screen Recording permissions needed.
 set -euo pipefail
 
-APP="${APP:-$(ls -d ~/Library/Developer/Xcode/DerivedData/Madroid-*/Build/Products/Debug/Madroid.app 2>/dev/null | head -1)}"
+APP="${APP:-$(ls -d ~/Library/Developer/Xcode/DerivedData/Mandroid-*/Build/Products/Debug/Mandroid.app 2>/dev/null | head -1)}"
 APK="${APK:-}"
 PKG="${PKG:-com.github.shadowsocks}"
 OUT="${OUT:-$(mktemp -d /tmp/aar-it.XXXXXX)}"
@@ -17,16 +17,16 @@ url() { python3 "$SCRIPT_DIR/ui-test-command.py" "$1"; }
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 snap() {
-  rm -rf "$OUT/$1"; url "madroid://debug/snapshot?dir=$OUT/$1"
+  rm -rf "$OUT/$1"; url "mandroid://debug/snapshot?dir=$OUT/$1"
   for i in $(seq 1 20); do sleep 0.5; [[ -f "$OUT/$1/state.txt" ]] && break; done
   grep -q '^offscreen=true' "$OUT/$1/state.txt" || fail "not offscreen"
   grep -q '^visibleWindows=0' "$OUT/$1/state.txt" || fail "test showed a window"
   cat "$OUT/$1/state.txt" 2>/dev/null; echo
 }
-hook() { url "madroid://debug/$1"; }
+hook() { url "mandroid://debug/$1"; }
 
 [[ -d "$APP" ]] || fail "app not built: $APP"
-echo "==> waiting for offscreen Madroid"
+echo "==> waiting for offscreen Mandroid"
 T0=$(date +%s)
 for i in $(seq 1 120); do
   sleep 5
@@ -63,9 +63,9 @@ fi
 snap installed; grep -qF "\"$PKG\"" "$OUT/installed/state.txt" || fail "$PKG not installed"
 
 echo "==> opening $PKG"
-url "madroid://launch/$PKG"
-url "madroid://launch/$PKG"
-url "madroid://launch/$PKG"; sleep 8
+url "mandroid://launch/$PKG"
+url "mandroid://launch/$PKG"
+url "mandroid://launch/$PKG"; sleep 8
 snap opened; grep -qF "sessions=[\"$PKG\"]" "$OUT/opened/state.txt" || fail "no session for $PKG"
 secondaries() { "$ADB" shell dumpsys display | grep -oE 'uniqueId="virtual:com.android.emulator.multidisplay:[0-9]+"' | sort -u | wc -l | tr -d ' '; }
 [[ $(secondaries) == 1 ]] || fail "expected one secondary display, got $(secondaries)"
@@ -109,7 +109,7 @@ snap after_input >/dev/null
 echo "==> closing a parked window after its slot is reused"
 hook "park?pkg=$PKG"; sleep 3
 [[ $(secondaries) == 0 ]] || fail "parking did not release display"
-url 'madroid://launch/com.android.settings'; sleep 8
+url 'mandroid://launch/com.android.settings'; sleep 8
 [[ $(secondaries) == 1 ]] || fail "replacement display not allocated"
 hook "close?pkg=$PKG"; sleep 3
 [[ $(secondaries) == 1 ]] || fail "parked close removed another app's display"

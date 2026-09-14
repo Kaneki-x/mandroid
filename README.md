@@ -1,4 +1,4 @@
-# Madroid
+# Mandroid
 
 Run Android apps on your Mac as if they were native macOS apps. Each Android
 app gets its own window with a normal title bar, resizes like a Mac window,
@@ -21,13 +21,13 @@ plan live in [`docs/`](docs/):
 ```bash
 brew install xcodegen protobuf   # protobuf only if you regenerate gRPC code
 xcodegen generate
-xcodebuild -scheme Madroid -configuration Debug build
-open ~/Library/Developer/Xcode/DerivedData/Madroid-*/Build/Products/Debug/Madroid.app
+xcodebuild -scheme Mandroid -configuration Debug build
+open ~/Library/Developer/Xcode/DerivedData/Mandroid-*/Build/Products/Debug/Mandroid.app
 ```
 
 On first launch the app lists what it will download (about 2.5 GB from
 `dl.google.com`) and installs everything under
-`~/Library/Application Support/Madroid/`. On Macs set to mainland China the
+`~/Library/Application Support/Mandroid/`. On Macs set to mainland China the
 download comes from the Tencent Cloud mirror instead (Aliyun for aapt2); the
 choice can be changed on the setup screen or in Settings ▸ Downloads.
 
@@ -74,15 +74,15 @@ provider to lift the three-window cap, and a macOS notification bridge.
 Build Debug, then run the real-emulator smoke test with an APK:
 
 ```sh
-python3 Scripts/run-ui-tests.py --app /path/to/Madroid.app --apk /path/to/app.apk --package com.example.app
+python3 Scripts/run-ui-tests.py --app /path/to/Mandroid.app --apk /path/to/app.apk --package com.example.app
 ```
 
 For the volume controls alone, use `--test volume` instead of `--apk` and
 `--package`. This checks mute, full volume, and midpoint volume through the
 same native Android control path as Settings, then restores the previous level.
 
-The launcher uses fresh guest data in `~/Library/Caches/madroid-ui-*`, reuses
-Madroid's installed SDK and tools, and shuts down its own process afterward.
+The launcher uses fresh guest data in `~/Library/Caches/mandroid-ui-*`, reuses
+Mandroid's installed SDK and tools, and shuts down its own process afterward.
 Windows stay hidden; input and resize commands use a private file queue.
 The test checks rendered frames, guest resolution, display cleanup, and zero
 visible windows. Screenshots and logs remain in the printed artifact directory.
@@ -100,3 +100,12 @@ display is reused. See [the audit report](docs/AUDIT.md) for findings and scope.
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## Upgrading from Madroid
+
+Quit Madroid before opening Mandroid. On first launch, Mandroid moves the
+existing SDK, Android virtual device, installed apps, and icon cache from
+`~/Library/Application Support/Madroid` to `~/Library/Application Support/Mandroid`
+and copies your preferences. Android App Runner installations are also supported.
+Existing Mandroid data is never overwritten. Old `madroid://` links still work,
+and generated app launchers are updated to use `mandroid://`.
