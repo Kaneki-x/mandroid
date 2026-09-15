@@ -155,6 +155,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         Task { @MainActor in
+            #if DEBUG
+            await DebugHooks.finishRecording()
+            #endif
             windows.closeAll()
             await coordinator.shutdown()
             NSApp.reply(toApplicationShouldTerminate: true)

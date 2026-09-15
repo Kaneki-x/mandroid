@@ -222,6 +222,13 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
         window?.makeFirstResponder(isParked ? overlay : frameView)
         guard !isParked else { return }
         Task {
+            // When the activation came from a click, the touch itself moves
+            // Android's focus to this display a few ms from now. Wait for it
+            // so the nudge (an `am start` that re-delivers the launcher
+            // intent) is skipped: some games drop a touch that arrives during
+            // that resume cycle. Keys call ensureFocus() themselves.
+            try? await Task.sleep(for: .milliseconds(300))
+            guard window?.isKeyWindow == true else { return }
             await ensureFocus()
             await coordinator.clipboard?.pushHostClipboard()
         }
