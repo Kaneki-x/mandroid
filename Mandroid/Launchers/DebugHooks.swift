@@ -16,13 +16,19 @@ import MandroidKit
 /// - `debug/type?pkg=&text=<text>` synthesises key presses for each character
 /// - `debug/key?pkg=&code=<keyCode>[&cmd=1][&shift=1]` one key press
 /// - `debug/resize?pkg=&w=&h=` resizes the window content
+/// - `debug/move?pkg=&x=&y=` moves the window top-left corner
+/// - `debug/front?pkg=` brings a window forward; `debug/library` opens the library
+/// - `debug/screenperm` requests Screen Recording permission
 /// - `debug/rotate?pkg=` swaps the window orientation
 /// - `debug/close?pkg=` closes the window
 /// - `debug/settings` opens the Settings window
+/// - `debug/record?secs=&fps=&file=&scale=` records the app's windows to an MP4
+///   (`debug/stoprecord` ends it early)
 /// - `debug/quit` terminates the app (exercises the shutdown path)
 @MainActor
 struct DebugHooks {
     let delegate: AppDelegate
+    private static var recordingTask: Task<Void, Never>?
 
     func handle(path: [String], query q: [String: String]) {
         guard let cmd = path.first else { return }
@@ -48,6 +54,45 @@ struct DebugHooks {
                 do { _ = try await adb.setMediaVolume(percent: percent) }
                 catch { Log.file("debug volume: \(error.localizedDescription)") }
             }
+        case "screenperm":
+            DebugScreenRecorder.requestPermission()
+        case "record":
+            let file = URL(fileURLWithPath: q["file"] ?? NSTemporaryDirectory() + "mandroid.mp4")
+            let secs = Double(q["secs"] ?? "") ?? 30, fps = Int(q["fps"] ?? "") ?? 15
+            let scale = CGFloat(Double(q["scale"] ?? "") ?? 1)
+            guard secs.isFinite, secs > 0, secs <= 3600, (1...120).contains(fps),
+                  scale.isFinite, scale > 0, scale <= 4 else {
+                Log.file("record: invalid duration, frame rate or scale")
+                return
+            }
+            let previous = Self.recordingTask
+            Self.recordingTask = Task { @MainActor in
+                await previous?.value
+                await DebugRecorder.current?.stop()
+                await DebugScreenRecorder.current?.stop()
+                if DebugScreenRecorder.hasPermission, q["composite"] != "1" {
+                    let r = DebugScreenRecorder(file: file)
+                    DebugScreenRecorder.current = r
+                    do { try await r.start(seconds: secs, fps: fps, allWindows: q["all"] == "1") }
+                    catch {
+                        Log.file("record(screen): failed \(error.localizedDescription)")
+                        await r.stop()
+                        if DebugScreenRecorder.current === r { DebugScreenRecorder.current = nil }
+                    }
+                } else if let r = DebugRecorder(file: file, seconds: secs, fps: fps, scale: scale) {
+                    DebugRecorder.current = r
+                    r.start()
+                } else {
+                    Log.file("record: could not initialize composite recorder")
+                }
+            }
+        case "stoprecord":
+            let previous = Self.recordingTask
+            Self.recordingTask = Task { @MainActor in
+                await previous?.value
+                await DebugRecorder.current?.stop()
+                await DebugScreenRecorder.current?.stop()
+            }
         case "click":
             guard let wc = controller(q["pkg"]), let x = Double(q["x"] ?? ""), let y = Double(q["y"] ?? "") else { return }
             synthesizeDrag(in: wc, from: CGPoint(x: x, y: y), to: CGPoint(x: x, y: y), steps: 0)
@@ -71,6 +116,14 @@ struct DebugHooks {
         case "resize":
             guard let wc = controller(q["pkg"]), let w = Double(q["w"] ?? ""), let h = Double(q["h"] ?? "") else { return }
             wc.window?.setContentSize(NSSize(width: w, height: h))
+        case "move":
+            guard let wc = controller(q["pkg"]), let x = Double(q["x"] ?? ""), let y = Double(q["y"] ?? ""),
+                  x.isFinite, y.isFinite else { return }
+            wc.window?.setFrameTopLeftPoint(NSPoint(x: x, y: y))
+        case "front":
+            controller(q["pkg"])?.window?.makeKeyAndOrderFront(nil)
+        case "library":
+            delegate.showLibrary()
         case "rotate":
             controller(q["pkg"])?.rotateWindow(nil)
         case "close":
@@ -80,6 +133,7 @@ struct DebugHooks {
         case "quit":
             if UITestMode.enabled {
                 Task {
+                    await Self.finishRecording()
                     delegate.windows.closeAll()
                     await delegate.coordinator.shutdown()
                     exit(0)
@@ -90,6 +144,12 @@ struct DebugHooks {
         default:
             break
         }
+    }
+
+    static func finishRecording() async {
+        await recordingTask?.value
+        await DebugRecorder.current?.stop()
+        await DebugScreenRecorder.current?.stop()
     }
 
     private func controller(_ pkg: String?) -> AppWindowController? {

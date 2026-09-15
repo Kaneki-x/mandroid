@@ -29,6 +29,7 @@
 		34DCBE5B97CD020796A1351F /* AppWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55DA50087CE3FCBA56353A14 /* AppWindowController.swift */; };
 		3527AAD84254AF8D34B7EEB6 /* FrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80179973E7A67D4C1D77F184 /* FrameView.swift */; };
 		36C9FD8CA5994BB3814D6165 /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF930F7161F1DCE323E31A4B /* MainMenu.swift */; };
+		3943B4DB3EDBCE2DA7980562 /* DebugScreenRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3EE04C509DE8E5F9C0FE9B0 /* DebugScreenRecorder.swift */; };
 		3C2845CC3E063C2CC11B95E0 /* MandroidKitError.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97FCFF669F1D99C5B174E18 /* MandroidKitError.swift */; };
 		3E2808F8E2220D9787390C22 /* AppMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F094A6E1BC089B2693B13E3E /* AppMigrationTests.swift */; };
 		400DF40E5CA1F033D0C6024A /* GRPCFrameStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3112787BCD2CFEB6E6A41B16 /* GRPCFrameStream.swift */; };
@@ -66,6 +67,7 @@
 		8D4ED6A726DA7E4EAAAE88B0 /* IconExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A577EDF958CD6BFC2A38D77 /* IconExtractor.swift */; };
 		8F073A81288670F1E64D2A72 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDDC728FEC8C95305485F555 /* Log.swift */; };
 		912BBA3C8605E288731E51EA /* ScrollGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 536A55812105ED240C8E7C38 /* ScrollGesture.swift */; };
+		95B4D81D941F24D9F6F6E6D3 /* DebugRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B597A920FF3617F9050114B /* DebugRecorder.swift */; };
 		96176E04B147D3AC91814212 /* DumpsysDisplayParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D11E38C038FB4B3588521DD2 /* DumpsysDisplayParser.swift */; };
 		9B24B15DA44DF7AB251444C6 /* MediaVolume.swift in Sources */ = {isa = PBXBuildFile; fileRef = 759F9FA0196823EB903E42BC /* MediaVolume.swift */; };
 		9E377C462F430226BDAF01C2 /* guest-display.jar in Resources */ = {isa = PBXBuildFile; fileRef = 1B295493DF380A14E7678370 /* guest-display.jar */; };
@@ -181,6 +183,7 @@
 		536A55812105ED240C8E7C38 /* ScrollGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollGesture.swift; sourceTree = "<group>"; };
 		55DA50087CE3FCBA56353A14 /* AppWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppWindowController.swift; sourceTree = "<group>"; };
 		573F637DED923589D2EA7A4D /* WindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowManager.swift; sourceTree = "<group>"; };
+		5B597A920FF3617F9050114B /* DebugRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugRecorder.swift; sourceTree = "<group>"; };
 		5D33770E780457C7F1F097F5 /* GPUBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUBackend.swift; sourceTree = "<group>"; };
 		624282BC5C68C313873805CF /* EmulatorClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorClient.swift; sourceTree = "<group>"; };
 		65FC82E5A6022D0FD80D1A42 /* CoordinateMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateMapper.swift; sourceTree = "<group>"; };
@@ -206,6 +209,7 @@
 		9729937DF91EB20F700976AA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9DBE7D716FD2458F5DD3E580 /* EmulatorConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorConnection.swift; sourceTree = "<group>"; };
 		A22C4002AC149141CE2CCFEA /* APKBadging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APKBadging.swift; sourceTree = "<group>"; };
+		A3EE04C509DE8E5F9C0FE9B0 /* DebugScreenRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugScreenRecorder.swift; sourceTree = "<group>"; };
 		ACB7F8283829550F01F27379 /* emulator_controller.pb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = emulator_controller.pb.swift; sourceTree = "<group>"; };
 		AD0026E3FBD96D348C57055D /* RepositoryManifestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryManifestTests.swift; sourceTree = "<group>"; };
 		AD9C4268BD8813AED61B437D /* GPUBackendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUBackendTests.swift; sourceTree = "<group>"; };
@@ -372,6 +376,8 @@
 			isa = PBXGroup;
 			children = (
 				E3B147EB246CA2F3A3C58614 /* DebugHooks.swift */,
+				5B597A920FF3617F9050114B /* DebugRecorder.swift */,
+				A3EE04C509DE8E5F9C0FE9B0 /* DebugScreenRecorder.swift */,
 				0CA57E57B95AE22134C1E9C8 /* LauncherStubBuilder.swift */,
 				6779B6FF861E9BD4662EA422 /* UITestMode.swift */,
 				DB937303F6A23EDA3C41AFEE /* URLSchemeHandler.swift */,
@@ -740,6 +746,8 @@
 				C74B91BD02E590AA9175CEFB /* AppProxyView.swift in Sources */,
 				34DCBE5B97CD020796A1351F /* AppWindowController.swift in Sources */,
 				05D232786974587E475E9966 /* DebugHooks.swift in Sources */,
+				95B4D81D941F24D9F6F6E6D3 /* DebugRecorder.swift in Sources */,
+				3943B4DB3EDBCE2DA7980562 /* DebugScreenRecorder.swift in Sources */,
 				3527AAD84254AF8D34B7EEB6 /* FrameView.swift in Sources */,
 				32FB224EE27EAD34F6D50934 /* LauncherStubBuilder.swift in Sources */,
 				D11CCC1F6AC91DB80A92B9C9 /* LibraryView.swift in Sources */,
