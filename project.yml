@@ -66,7 +66,12 @@ targets:
     type: application
     platform: macOS
     sources:
-      - Mandroid
+      - path: Mandroid
+        excludes:
+          - AppIcon.icon
+      - path: Mandroid/AppIcon.icon
+        type: file
+        buildPhase: resources
     dependencies:
       - target: MandroidKit
         embed: true

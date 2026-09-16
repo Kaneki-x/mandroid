@@ -183,12 +183,15 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
         ov.onResume = { [weak self] in self?.resume() }
         frameView.addSubview(ov)
         overlay = ov
+        ov.appear()
+        if window?.isKeyWindow == true { window?.makeFirstResponder(ov) }
         window?.title = (coordinator.app(for: app.package)?.label ?? Self.displayName(for: app.package)) + " (paused)"
     }
 
     func resume() {
         guard case .app(let app) = target, isParked, !isResuming, !isClosing, let window else { return }
         isResuming = true
+        overlay?.setResuming(true)
         Task { @MainActor in
             defer { isResuming = false }
             let scale = window.backingScaleFactor
@@ -205,9 +208,11 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
                 overlay?.removeFromSuperview(); overlay = nil
                 window.title = coordinator.app(for: app.package)?.label ?? Self.displayName(for: app.package)
                 configureInput()
+                window.makeFirstResponder(frameView)
                 startFrames()
                 startWatchdog()
             } catch {
+                overlay?.setResuming(false, error: "Could not resume. \(error.localizedDescription)")
                 Log.ui.error("resume failed: \(error.localizedDescription)")
                 NSSound.beep()
             }
@@ -339,7 +344,7 @@ final class AppWindowController: NSWindowController, NSWindowDelegate {
         var frame = window.frameRect(forContentRect: NSRect(origin: .zero, size: size))
         frame.origin = NSPoint(x: window.frame.minX, y: window.frame.maxY - frame.height)
         if let screen { frame = window.constrainFrameRect(frame, to: screen) }
-        window.setFrame(frame, display: true, animate: true)
+        window.setFrame(frame, display: true, animate: !HostStyle.reduceMotion)
         scheduleReconfigure()
     }
 

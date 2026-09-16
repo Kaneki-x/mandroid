@@ -2,6 +2,7 @@ import SwiftUI
 import MandroidKit
 
 struct AppProxyView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let app: AppInfo
     @Bindable var coordinator: RunnerCoordinator
     @Environment(\.dismiss) private var dismiss
@@ -29,25 +30,32 @@ struct AppProxyView: View {
                     Text(app.label).foregroundStyle(.secondary)
                 }
             }
-            Toggle("Use an HTTP proxy for this app", isOn: $enabled)
+            Toggle("Use an HTTP proxy for this app", isOn: $enabled).disabled(saving)
             Form {
-                TextField("Host", text: $host)
-                TextField("Port", text: $port)
+                TextField("Host", text: $host, prompt: Text("localhost"))
+                TextField("Port", text: $port, prompt: Text("8080"))
             }
+            .textFieldStyle(.roundedBorder)
             .disabled(!enabled || saving)
             Text("Use localhost for a proxy on this Mac. Each app can use a different proxy at the same time.")
                 .font(.caption).foregroundStyle(.secondary)
             Text("Applies to apps that honor Android HTTP proxy settings. Other traffic remains direct. Uses Android’s VPN connection and replaces another Android VPN if one is active.")
                 .font(.caption).foregroundStyle(.secondary)
-            if let error { Text(error).foregroundStyle(.red).font(.callout).textSelection(.enabled) }
+            if let error { HostNotice(message: error).transition(.opacity) }
+            Divider()
             HStack {
-                if saving { ProgressView().controlSize(.small) }
+                if saving {
+                    ProgressView().controlSize(.small)
+                    Text("Saving…").foregroundStyle(.secondary)
+                }
                 Spacer()
                 Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction).disabled(saving)
                 Button("Save") { save() }.keyboardShortcut(.defaultAction).disabled(saving)
             }
         }
-        .padding(24).frame(width: 410)
+        .padding(HostStyle.inset).frame(width: 440)
+        .animation(HostStyle.motion(reduceMotion: reduceMotion), value: error != nil)
+        .animation(HostStyle.motion(reduceMotion: reduceMotion), value: saving)
         .interactiveDismissDisabled(saving)
     }
 
