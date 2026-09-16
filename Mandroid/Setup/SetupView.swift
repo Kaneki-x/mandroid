@@ -3,25 +3,62 @@ import SwiftUI
 
 /// First-run download UI and boot progress.
 struct SetupView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Bindable var coordinator: RunnerCoordinator
     @State private var mirrorPreference = RunnerSettings.load().downloadMirror
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 12) {
-                Image(systemName: "iphone.gen3.badge.play")
-                    .font(.system(size: 40))
-                    .foregroundStyle(.tint)
-                VStack(alignment: .leading) {
-                    Text("Mandroid").font(.title2.bold())
-                    Text(subtitle).foregroundStyle(.secondary)
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: HostStyle.inset) {
+                    HStack(spacing: 16) {
+                        Image(systemName: "iphone.gen3.badge.play")
+                            .font(.system(size: 40)).foregroundStyle(.secondary).accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Mandroid").font(.title2.weight(.semibold))
+                            Text(subtitle).foregroundStyle(.secondary)
+                        }
+                    }
+                    content.id(stage).transition(.opacity)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(HostStyle.inset)
+            }
+            Divider()
+            HStack {
+                Text("Android on your Mac").font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                switch coordinator.state {
+                case .needsSetup(let plan):
+                    Button("Download and Install") { coordinator.runSetup(plan) }
+                        .keyboardShortcut(.defaultAction)
+                case .failed:
+                    Button("Try Again") { coordinator.retry() }.keyboardShortcut(.defaultAction)
+                default:
+                    ProgressView().controlSize(.small).accessibilityLabel(subtitle)
                 }
             }
-            content
-            Spacer(minLength: 0)
+            .padding(16).background(.bar)
         }
-        .padding(24)
-        .frame(width: 480, height: 360)
+        .frame(minWidth: 480, idealWidth: 520, minHeight: 360, idealHeight: 480)
+        .animation(HostStyle.motion(reduceMotion: reduceMotion), value: stage)
+    }
+
+    // Progress bytes are intentionally excluded so downloads do not restart transitions.
+    private var stage: String {
+        switch coordinator.state {
+        case .needsSetup: return "plan"
+        case .settingUp(let phase):
+            switch phase {
+            case .fetchingManifests: return "manifests"
+            case .downloading(let name, _): return "download-" + name
+            case .extracting(let name): return "extract-" + name
+            case .finished: return "finished"
+            }
+        case .booting: return "booting"
+        case .failed: return "failed"
+        default: return "checking"
+        }
     }
 
     private var subtitle: String {
@@ -43,18 +80,14 @@ struct SetupView: View {
         case .booting(let stage):
             HStack { ProgressView(); Text(stage) }
         case .failed(let message):
-            VStack(alignment: .leading, spacing: 12) {
-                Text(message).font(.callout).textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Button("Try Again") { coordinator.retry() }.keyboardShortcut(.defaultAction)
-            }
+            HostNotice(message: message)
         default:
             HStack { ProgressView(); Text("Checking…") }
         }
     }
 
     private func planView(_ plan: BootstrapPlan) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("The following components will be downloaded into your Application Support folder:")
                 .fixedSize(horizontal: false, vertical: true)
             ForEach(plan.components) { c in
@@ -86,11 +119,6 @@ struct SetupView: View {
             Text("By continuing you accept the Android SDK License Agreement and the terms of the Google Play system image. Nothing outside this app's folder is modified.")
                 .font(.caption).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
-            HStack {
-                Spacer()
-                Button("Download and Install") { coordinator.runSetup(plan) }
-                    .keyboardShortcut(.defaultAction)
-            }
         }
     }
 
@@ -101,7 +129,10 @@ struct SetupView: View {
         case .downloading(let name, let p):
             VStack(alignment: .leading, spacing: 8) {
                 Text("Downloading \(name)")
-                ProgressView(value: p.fraction ?? 0)
+                Group {
+                    if let fraction = p.fraction { ProgressView(value: fraction) }
+                    else { ProgressView().controlSize(.small) }
+                }.accessibilityLabel("Downloading " + name)
                 HStack {
                     Text(ByteCountFormatter.string(fromByteCount: p.received, countStyle: .file))
                     if let total = p.total { Text("of \(ByteCountFormatter.string(fromByteCount: total, countStyle: .file))") }

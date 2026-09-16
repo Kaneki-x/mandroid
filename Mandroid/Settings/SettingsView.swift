@@ -2,6 +2,7 @@ import MandroidKit
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let coordinator: RunnerCoordinator
     let windows: WindowManager
     @State private var settings = RunnerSettings.load()
@@ -27,7 +28,8 @@ struct SettingsView: View {
                     ForEach(GPUBackend.allCases, id: \.self) { Text($0.label).tag($0) }
                 }
                 if needsRestart {
-                    Text("Takes effect after the emulator restarts.").font(.caption).foregroundStyle(.secondary)
+                    HostNotice(message: "Changes saved. Restart the emulator to apply them.", symbol: "arrow.clockwise.circle")
+                        .transition(.opacity)
                 }
                 HStack {
                     Button("Restart Emulator") { restart(cold: false) }
@@ -48,7 +50,7 @@ struct SettingsView: View {
                 if !coordinator.state.isReady {
                     Text("Available when Android is running.").font(.caption).foregroundStyle(.secondary)
                 }
-                if let volumeError { Text(volumeError).font(.caption).foregroundStyle(.red) }
+                if let volumeError { HostNotice(message: volumeError).transition(.opacity) }
             }
             Section("Windows") {
                 Picker("New windows open", selection: $settings.landscapeByDefault) {
@@ -58,8 +60,8 @@ struct SettingsView: View {
                 .pickerStyle(.segmented)
                 Stepper("Default window height: \(settings.defaultWindowHeight) pt",
                         value: $settings.defaultWindowHeight, in: 500...1600, step: 50)
-                Toggle("Create launcher stubs in ~/Applications/Android Apps", isOn: $settings.launcherStubs)
-                Text("Stubs let Android apps appear in Spotlight and the Dock.").font(.caption).foregroundStyle(.secondary)
+                Toggle("Create launchers in ~/Applications/Android Apps", isOn: $settings.launcherStubs)
+                Text("Launchers let Android apps appear in Spotlight and the Dock.").font(.caption).foregroundStyle(.secondary)
             }
             Section("Downloads") {
                 Picker("Download SDK from", selection: $settings.downloadMirror) {
@@ -82,9 +84,9 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        // A grouped Form has no intrinsic height (it is a scroll view), so the
-        // hosting window would collapse to zero height without an explicit size.
-        .frame(width: 500, height: 780)
+        .frame(minWidth: 480, idealWidth: 560, minHeight: 420, idealHeight: 720)
+        .animation(HostStyle.motion(reduceMotion: reduceMotion), value: needsRestart)
+        .animation(HostStyle.motion(reduceMotion: reduceMotion), value: volumeError != nil)
         .task(id: coordinator.state.isReady) {
             volumeReady = false
             guard coordinator.state.isReady, let adb = coordinator.session?.adb else { return }
@@ -131,7 +133,9 @@ final class SettingsWindowController: NSWindowController {
         let host = NSHostingController(rootView: SettingsView(coordinator: coordinator, windows: windows))
         let window = NSWindow(contentViewController: host)
         window.title = "Settings"
-        window.styleMask = [.titled, .closable]
+        window.styleMask = [.titled, .closable, .resizable]
+        window.contentMinSize = NSSize(width: 480, height: 420)
+        window.setContentSize(NSSize(width: 560, height: 720))
         window.isReleasedWhenClosed = false
         window.center()
         super.init(window: window)

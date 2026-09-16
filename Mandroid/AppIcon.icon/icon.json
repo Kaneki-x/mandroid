@@ -1,0 +1,74 @@
+{
+  "color-space-for-untagged-svg-colors" : "display-p3",
+  "fill" : {
+    "linear-gradient" : [
+      "srgb:0.20,0.39,0.47,1",
+      "srgb:0.055,0.13,0.21,1"
+    ]
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "glass" : true,
+          "image-name" : "Android.svg",
+          "name" : "Android"
+        }
+      ],
+      "lighting" : "individual",
+      "name" : "Android",
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.32000000000000001
+      },
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.5
+      }
+    },
+    {
+      "layers" : [
+        {
+          "glass" : true,
+          "image-name" : "Titlebar.svg",
+          "name" : "Titlebar"
+        }
+      ],
+      "lighting" : "individual",
+      "name" : "Mac titlebar",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.12
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.22
+      }
+    },
+    {
+      "layers" : [
+        {
+          "glass" : true,
+          "image-name" : "Window.svg",
+          "name" : "Window"
+        }
+      ],
+      "lighting" : "individual",
+      "name" : "Glass window",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.25
+      },
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.32000000000000001
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+
+    ],
+    "squares" : "shared"
+  }
+}

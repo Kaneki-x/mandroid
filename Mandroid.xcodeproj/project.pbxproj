@@ -52,7 +52,9 @@
 		6968875561F06E48324AB93C /* PortAllocatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F844F828334E854BE651303 /* PortAllocatorTests.swift */; };
 		69828A20E8FC79307F7B3A9E /* aapt2-badging-shadowsocks.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1112FF2A97D0DA989EEA2428 /* aapt2-badging-shadowsocks.txt */; };
 		6DC9A901C87D8826C8D92CF7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A060D4CAD73DA56209C2447 /* AppDelegate.swift */; };
+		6E4030E4FF2028250F1AD9B5 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 8B90226F41696CAD5B920D1F /* AppIcon.icon */; };
 		6E665EC43F8884619B5C7EE3 /* SHA1.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC27965EAAF15BDD04A12AFD /* SHA1.swift */; };
+		6EEA1DB9BBD675E04B8ECDC1 /* HostStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08D361DE1BDD3FCEC2E336DE /* HostStyle.swift */; };
 		713C2AB7969825E509E648CE /* PackageListParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C489BE2152005B66250C0ABB /* PackageListParser.swift */; };
 		7205336F82C0C7877D740FCA /* EmulatorProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7BED9150E46ED563A22EE48 /* EmulatorProcess.swift */; };
 		74A93C1F77047983F9AF98C6 /* InputChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC417C37F335A7C64F188777 /* InputChannel.swift */; };
@@ -151,6 +153,7 @@
 /* Begin PBXFileReference section */
 		0474DE5D80286AB4EFFC76CB /* SDKBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKBootstrap.swift; sourceTree = "<group>"; };
 		05E3D8D73C25821980720D7F /* AppProxyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppProxyTests.swift; sourceTree = "<group>"; };
+		08D361DE1BDD3FCEC2E336DE /* HostStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostStyle.swift; sourceTree = "<group>"; };
 		08F68DF1547E8385DD5C111B /* PasteboardClipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardClipboard.swift; sourceTree = "<group>"; };
 		0CA57E57B95AE22134C1E9C8 /* LauncherStubBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LauncherStubBuilder.swift; sourceTree = "<group>"; };
 		0F844F828334E854BE651303 /* PortAllocatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortAllocatorTests.swift; sourceTree = "<group>"; };
@@ -202,6 +205,7 @@
 		837A9A0CE90A9279D60ABFAA /* sys-img2-3-google_apis_playstore.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "sys-img2-3-google_apis_playstore.xml"; sourceTree = "<group>"; };
 		85BB7A4A6CDC3A601EB286D4 /* DownloadMirror.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadMirror.swift; sourceTree = "<group>"; };
 		8A577EDF958CD6BFC2A38D77 /* IconExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconExtractor.swift; sourceTree = "<group>"; };
+		8B90226F41696CAD5B920D1F /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		8C26B1DC044AE793A2CA9408 /* Subprocess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Subprocess.swift; sourceTree = "<group>"; };
 		938C35D89238057FA9E32103 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		95AABDC6915A7C99384D3459 /* InputRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputRouter.swift; sourceTree = "<group>"; };
@@ -441,7 +445,9 @@
 			isa = PBXGroup;
 			children = (
 				7A060D4CAD73DA56209C2447 /* AppDelegate.swift */,
+				8B90226F41696CAD5B920D1F /* AppIcon.icon */,
 				9729937DF91EB20F700976AA /* Assets.xcassets */,
+				08D361DE1BDD3FCEC2E336DE /* HostStyle.swift */,
 				782AB065419FE991C79921CE /* Info.plist */,
 				573F637DED923589D2EA7A4D /* WindowManager.swift */,
 				BB870F1C150DF5F41851E5E9 /* AppWindow */,
@@ -722,6 +728,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6E4030E4FF2028250F1AD9B5 /* AppIcon.icon in Resources */,
 				E004BA10A34CFBDE1A58D7DE /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -749,6 +756,7 @@
 				95B4D81D941F24D9F6F6E6D3 /* DebugRecorder.swift in Sources */,
 				3943B4DB3EDBCE2DA7980562 /* DebugScreenRecorder.swift in Sources */,
 				3527AAD84254AF8D34B7EEB6 /* FrameView.swift in Sources */,
+				6EEA1DB9BBD675E04B8ECDC1 /* HostStyle.swift in Sources */,
 				32FB224EE27EAD34F6D50934 /* LauncherStubBuilder.swift in Sources */,
 				D11CCC1F6AC91DB80A92B9C9 /* LibraryView.swift in Sources */,
 				52624FADADB0BC7C839C61B4 /* LibraryWindowController.swift in Sources */,

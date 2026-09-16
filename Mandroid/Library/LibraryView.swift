@@ -6,6 +6,7 @@ import UniformTypeIdentifiers
 struct LibraryView: View {
     @Bindable var coordinator: RunnerCoordinator
     let windows: WindowManager
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var search = ""
     @State private var dropTargeted = false
     @State private var proxyApp: AppInfo?
@@ -16,22 +17,25 @@ struct LibraryView: View {
             : coordinator.apps.filter { $0.label.lowercased().contains(q) || $0.package.lowercased().contains(q) }
     }
 
-    private let columns = [GridItem(.adaptive(minimum: 96, maximum: 120), spacing: 12)]
+    private let columns = [GridItem(.adaptive(minimum: 112, maximum: 160), spacing: 16)]
 
     var body: some View {
         VStack(spacing: 0) {
             if let error = coordinator.proxyError {
-                Text("HTTP proxy setup failed: \(error)").font(.callout).foregroundStyle(.red).padding(10)
+                HostNotice(message: "HTTP proxy setup failed: \(error)").padding(16)
             }
             if coordinator.apps.isEmpty {
                 emptyState
+            } else if filtered.isEmpty {
+                ContentUnavailableView.search(text: search)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 16) {
                         ForEach(filtered) { app in
                             AppTile(app: app, isOpen: coordinator.sessions[app.package] != nil,
-                                    isParked: coordinator.parked[app.package] != nil)
-                                .onTapGesture(count: 2) { windows.open(package: app.package) }
+                                    isParked: coordinator.parked[app.package] != nil,
+                                    open: { windows.open(package: app.package) })
                                 .contextMenu {
                                     Button("Open") { windows.open(package: app.package) }
                                     if coordinator.sessions[app.package] != nil {
@@ -53,15 +57,27 @@ struct LibraryView: View {
                 Text("\(coordinator.sessions.count) of \(DisplaySlotPool.capacity) windows in use")
                     .font(.caption).foregroundStyle(.secondary)
                 Spacer()
-                Button("Refresh") { Task { await coordinator.refreshApps() } }
-                Button("Install APK…") { pickAPK() }
-                Button("Play Store") {
-                    Task { await coordinator.openPlayStore() }
-                    windows.showDeviceScreen()
-                }
-                Button("Device Screen") { windows.showDeviceScreen() }
+
             }
-            .padding(10)
+            .padding(.horizontal, 16).padding(.vertical, 8)
+        }
+        .background(Color(nsColor: .windowBackgroundColor))
+        .toolbar {
+            ToolbarItemGroup {
+                Button(action: pickAPK) { Label("Install APK…", systemImage: "plus") }
+                    .help("Install an APK from your Mac")
+                Button { Task { await coordinator.refreshApps() } } label: {
+                    Label("Refresh", systemImage: "arrow.clockwise")
+                }.help("Refresh installed apps")
+                Menu {
+                    Button("Play Store") {
+                        Task { await coordinator.openPlayStore() }
+                        windows.showDeviceScreen()
+                    }
+                    Button("Device Screen") { windows.showDeviceScreen() }
+                } label: { Label("Device", systemImage: "iphone") }
+                .help("Open Play Store or the device screen")
+            }
         }
         .sheet(item: $proxyApp) { app in AppProxyView(app: app, coordinator: coordinator) }
         .searchable(text: $search, placement: .toolbar, prompt: "Search apps")
@@ -79,17 +95,26 @@ struct LibraryView: View {
         }
         .overlay {
             if dropTargeted {
-                RoundedRectangle(cornerRadius: 8).strokeBorder(.tint, lineWidth: 3).padding(4)
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8).fill(.regularMaterial)
+                    RoundedRectangle(cornerRadius: 8).strokeBorder(.tint, lineWidth: 2)
+                    Label("Drop APK files to install", systemImage: "square.and.arrow.down")
+                        .font(.title3.weight(.medium))
+                }
+                .padding(8).allowsHitTesting(false).transition(.opacity)
             }
         }
+        .animation(HostStyle.motion(reduceMotion: reduceMotion), value: dropTargeted)
+        .animation(HostStyle.motion(reduceMotion: reduceMotion), value: coordinator.proxyError != nil)
     }
 
     private var emptyState: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
             Image(systemName: "square.and.arrow.down.on.square").font(.system(size: 36)).foregroundStyle(.secondary)
-            Text("No apps installed yet").font(.title3)
+            Text("No apps installed yet").font(.title3.weight(.semibold))
             Text("Install apps from the Play Store on the device screen, or drop an APK here.")
                 .foregroundStyle(.secondary).multilineTextAlignment(.center)
+            Button("Install APK…", action: pickAPK)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
@@ -122,23 +147,44 @@ struct AppTile: View {
     let isOpen: Bool
     let isParked: Bool
 
+    let open: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var hovering = false
+    @FocusState private var focused: Bool
+
+    private var status: String { isParked ? "Paused" : isOpen ? "Running" : "" }
+
     var body: some View {
-        VStack(spacing: 6) {
-            ZStack(alignment: .bottomTrailing) {
-                AppIconView(app: app, size: 56)
-                if isOpen || isParked {
-                    Circle().fill(isOpen ? Color.green : Color.orange).frame(width: 10, height: 10)
-                        .overlay(Circle().stroke(Color(nsColor: .windowBackgroundColor), lineWidth: 2))
-                        .offset(x: 2, y: 2)
-                }
-            }
-            Text(app.label).font(.caption).lineLimit(2).multilineTextAlignment(.center)
-                .frame(height: 30, alignment: .top)
+        VStack(spacing: 8) {
+            AppIconView(app: app, size: 56).accessibilityHidden(true)
+            Text(app.label).font(.callout).lineLimit(2).multilineTextAlignment(.center)
+                .frame(height: 36, alignment: .top)
+            Label(status, systemImage: isParked ? "pause.circle.fill" : "circle.fill")
+                .font(.caption2).foregroundStyle(.secondary)
+                .opacity(status.isEmpty ? 0 : 1)
+                .accessibilityHidden(true)
         }
-        .frame(width: 96)
-        .padding(6)
+        .frame(maxWidth: .infinity)
+        .padding(8)
+        .background(hovering || focused ? Color.accentColor.opacity(0.1) : .clear,
+                    in: RoundedRectangle(cornerRadius: 8))
+        .overlay { RoundedRectangle(cornerRadius: 8).strokeBorder(focused ? Color.accentColor : .clear, lineWidth: 2) }
         .contentShape(Rectangle())
-        .help(app.package)
+        .focusable().focused($focused).focusEffectDisabled()
+        .onTapGesture(count: 2, perform: open)
+        .onTapGesture { focused = true }
+        .onKeyPress(.return) { open(); return .handled }
+        .onKeyPress(.space) { open(); return .handled }
+        .onHover { hovering = $0 }
+        .animation(HostStyle.motion(reduceMotion: reduceMotion, hover: true), value: hovering)
+        .animation(HostStyle.motion(reduceMotion: reduceMotion), value: status)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(app.label)
+        .accessibilityValue(status.isEmpty ? "Installed" : status)
+        .accessibilityHint("Open in an Android app window")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction { open() }
+        .help("\(app.label)\n\(app.package)")
     }
 }
 
@@ -165,6 +211,6 @@ struct AppIconView: View {
 
     private var color: Color {
         let hues: [Color] = [.blue, .indigo, .purple, .pink, .red, .orange, .teal, .green, .mint, .cyan]
-        return hues[abs(app.package.hashValue) % hues.count]
+        return hues[Int(app.package.utf8.reduce(UInt(0)) { ($0 &* 31) &+ UInt($1) } % UInt(hues.count))]
     }
 }
