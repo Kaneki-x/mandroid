@@ -7,9 +7,10 @@ Spotlight — no phone frame, no Android status or navigation bars.
 
 **Status: working prototype.** Phases 0–3 of the plan are implemented and
 exercised end to end (first-run download, boot, app windows with touch,
-keyboard, scroll, free resize, clipboard, launcher stubs). Not yet signed or
-notarized for distribution; build it from source. The design and the phased
-plan live in [`docs/`](docs/):
+keyboard, scroll, free resize, clipboard, launcher stubs). Signed and
+notarized builds are on the [Releases](https://github.com/madeye/mandroid/releases)
+page; you can also build from source. The design and the phased plan live in
+[`docs/`](docs/):
 
 - [docs/DESIGN.md](docs/DESIGN.md) — architecture, verified facts, mechanisms, risks
 - [docs/PLAN.md](docs/PLAN.md) — phases with "done when" criteria and status
