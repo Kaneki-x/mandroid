@@ -1,8 +1,8 @@
 # Native UI polish validation
 
-Branch: `feature/native-ui-polish`. Checked on 2026-09-15 with the macOS 15
-deployment target and the local macOS SDK. No dependencies or persisted
-settings formats changed.
+Branch: `fix/app-icon-contrast` (merged as PR #9). Checked on 2026-09-15
+with the macOS 15 deployment target and the local macOS SDK. No dependencies
+or persisted settings formats changed.
 
 ## Build and source checks
 
