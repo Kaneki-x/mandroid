@@ -55,7 +55,7 @@ MandroidKit:
       plan), `AAPT2Fetcher`
 - [x] `AVD/`: `AVDConfig` (template in DESIGN §3.4), `AVDStore`
 - [x] `Emulator/`: `EmulatorProcess`, `EmulatorLaunchOptions`,
-      `PortAllocator`, `BootWaiter`, `GuestSetup` (settings + snapshot)
+      `PortAllocator`, `BootWaiter`, `GuestSetup` (guest settings)
 - [x] `ADB/`: `ADBClient`, `DumpsysDisplayParser`, `PackageListParser`
 - [x] `Client/`: `EmulatorConnection` (long-lived), `EmulatorClient` facade,
       `MethodConfig` raising `maxResponseMessageBytes` for `streamScreenshot`
@@ -136,9 +136,12 @@ recorded in `docs/compat.md`: some apps lose text input after a park/resume.
 - [x] `Launchers/LauncherStubBuilder` + `URLSchemeHandler`
       (`~/Applications/Android Apps/<Label>.app`, `.icns` from the app icon,
       regenerate on catalog change, remove on uninstall)
-- [ ] Global audio toggle (`streamAudio` is VM-wide)
-- [x] `Settings/`: system image choice and update, RAM/cores, default window
-      size, cold boot, keep-warm policy, open logs, diagnostics
+- [x] Guest media-volume slider, including mute and persisted volume
+- [x] `Settings/`: RAM/cores, graphics backend, device display profiles,
+      default window size/orientation, launcher stubs, media volume, SDK
+      download mirror, cold boot, and log/data folders
+- [x] Optional KernelSU image preparation, activation status, and stock recovery
+- [ ] System-image selection/update UI and configurable keep-warm policy
 - [x] Emulator crash detection and restart; pause frame streams for occluded
       or miniaturised windows; drop stale frames
 - [x] Release: hardened runtime, Developer ID signing, notarisation script
@@ -147,9 +150,10 @@ Done when: windows resize smoothly without losing app state, frames are
 Retina-crisp, launcher stubs show up in Spotlight and the Dock, and the menu
 bar exposes Android navigation with standard shortcuts.
 
-**Status 2026-09-10: done except the audio toggle** (audio follows the
-emulator's default host output; a mute switch is a one-line `-no-audio`
-launch option away and is left for when someone asks). Resize lives in
+**Status updated 2026-09-17: core native polish implemented.** Media volume
+and mute use Android's native media stream and apply immediately. System-image
+selection/update and configurable keep-warm policy remain outstanding.
+Resize lives in
 `AppWindowController` (debounced in-place reconfigure) rather than a separate
 `ResizeCoordinator`. Launcher stubs verified: `~/Applications/Android
 Apps/<Label>.app` is indexed by Spotlight and opens the app window. Settings
@@ -157,6 +161,25 @@ Apps/<Label>.app` is indexed by Spotlight and opens the app window. Settings
 folders, restart and cold boot. Crash handling: an unexpected emulator exit
 shows the error with "Try Again"; hidden or miniaturised windows stop
 streaming frames. `Scripts/release.sh` signs, notarizes and staples.
+
+## Settings and compatibility follow-up (2026-09-17)
+
+- [x] Tablet, Phone, Compact phone, and bounded Custom device-screen profiles;
+      apply changes by cold boot while preserving guest data. Separate app
+      windows retain their own geometry.
+- [x] KernelSU 3.3.0 ramdisk preparation for the tested Android 36.1 ARM64
+      kernel; exact compatibility checks, pinned asset hashes, cancellable
+      preparation, validated cache, and Manager initialization.
+- [x] Stock → KernelSU → stock runtime checks with fresh guest writes preserved
+      at both transitions and stock image hashes unchanged.
+- [x] README icon uses the app's existing generated PNG.
+- [ ] Exercise an uncached KernelSU asset download end to end. The runtime
+      checks used verified cached release assets.
+
+The 2026-09-17 audit passed Debug/Release builds, 85 tests in 26 suites,
+script syntax checks, and generated-source verification. These are dated
+results; rerun the audit for subsequent code changes. See
+[KERNELSU.md](KERNELSU.md#validation) for the root-mode verification scope.
 
 ## Future (not scheduled)
 
@@ -168,7 +191,7 @@ streaming frames. `Scripts/release.sh` signs, notarizes and staples.
 
 ## Verification strategy
 
-- **Unit tests** (`MandroidKitTests`, run on every build): manifest parsing
+- **Unit tests** (`MandroidKitTests`, run with `xcodebuild -scheme Mandroid test`): manifest parsing
   from fixture XML (archive selection by os/arch/channel), AVD config
   rendering, `dumpsys display` parsing from captured fixtures, package list
   parsing, aapt2 badging parsing, coordinate mapping (letterbox, scale,

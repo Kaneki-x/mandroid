@@ -41,6 +41,50 @@ public final class RunnerCoordinator {
     public let avdStore: AVDStore
     public var avdName = "runner"
 
+    public private(set) var preparingKernelSU = false
+    public private(set) var kernelSUStatus = "Prepare an image now, or enable KernelSU and restart."
+    public private(set) var kernelSUError: String?
+    private var kernelSUPreparation: Task<KernelSUPatcher.Prepared, Error>?
+    private var kernelSUGeneration = UUID()
+
+    /// One owner for Settings and boot requests; shutdown cancels and drains it.
+    public func prepareKernelSU() async throws -> KernelSUPatcher.Prepared {
+        if let kernelSUPreparation { return try await kernelSUPreparation.value }
+        guard let image = bootstrap.installedSystemImage() else {
+            throw MandroidKitError.avd("Install a system image before preparing KernelSU.")
+        }
+        preparingKernelSU = true
+        kernelSUError = nil
+        let generation = UUID()
+        kernelSUGeneration = generation
+        let patcher = KernelSUPatcher(paths: paths)
+        let task = Task {
+            try await patcher.prepare(imageDirectory: image.directory) { text in
+                await MainActor.run {
+                    if self.kernelSUGeneration == generation { self.kernelSUStatus = text }
+                }
+            }
+        }
+        kernelSUPreparation = task
+        defer {
+            if kernelSUGeneration == generation { preparingKernelSU = false; kernelSUPreparation = nil }
+        }
+        do {
+            let prepared = try await task.value
+            guard kernelSUGeneration == generation else { throw CancellationError() }
+            kernelSUStatus = "KernelSU 3.3.0 image is ready. Restart to apply."
+            return prepared
+        } catch {
+            if kernelSUGeneration == generation {
+                kernelSUStatus = "Image preparation did not complete."
+                if !task.isCancelled { kernelSUError = error.localizedDescription }
+            }
+            throw error
+        }
+    }
+
+    public func cancelKernelSUPreparation() { kernelSUPreparation?.cancel() }
+
     private var bootTask: Task<Void, Never>?
     private var changingPackages = Set<String>()
 
@@ -138,6 +182,12 @@ public final class RunnerCoordinator {
             config.name = avdName
             let settings = RunnerSettings.load()
             settings.apply(to: &config)
+            var kernelSU: KernelSUPatcher.Prepared?
+            if settings.kernelSUEnabled {
+                setStage("Preparing KernelSU image")
+                kernelSU = try await prepareKernelSU()
+                try Task.checkCancellation()
+            }
             // (Re)write the ini files every boot: picks up RAM/core changes and
             // drops hw.displayN.* keys the emulator persisted. User data and
             // snapshots live in other files and are untouched.
@@ -151,6 +201,7 @@ public final class RunnerCoordinator {
             var options = EmulatorLaunchOptions(avdName: avdName, consolePort: console, grpcPort: grpc, adbServerPort: adbPort)
             options.coldBoot = coldBoot || profileChanged
             options.gpuBackend = settings.gpuBackend
+            options.kernelSURamdisk = kernelSU?.ramdisk
 
             setStage("Starting adb")
             let adb = ADBClient(paths: paths, serverPort: adbPort, serial: options.serial)
@@ -183,6 +234,11 @@ public final class RunnerCoordinator {
                 Task { @MainActor in
                     if case .booting = self.state { self.setStage(text) }
                 }
+            }
+            if let kernelSU {
+                setStage("Activating KernelSU")
+                try await KernelSUPatcher(paths: paths).activate(kernelSU, adb: adb)
+                kernelSUStatus = "KernelSU 3.3.0 is active (kernel 32601). Manage root access in KernelSU Manager."
             }
             await GuestSetup.apply(adb: adb)
             await restoreAppProxies(adb: adb)
@@ -279,6 +335,11 @@ public final class RunnerCoordinator {
     private func performShutdown() async {
         state = .shuttingDown
         bootTask?.cancel()
+        kernelSUPreparation?.cancel()
+        _ = try? await kernelSUPreparation?.value
+        kernelSUGeneration = UUID()
+        kernelSUPreparation = nil
+        preparingKernelSU = false
         await bootTask?.value
         bootTask = nil
         refreshTask?.cancel()
@@ -288,6 +349,11 @@ public final class RunnerCoordinator {
         clipboard = nil
         await session.input.close()
         try? await session.displays.reset()
+        // A subsequent boot may bypass the snapshot (including stock → root).
+        // Flush Android's filesystem cache before QEMU exits so recent writes
+        // survive that cold boot even when this session used snapshots.
+        do { _ = try await session.adb.shell("sync", timeout: .seconds(15)) }
+        catch { Log.file("Could not flush guest files before shutdown: \(error.localizedDescription)", paths: paths) }
         // Ask QEMU to power off over gRPC (adb "emu kill" needs the console
         // auth token and silently does nothing without it). The emulator saves
         // the quickboot snapshot on the way out, which takes several seconds

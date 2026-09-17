@@ -4,9 +4,14 @@ import Foundation
 public struct RunnerSettings: Sendable, Equatable {
     /// Nil preserves the guest volume until the user first adjusts it.
     public var mediaVolumePercent: Int?
+    public var kernelSUEnabled = false
     public var ramMB: Int = 4096
     public var cores: Int = 4
     public var gpuBackend: GPUBackend = .defaultBackend
+    public var deviceProfile: DeviceProfile = .tablet
+    public var customDeviceWidthDP: Int = 400
+    public var customDeviceHeightDP: Int = 900
+    public var customDeviceDensity: Int = 320
     public var defaultWindowHeight: Int = 800
     public var launcherStubs: Bool = true
     /// New app windows open in landscape ("horizontal") unless changed.
@@ -21,6 +26,7 @@ public struct RunnerSettings: Sendable, Equatable {
 
     public static func load(from defaults: UserDefaults = .standard) -> RunnerSettings {
         var s = RunnerSettings()
+        s.kernelSUEnabled = defaults.bool(forKey: "kernelSUEnabled")
         if let v = defaults.object(forKey: "mediaVolumePercent") as? Int, (0...100).contains(v) { s.mediaVolumePercent = v }
         if let v = defaults.object(forKey: "ramMB") as? Int, ramChoices.contains(v) { s.ramMB = v }
         if let v = defaults.object(forKey: "cores") as? Int, coreChoices.contains(v) { s.cores = v }
@@ -29,14 +35,27 @@ public struct RunnerSettings: Sendable, Equatable {
         if let v = defaults.object(forKey: "landscapeByDefault") as? Bool { s.landscapeByDefault = v }
         if let v = defaults.string(forKey: "downloadMirror"), let m = DownloadMirror.Preference(rawValue: v) { s.downloadMirror = m }
         if let value = defaults.string(forKey: "gpuBackend"), let backend = GPUBackend(rawValue: value) { s.gpuBackend = backend }
+        if let value = defaults.string(forKey: "deviceProfile"), let profile = DeviceProfile(rawValue: value) { s.deviceProfile = profile }
+        // integer(forKey:) also accepts numeric launch arguments for isolated tests.
+        let width = defaults.integer(forKey: "customDeviceWidthDP")
+        let height = defaults.integer(forKey: "customDeviceHeightDP")
+        let density = defaults.integer(forKey: "customDeviceDensity")
+        if DeviceDisplay.dimensionRange.contains(width) { s.customDeviceWidthDP = width }
+        if DeviceDisplay.dimensionRange.contains(height) { s.customDeviceHeightDP = height }
+        if DeviceDisplay.densityRange.contains(density) { s.customDeviceDensity = density }
         return s
     }
 
     public func save(to defaults: UserDefaults = .standard) {
         defaults.set(mediaVolumePercent, forKey: "mediaVolumePercent")
+        defaults.set(kernelSUEnabled, forKey: "kernelSUEnabled")
         defaults.set(ramMB, forKey: "ramMB")
         defaults.set(cores, forKey: "cores")
         defaults.set(gpuBackend.rawValue, forKey: "gpuBackend")
+        defaults.set(deviceProfile.rawValue, forKey: "deviceProfile")
+        defaults.set(customDeviceWidthDP, forKey: "customDeviceWidthDP")
+        defaults.set(customDeviceHeightDP, forKey: "customDeviceHeightDP")
+        defaults.set(customDeviceDensity, forKey: "customDeviceDensity")
         defaults.set(defaultWindowHeight, forKey: "defaultWindowHeight")
         defaults.set(launcherStubs, forKey: "launcherStubs")
         defaults.set(landscapeByDefault, forKey: "landscapeByDefault")
@@ -62,10 +81,24 @@ public struct RunnerSettings: Sendable, Equatable {
     /// Mirrors to try, in order, for the current preference.
     public var mirrors: [DownloadMirror] { DownloadMirror.order(for: downloadMirror) }
 
+    public var deviceDisplay: DeviceDisplay {
+        deviceProfile.display(widthDP: customDeviceWidthDP, heightDP: customDeviceHeightDP, density: customDeviceDensity)
+    }
+
+    public func requiresRestart(comparedTo running: RunnerSettings) -> Bool {
+        ramMB != running.ramMB || cores != running.cores || gpuBackend != running.gpuBackend
+            || deviceDisplay != running.deviceDisplay || kernelSUEnabled != running.kernelSUEnabled
+    }
+
     /// Applies the hardware settings to an AVD config.
     public func apply(to config: inout AVDConfig) {
+        config.kernelSUEnabled = kernelSUEnabled
         config.ramMB = ramMB
         config.cores = cores
         config.gpuBackend = gpuBackend
+        config.displayName = "Mandroid (\(deviceProfile.label))"
+        config.lcdWidth = deviceDisplay.widthPixels
+        config.lcdHeight = deviceDisplay.heightPixels
+        config.lcdDensity = deviceDisplay.density
     }
 }
