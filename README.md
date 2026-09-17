@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Mandroid/Assets.xcassets/AppIcon.appiconset/icon_256.png" width="128" height="128" alt="Mandroid app icon">
+</p>
+
 # Mandroid
 
 Run Android apps on your Mac as if they were native macOS apps. Each Android
@@ -5,7 +9,7 @@ app gets its own window with a normal title bar, resizes like a Mac window,
 shares the clipboard, answers to Cmd shortcuts, and shows up in the Dock and
 Spotlight — no phone frame, no Android status or navigation bars.
 
-**Status: working prototype.** Phases 0–3 of the plan are implemented and
+**Status: working prototype.** The core workflows from phases 0–3 are implemented and
 exercised end to end (first-run download, boot, app windows with touch,
 keyboard, scroll, free resize, clipboard, launcher stubs). Signed and
 notarized builds are on the [Releases](https://github.com/madeye/mandroid/releases)
@@ -15,7 +19,8 @@ page; you can also build from source. The design and the phased plan live in
 - [docs/DESIGN.md](docs/DESIGN.md) — architecture, verified facts, mechanisms, risks
 - [docs/PLAN.md](docs/PLAN.md) — phases with "done when" criteria and status
 - [docs/SPIKE-NOTES.md](docs/SPIKE-NOTES.md) — measurements behind the design decisions
-- [docs/compat.md](docs/compat.md) — per-app compatibility notes
+- [docs/compat.md](docs/compat.md) — per-app compatibility and display-profile testing
+- [docs/KERNELSU.md](docs/KERNELSU.md) — optional root support, supported image, and recovery
 
 ## Building
 
@@ -45,9 +50,32 @@ default to 1280×800 points (2560×1600 pixels on a 2× Retina screen), scaled
 down to fit smaller screens. Mouse, keyboard, scroll and
 clipboard are translated back the same way.
 
-Settings includes a media-volume slider for all Android apps. It controls the
+## Settings
+
+Settings (⌘,) includes a media-volume slider for all Android apps. It controls the
 guest's native media stream, supports mute, and restores your chosen level on
 restart. Audio continues to play through the emulator's native macOS backend.
+
+For layout compatibility testing, Settings ▸ Virtual device ▸ Device screen
+profile offers Tablet (1280×800 dp), Phone (400×900 dp), Compact phone
+(360×640 dp), and Custom. Presets use 320 dpi; Custom supports width and
+height from 320–1600 dp and density from 120–480 dpi. Restart Emulator applies
+display changes with a cold boot and preserves installed apps and data.
+Open Device Screen and launch the Android app there to test the selected
+profile. Separate app windows continue to follow their own window geometry.
+Profiles configure display geometry; Android device identity and attestation
+remain those of the stock emulator image.
+
+Settings ▸ KernelSU (experimental) can prepare a separate patched ramdisk and
+boot with root support. It is off by default. Enable **Boot with KernelSU**,
+then **Restart to Apply**. The first rooted boot downloads and verifies
+KernelSU 3.3.0 and installs its Manager if needed.
+You can also prepare the image ahead of time with **Prepare Patched Image**.
+The supported image is Android 36.1 ARM64 revision 4 with kernel
+`6.12.38-android16-5-gbb9513914902-ab13996879-4k`; other kernels are rejected.
+Rooted sessions cold boot. Turn KernelSU off and restart to boot stock while
+keeping installed apps and data. Manage root grants in KernelSU Manager;
+ADB shell is not automatically granted root. See [KernelSU settings](docs/KERNELSU.md).
 
 Settings ▸ Virtual device defaults to hardware graphics with Vulkan descriptor
 batching, with the original hardware, automatic, and software profiles available.
@@ -68,13 +96,13 @@ the measurement protocol and backend results.
 - At most three Android app windows at a time per emulator instance (an
   emulator limit); additional windows are parked and resume on click
 - Apps that require Play Integrity attestation (many banking and DRM apps)
-  detect the emulator and will not run
+  are unsupported; enabling KernelSU does not provide a passing verdict
 
 ## Roadmap
 
-See [docs/PLAN.md](docs/PLAN.md) for what is done. Next candidates: signed
-and notarized releases, an audio mute switch, an Android-side display
-provider to lift the three-window cap, and a macOS notification bridge.
+See [docs/PLAN.md](docs/PLAN.md) for implementation status and remaining work.
+Future candidates include an Android-side display provider to lift the
+three-window cap, a second emulator instance, and a macOS notification bridge.
 
 ## Offscreen UI tests
 

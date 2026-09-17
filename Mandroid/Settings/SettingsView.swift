@@ -13,11 +13,33 @@ struct SettingsView: View {
     @State private var volumeError: String?
 
 
-    private var needsRestart: Bool { settings.ramMB != saved.ramMB || settings.cores != saved.cores || settings.gpuBackend != saved.gpuBackend }
+    private var needsRestart: Bool {
+        if let session = coordinator.session {
+            if (session.options.kernelSURamdisk != nil) != settings.kernelSUEnabled { return true }
+            let display = settings.deviceDisplay
+            if session.deviceWidth != display.widthPixels || session.deviceHeight != display.heightPixels
+                || session.deviceDpi != display.density { return true }
+        }
+        return settings.requiresRestart(comparedTo: saved)
+    }
 
     var body: some View {
         Form {
             Section("Virtual device") {
+                Picker("Device screen profile", selection: $settings.deviceProfile) {
+                    ForEach(DeviceProfile.allCases, id: \.self) { Text($0.label).tag($0) }
+                }
+                if settings.deviceProfile == .custom {
+                    Stepper("Width: \(settings.customDeviceWidthDP) dp", value: $settings.customDeviceWidthDP,
+                            in: DeviceDisplay.dimensionRange, step: 20)
+                    Stepper("Height: \(settings.customDeviceHeightDP) dp", value: $settings.customDeviceHeightDP,
+                            in: DeviceDisplay.dimensionRange, step: 20)
+                    Stepper("Density: \(settings.customDeviceDensity) dpi", value: $settings.customDeviceDensity,
+                            in: DeviceDisplay.densityRange, step: 20)
+                }
+                Text(settings.deviceDisplay.summary).font(.caption).foregroundStyle(.secondary)
+                Text("Open Device Screen to test apps with this display profile. Separate app windows use their own window size.")
+                    .font(.caption).foregroundStyle(.secondary)
                 Picker("Memory", selection: $settings.ramMB) {
                     ForEach(RunnerSettings.ramChoices, id: \.self) { Text("\($0 / 1024) GB").tag($0) }
                 }
@@ -35,6 +57,33 @@ struct SettingsView: View {
                     Button("Restart Emulator") { restart(cold: false) }
                     Button("Cold Boot") { restart(cold: true) }
                 }
+            }
+            Section("KernelSU (experimental)") {
+                Toggle("Boot with KernelSU", isOn: $settings.kernelSUEnabled)
+                Text("Adds root support to the supported Android 36.1 ARM64 image. A separate patched image preserves the stock image. Turn this off and restart to return to stock; installed apps and data are kept.")
+                    .font(.caption).foregroundStyle(.secondary)
+                if coordinator.session?.options.kernelSURamdisk != nil {
+                    Label("KernelSU is active", systemImage: "checkmark.circle")
+                } else {
+                    Text("KernelSU is not active in this session.").font(.caption).foregroundStyle(.secondary)
+                }
+                Text(coordinator.kernelSUStatus).font(.caption).foregroundStyle(.secondary)
+                if let error = coordinator.kernelSUError { HostNotice(message: error) }
+                HStack {
+                    if coordinator.preparingKernelSU {
+                        ProgressView().controlSize(.small)
+                        Button("Cancel Preparation") { coordinator.cancelKernelSUPreparation() }
+                    } else {
+                        Button("Prepare Patched Image") {
+                            Task { _ = try? await coordinator.prepareKernelSU() }
+                        }
+                        .disabled(!coordinator.bootstrap.isReady)
+                    }
+                    Button("Restart to Apply") { restart(cold: true) }
+                        .disabled(coordinator.preparingKernelSU)
+                }
+                Link("KernelSU project and license", destination: URL(string: "https://github.com/tiann/KernelSU")!)
+                    .font(.caption)
             }
             Section("Audio") {
                 HStack {

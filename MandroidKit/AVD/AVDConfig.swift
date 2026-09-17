@@ -6,6 +6,7 @@ public struct AVDConfig: Sendable, Hashable {
     public var name: String = "runner"
     public var displayName: String = "Mandroid (Pixel Tablet)"
     public var systemImagePath: String            // "system-images;android-36.1;google_apis_playstore;arm64-v8a"
+    public var kernelSUEnabled = false
     public var ramMB: Int = 4096
     public var cores: Int = 4
     public var heapMB: Int = 512
@@ -58,6 +59,7 @@ public struct AVDConfig: Sendable, Hashable {
             ("hw.gpu.enabled", "yes"),
             ("hw.gpu.mode", gpuMode),
             ("mandroid.gpu.backend", gpuBackend.rawValue),
+            ("mandroid.kernelsu.enabled", kernelSUEnabled ? "true" : "false"),
             ("hw.gyroscope", "yes"),
             ("hw.initialOrientation", "portrait"),
             ("hw.keyboard", "yes"),

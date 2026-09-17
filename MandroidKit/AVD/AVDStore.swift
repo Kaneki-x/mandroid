@@ -17,7 +17,7 @@ public struct AVDStore: Sendable {
     /// snapshots) is preserved; only the ini files are (re)written.
     /// The emulator appends `hw.displayN.*` keys at runtime; we strip them so
     /// every boot starts with display 0 only.
-    /// Returns true when an existing display or GPU profile changed and its old
+    /// Returns true when an existing display, GPU, or boot profile changed and its old
     /// quickboot snapshot must not be loaded. User data is never reset.
     @discardableResult
     public func write(_ config: AVDConfig) throws -> Bool {
@@ -25,7 +25,7 @@ public struct AVDStore: Sendable {
         let ini = dir.appendingPathComponent("config.ini")
         let previous = try? String(contentsOf: ini, encoding: .utf8)
         let rendered = config.renderConfigINI()
-        let snapshotKeys = ["hw.lcd.width", "hw.lcd.height", "hw.lcd.density", "hw.initialOrientation", "hw.gpu.mode", "mandroid.gpu.backend"]
+        let snapshotKeys = ["hw.lcd.width", "hw.lcd.height", "hw.lcd.density", "hw.initialOrientation", "hw.gpu.mode", "mandroid.gpu.backend", "mandroid.kernelsu.enabled"]
         func value(_ key: String, in text: String) -> String? {
             for line in text.split(separator: "\n") {
                 let parts = line.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)

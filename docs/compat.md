@@ -15,6 +15,28 @@ tried; keep one line per app.
 | Settings (system) | `com.android.settings` | yes | yes | yes | Used for the spike; search typing verified. |
 | Camera (AOSP) | `com.android.camera2` | yes | — | — | Runtime permission dialog appears on the app's own display. |
 
+## Device-screen profile testing
+
+Choose Settings ▸ Virtual device ▸ Device screen profile, restart the emulator,
+then open Device Screen and launch the app there. These profiles configure
+Android's built-in display; separate app windows follow their own size.
+
+| Profile | Logical size | Density | Pixel size |
+| --- | --- | --- | --- |
+| Tablet (default) | 1280×800 dp | 320 dpi | 2560×1600 |
+| Phone | 400×900 dp | 320 dpi | 800×1800 |
+| Compact phone | 360×640 dp | 320 dpi | 720×1280 |
+| Custom | 320–1600 dp per dimension | 120–480 dpi | Derived from size and density |
+
+Changes cold boot the emulator and preserve installed apps and data. Profiles
+configure display geometry without changing Android device identity. Record
+the chosen profile, app version, and whether testing used Device Screen or a
+separate window when adding compatibility results.
+
+KernelSU is a separate, optional setting for root-dependent tests. See
+[setup and recovery](KERNELSU.md); the secondary-window table above does not
+establish app behavior with root enabled.
+
 ## Orientation
 
 New windows open in landscape by default (Settings ▸ Windows switches to
@@ -36,14 +58,16 @@ whose window was resized.
 - **Parking** moves the Android task to display 0, where it is visible in
   the Device Screen window until resumed. Some apps lose text-input focus
   after coming back; a reopen (⌘W, then open again) restores it.
-- **Play Integrity / SafetyNet** protected apps (banking, some streaming)
-  refuse to run on any emulator; this is not fixable from the runner.
+- **Play Integrity / SafetyNet** protected apps are unsupported. The isolated
+  checker experiment did not obtain a passing device verdict; neither display
+  profiles nor KernelSU activation establish protected-app compatibility.
+  See the [dated experiment](KERNELSU-EXPERIMENT.md) for its exact scope.
 - **`resizeableActivity=false`** apps are letterboxed by Android when the
   window aspect does not match; the runner does not compensate.
 - **Notifications** appear in the device screen's status bar only; there is
   no macOS notification bridge yet.
 - **Audio** plays through the emulator regardless of which window is
-  focused (`streamAudio` is VM-wide).
+  focused. Settings ▸ Audio controls the guest media stream; 0% mutes it.
 
 ## Audio
 

@@ -1,8 +1,10 @@
 # Mandroid for macOS — Design
 
-Status: design stage (September 2026). No application code exists yet; see
-[PLAN.md](PLAN.md) for the phased roadmap and [SPIKE-NOTES.md](SPIKE-NOTES.md)
-for the questions the first spike must answer.
+Status: working prototype (updated 2026-09-17). This document records the
+architecture, measured constraints, and implementation decisions. See
+[PLAN.md](PLAN.md) for completed and outstanding work,
+[SPIKE-NOTES.md](SPIKE-NOTES.md) for the original measurements, and
+[KERNELSU.md](KERNELSU.md) for optional rooted-boot setup and recovery.
 
 ## 1. Goals and non-goals
 
@@ -128,6 +130,14 @@ Sources: `android/android-emu/android/emulation/MultiDisplay.cpp`,
   added.**
 
 ### 3.3 Android behaviour on secondary displays
+
+Device screen profiles (`DeviceProfile`, persisted by `RunnerSettings`) set
+the built-in AVD's resolution and density. Tablet retains the default
+2560×1600 at 320 dpi; phone and compact-phone profiles provide smaller logical
+layouts. Custom dimensions are bounded in dp before conversion to pixels.
+`AVDStore.write` detects effective geometry changes and the coordinator
+skips the old quickboot snapshot, preserving userdata. Profiles do not alter
+the system image, device identity, or the geometry of separate app windows.
 
 - An activity launched from an activity on display N is placed on display N by
   default (AOSP activity-launch policy). Shell-initiated launches use
@@ -369,12 +379,13 @@ writes the pointer `.ini` and the `.avd` directory under `ANDROID_AVD_HOME`.
 **Emulator/** — `EmulatorProcess` spawns
 `emulator -avd runner -qt-hide-window -grpc <port> -no-boot-anim -gpu host -feature Vulkan`
 with the isolated environment, captures stdout/stderr to
-`~/Library/Logs/Mandroid/emulator.log`, and shuts down via
+`<dataRoot>/logs/emulator-<timestamp>.log`, and shuts down via
 `setVmState(SHUTDOWN)` with a SIGTERM fallback. `PortAllocator` picks a free
 even console port (5554 + 2n; adb serial is `emulator-<port>`) and a gRPC
 port. `BootWaiter` waits for adb and `sys.boot_completed=1`. `GuestSetup`
-applies one-time settings and then requests a quickboot snapshot so later
-restores skip the work.
+applies guest settings after each boot. Normal sessions save quickboot state
+at shutdown; KernelSU sessions disable snapshot loading and saving. The
+coordinator flushes guest filesystem writes before requesting shutdown.
 
 **ADB/** — `ADBClient` is an async wrapper around the bundled `adb`
 (`-P <server port> -s emulator-<console>`), with typed commands (`shell`,
@@ -468,8 +479,10 @@ registers `mandroid`; not `LSUIElement` (we own real windows).
 2. **Boot**: spawn the emulator, wait for adb, wait for
    `sys.boot_completed`, apply guest settings
    (`settings put secure show_ime_with_hard_keyboard 0`,
-   `svc power stayon true`, optional animation scale 0), snapshot. Cold boot
-   is 20–60 s; snapshot restore 2–8 s.
+   `svc power stayon true`, animation scale 1.0). When KernelSU is enabled,
+   prepare the verified ramdisk before launch and verify the module after
+   boot. Normal sessions may load quickboot state; display/GPU/boot-mode
+   changes skip it. KernelSU sessions always cold boot.
 3. **Ready**: library window, catalog refresh, device-screen window on demand.
 4. **Open app**: acquire a slot → `am start --display <androidId> -n
    <component>` where the component comes from
@@ -666,3 +679,26 @@ Android VPN if one is active. See the [Android VPN proxy API](https://developer.
 Rebuild the APK using `Scripts/gen-proxy-agent.sh` with JDK 17, `ANDROID_JAR`,
 `ANDROID_BUILD_TOOLS`, `KEYSTORE_PATH`, `KEY_ALIAS`, and `KEYSTORE_PASSWORD`.
 Use the same signing key for upgrades. Runtime users need no Android build tools.
+
+### Optional KernelSU ramdisk
+
+`KernelSUPatcher` prepares a copy of the supported stock ramdisk under
+`boot-patches/kernelsu` in the selected data root. KernelSU 3.3.0 assets are
+pinned by SHA-256 and verified before execution. CryptoKit is supplied by
+macOS; no package dependency is added. Kernel compatibility is checked against
+the actual decompressed kernel version, including its build and page size.
+
+The cache key includes the stock kernel and ramdisk hashes; a manifest verifies
+the patched ramdisk and extracted guest helper before reuse. Failed or cancelled
+preparation removes staging files. SDK image files are never patched in place.
+The coordinator owns one preparation task shared by Settings and boot and
+cancels/drains it at shutdown. Tool execution has a two-minute timeout.
+
+Rooted launches use `-ramdisk` and `-no-snapshot`. Shutdown runs guest `sync`
+before QEMU exits so recent filesystem writes survive the next cold boot.
+The AVD root-mode marker forces a cold boot when returning to stock,
+preventing an old snapshot from restoring
+a different boot mode. Guest data and installed apps remain in the same AVD.
+After boot, the guest helper verifies kernel version code 32601, and the official
+Manager is installed if absent and opened to initialize userspace. Shell root
+is not pre-authorized. The default setting is off.

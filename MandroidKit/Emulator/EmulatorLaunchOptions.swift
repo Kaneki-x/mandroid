@@ -6,6 +6,7 @@ public struct EmulatorLaunchOptions: Sendable, Hashable {
     public var consolePort: Int        // even, adb serial is emulator-<consolePort>
     public var grpcPort: Int
     public var adbServerPort: Int
+    public var kernelSURamdisk: URL?
     public var coldBoot: Bool = false
     public var gpuBackend: GPUBackend = .defaultBackend
     public var extraArguments: [String] = []
@@ -30,7 +31,9 @@ public struct EmulatorLaunchOptions: Sendable, Hashable {
             "-gpu", gpuBackend.emulatorMode,
             "-feature", gpuBackend.emulatorFeatures,
         ]
-        if coldBoot { args += ["-no-snapshot-load"] }
+        if let kernelSURamdisk {
+            args += ["-ramdisk", kernelSURamdisk.path, "-no-snapshot"]
+        } else if coldBoot { args += ["-no-snapshot-load"] }
         args += extraArguments
         return args
     }
